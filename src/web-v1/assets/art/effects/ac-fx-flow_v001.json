@@ -1,0 +1,745 @@
+{
+  "frames": [
+    {
+      "filename": "yuun-flow 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 1",
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 2",
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 3",
+      "frame": {
+        "x": 288,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 4",
+      "frame": {
+        "x": 384,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 5",
+      "frame": {
+        "x": 0,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 6",
+      "frame": {
+        "x": 96,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 7",
+      "frame": {
+        "x": 192,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 8",
+      "frame": {
+        "x": 288,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 9",
+      "frame": {
+        "x": 384,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 10",
+      "frame": {
+        "x": 0,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 11",
+      "frame": {
+        "x": 96,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 12",
+      "frame": {
+        "x": 192,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 13",
+      "frame": {
+        "x": 288,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 14",
+      "frame": {
+        "x": 384,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 15",
+      "frame": {
+        "x": 0,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 16",
+      "frame": {
+        "x": 96,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 17",
+      "frame": {
+        "x": 192,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 18",
+      "frame": {
+        "x": 288,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 19",
+      "frame": {
+        "x": 384,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 20",
+      "frame": {
+        "x": 0,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 21",
+      "frame": {
+        "x": 96,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 22",
+      "frame": {
+        "x": 192,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 23",
+      "frame": {
+        "x": 288,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "yuun-flow 24",
+      "frame": {
+        "x": 384,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "ac-fx-flow_v001.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 480,
+      "h": 400
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "yuun-flow",
+        "from": 0,
+        "to": 24,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "murim/yuun-flow",
+      "name": "Yuun Flow",
+      "fps": 30,
+      "loop": false,
+      "frames": 25,
+      "frameSize": [
+        96,
+        80
+      ],
+      "pivot": [
+        20,
+        64
+      ],
+      "columns": 5,
+      "act": {
+        "windup": 0.3,
+        "recovery": 0,
+        "onBody": false,
+        "targets": [
+          58
+        ],
+        "hits": [
+          {
+            "t": 0.2,
+            "freeze": 0,
+            "shake": 0,
+            "amp": 0,
+            "push": 0
+          }
+        ],
+        "poses": [
+          {
+            "t": -0.3,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": -0.85,
+              "x": -8
+            }
+          },
+          {
+            "t": -0.1636363636363636,
+            "how": "smooth",
+            "pose": {
+              "crouch": 4,
+              "fx": -7,
+              "fy": -35,
+              "bx": 9,
+              "by": -25,
+              "ffx": 9,
+              "fbx": -8,
+              "weapon": "sword",
+              "sa": -2.65,
+              "x": -8,
+              "lean": -4,
+              "armsFront": true
+            }
+          },
+          {
+            "t": -0.04363636363636363,
+            "how": "smooth",
+            "pose": {
+              "crouch": 5,
+              "fx": -7,
+              "fy": -35,
+              "bx": 9,
+              "by": -25,
+              "ffx": 9,
+              "fbx": -8,
+              "weapon": "sword",
+              "sa": -2.65,
+              "x": -8,
+              "lean": -5,
+              "armsFront": true
+            }
+          },
+          {
+            "t": 0,
+            "how": "snap",
+            "pose": {
+              "crouch": 2,
+              "fx": 16,
+              "fy": -37,
+              "bx": -7,
+              "by": -24,
+              "ffx": 11,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": -1.45,
+              "x": 0,
+              "lean": 3
+            }
+          },
+          {
+            "t": 0.05581395348837209,
+            "how": "snap",
+            "pose": {
+              "crouch": 5,
+              "fx": 20,
+              "fy": -21,
+              "bx": -9,
+              "by": -24,
+              "ffx": 13,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": 0.62,
+              "x": 2,
+              "lean": 5,
+              "toeB": true
+            }
+          },
+          {
+            "t": 0.27906976744186046,
+            "how": "smooth",
+            "pose": {
+              "crouch": 6,
+              "fx": 20,
+              "fy": -21,
+              "bx": -9,
+              "by": -24,
+              "ffx": 13,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": 0.62,
+              "x": 3,
+              "lean": 5,
+              "toeB": true
+            }
+          },
+          {
+            "t": 0.5395348837209302,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 15,
+              "fy": -21,
+              "bx": -5,
+              "by": -21,
+              "ffx": 9,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": 0.1,
+              "x": 1
+            }
+          },
+          {
+            "t": 0.8,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": -0.85,
+              "x": -8
+            }
+          }
+        ]
+      }
+    }
+  }
+}

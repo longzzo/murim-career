@@ -1,0 +1,591 @@
+{
+  "frames": [
+    {
+      "filename": "cheongpung-fast 0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 1",
+      "frame": {
+        "x": 96,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 2",
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 3",
+      "frame": {
+        "x": 288,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 4",
+      "frame": {
+        "x": 0,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 5",
+      "frame": {
+        "x": 96,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 6",
+      "frame": {
+        "x": 192,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 7",
+      "frame": {
+        "x": 288,
+        "y": 80,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 8",
+      "frame": {
+        "x": 0,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 9",
+      "frame": {
+        "x": 96,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 10",
+      "frame": {
+        "x": 192,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 11",
+      "frame": {
+        "x": 288,
+        "y": 160,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 12",
+      "frame": {
+        "x": 0,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 13",
+      "frame": {
+        "x": 96,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 14",
+      "frame": {
+        "x": 192,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 15",
+      "frame": {
+        "x": 288,
+        "y": 240,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 16",
+      "frame": {
+        "x": 0,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    },
+    {
+      "filename": "cheongpung-fast 17",
+      "frame": {
+        "x": 96,
+        "y": 320,
+        "w": 96,
+        "h": 80
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 80
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 80
+      },
+      "duration": 33
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/patch-gg/pixelfx",
+    "version": "1",
+    "image": "ac-fx-fast_v001.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 384,
+      "h": 400
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "cheongpung-fast",
+        "from": 0,
+        "to": 17,
+        "direction": "forward"
+      }
+    ],
+    "pixelfx": {
+      "id": "murim/cheongpung-fast",
+      "name": "Cheongpung Fast",
+      "fps": 30,
+      "loop": false,
+      "frames": 18,
+      "frameSize": [
+        96,
+        80
+      ],
+      "pivot": [
+        20,
+        64
+      ],
+      "columns": 4,
+      "act": {
+        "windup": 0.165,
+        "recovery": 0,
+        "onBody": false,
+        "targets": [
+          58
+        ],
+        "hits": [
+          {
+            "t": 0.06666666666666667,
+            "freeze": 0,
+            "shake": 0,
+            "amp": 0,
+            "push": 0
+          }
+        ],
+        "poses": [
+          {
+            "t": -0.165,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": -0.85,
+              "x": -8
+            }
+          },
+          {
+            "t": -0.09,
+            "how": "smooth",
+            "pose": {
+              "crouch": 4,
+              "fx": -7,
+              "fy": -35,
+              "bx": 9,
+              "by": -25,
+              "ffx": 9,
+              "fbx": -8,
+              "weapon": "sword",
+              "sa": -2.65,
+              "x": -8,
+              "lean": -4,
+              "armsFront": true
+            }
+          },
+          {
+            "t": -0.024,
+            "how": "smooth",
+            "pose": {
+              "crouch": 5,
+              "fx": -7,
+              "fy": -35,
+              "bx": 9,
+              "by": -25,
+              "ffx": 9,
+              "fbx": -8,
+              "weapon": "sword",
+              "sa": -2.65,
+              "x": -8,
+              "lean": -5,
+              "armsFront": true
+            }
+          },
+          {
+            "t": 0,
+            "how": "snap",
+            "pose": {
+              "crouch": 2,
+              "fx": 16,
+              "fy": -37,
+              "bx": -7,
+              "by": -24,
+              "ffx": 11,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": -1.45,
+              "x": 0,
+              "lean": 3
+            }
+          },
+          {
+            "t": 0.04046511627906976,
+            "how": "snap",
+            "pose": {
+              "crouch": 5,
+              "fx": 20,
+              "fy": -21,
+              "bx": -9,
+              "by": -24,
+              "ffx": 13,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": 0.62,
+              "x": 2,
+              "lean": 5,
+              "toeB": true
+            }
+          },
+          {
+            "t": 0.2023255813953488,
+            "how": "smooth",
+            "pose": {
+              "crouch": 6,
+              "fx": 20,
+              "fy": -21,
+              "bx": -9,
+              "by": -24,
+              "ffx": 13,
+              "fbx": -10,
+              "weapon": "sword",
+              "sa": 0.62,
+              "x": 3,
+              "lean": 5,
+              "toeB": true
+            }
+          },
+          {
+            "t": 0.3911627906976744,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 15,
+              "fy": -21,
+              "bx": -5,
+              "by": -21,
+              "ffx": 9,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": 0.1,
+              "x": 1
+            }
+          },
+          {
+            "t": 0.58,
+            "how": "smooth",
+            "pose": {
+              "crouch": 3,
+              "fx": 12,
+              "fy": -21,
+              "bx": 9,
+              "by": -21,
+              "ffx": 7,
+              "fbx": -7,
+              "weapon": "sword",
+              "sa": -0.85,
+              "x": -8
+            }
+          }
+        ]
+      }
+    }
+  }
+}

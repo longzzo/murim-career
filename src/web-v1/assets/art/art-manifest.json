@@ -1,0 +1,3345 @@
+{
+  "schemaVersion": 1,
+  "deliveryRevision": "ART-P0-P1-v002",
+  "specVersion": "ASPEC v0.2",
+  "sourceContract": "src/web-v1/M0-CONTRACT.md",
+  "runtimeRoot": "src/web-v1/assets/art/",
+  "status": "asset delivery ready; static review passed; new skill scene mapping and real gameplay verification pending",
+  "counts": {
+    "P0Images": 24,
+    "P1Images": 14,
+    "P1Deferred": 11
+  },
+  "budget": {
+    "P0ImageBytes": 274126,
+    "allImageBytes": 294449,
+    "effectJsonBytes": 86725,
+    "decodedRgbaBytes": 9400064,
+    "imageBudgetBytes": 819200,
+    "decodedBudgetBytes": 25165824
+  },
+  "assets": [
+    {
+      "assetId": "AC-CHR-PLAYER",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgba",
+      "width": 512,
+      "height": 192,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "frameCount": 24,
+      "anchorPx": [
+        32,
+        56
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameMs": 200,
+          "loop": true
+        },
+        "approach": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameMs": 100,
+          "loop": true
+        },
+        "attack": {
+          "frames": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "frameMs": 100,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            14,
+            15
+          ],
+          "frameMs": 100,
+          "loop": false
+        },
+        "guard": {
+          "frames": [
+            16,
+            17
+          ],
+          "frameMs": 100,
+          "loop": false,
+          "holdLast": true
+        },
+        "down": {
+          "frames": [
+            18,
+            19,
+            20,
+            21
+          ],
+          "frameMs": 120,
+          "loop": false,
+          "holdLast": true
+        },
+        "victory": {
+          "frames": [
+            22,
+            23
+          ],
+          "frameMs": 180,
+          "loop": false,
+          "holdLast": true
+        }
+      },
+      "palette": [
+        "#050404",
+        "#12110f",
+        "#1d1b19",
+        "#22221f",
+        "#282624",
+        "#2f2a29",
+        "#33322e",
+        "#393835",
+        "#44453a",
+        "#4a5044",
+        "#545849",
+        "#5c5f4e",
+        "#725c47",
+        "#626958",
+        "#6a735f",
+        "#7c7d6a",
+        "#957c66",
+        "#928a7a",
+        "#979881",
+        "#b2a189",
+        "#a6a59c",
+        "#c7b09d",
+        "#dabda6",
+        "#d8cdc5"
+      ],
+      "sourceKind": "built-in-imagegen",
+      "revision": "v002",
+      "runtimeFile": "assets/art/characters/ac-chr-player_v002.png",
+      "byteSize": 29841,
+      "sha256": "c713435d7191febab1fcbf88ffbf5cad25a47afdf9f3f628cab473adc498c657",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "unverified",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "character",
+      "contentIds": [
+        "P-01",
+        "S-01"
+      ],
+      "sourceCredit": "Built-in image_gen; original and prompts retained; approved local normalization",
+      "licenseStatus": "Generated for project; no third-party bitmap copied",
+      "appearanceStatus": "neutral-first-web-test; not canonical NPC appearance",
+      "file": "characters/ac-chr-player_v002.png"
+    },
+    {
+      "assetId": "AC-CHR-HUMAN",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgba",
+      "width": 512,
+      "height": 192,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "frameCount": 24,
+      "anchorPx": [
+        32,
+        56
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "clips": {
+        "idle": {
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameMs": 200,
+          "loop": true
+        },
+        "approach": {
+          "frames": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameMs": 100,
+          "loop": true
+        },
+        "attack": {
+          "frames": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "frameMs": 100,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            14,
+            15
+          ],
+          "frameMs": 100,
+          "loop": false
+        },
+        "guard": {
+          "frames": [
+            16,
+            17
+          ],
+          "frameMs": 100,
+          "loop": false,
+          "holdLast": true
+        },
+        "down": {
+          "frames": [
+            18,
+            19,
+            20,
+            21
+          ],
+          "frameMs": 120,
+          "loop": false,
+          "holdLast": true
+        },
+        "victory": {
+          "frames": [
+            22,
+            23
+          ],
+          "frameMs": 180,
+          "loop": false,
+          "holdLast": true
+        }
+      },
+      "palette": [
+        "#070404",
+        "#17110f",
+        "#291d17",
+        "#2a2523",
+        "#352d29",
+        "#3d3430",
+        "#433d3b",
+        "#583f2d",
+        "#514947",
+        "#73543c",
+        "#856246",
+        "#936c4c",
+        "#776254",
+        "#9e7756",
+        "#96785f",
+        "#a67f5d",
+        "#a88360",
+        "#9a9695",
+        "#b18966",
+        "#c29974",
+        "#d2b193",
+        "#f3c8a1",
+        "#dbd5ce",
+        "#fbe2ca"
+      ],
+      "sourceKind": "built-in-imagegen",
+      "revision": "v001",
+      "runtimeFile": "assets/art/characters/ac-chr-human_v001.png",
+      "byteSize": 27082,
+      "sha256": "072456e4b0477d20c3e0619d84bd3282144f06a4927f4cd4002b35ba7bff6be2",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "unverified",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "character",
+      "contentIds": [],
+      "sourceCredit": "Built-in image_gen; original and prompts retained; approved local normalization",
+      "licenseStatus": "Generated for project; no third-party bitmap copied",
+      "appearanceStatus": "neutral-first-web-test; not canonical NPC appearance",
+      "file": "characters/ac-chr-human_v001.png"
+    },
+    {
+      "assetId": "AC-BG-ROAD",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgb",
+      "width": 256,
+      "height": 144,
+      "frameCount": 1,
+      "anchorPx": [
+        0,
+        0
+      ],
+      "revision": "v001",
+      "palette": [
+        "#37432c",
+        "#3e4934",
+        "#445036",
+        "#4e5b3b",
+        "#4b4f48",
+        "#555852",
+        "#566341",
+        "#59644b",
+        "#606b45",
+        "#606856",
+        "#666e4f",
+        "#726e54",
+        "#6d784c",
+        "#717c53",
+        "#7e7d59",
+        "#83885c",
+        "#706e67",
+        "#758679",
+        "#87786a",
+        "#898573",
+        "#7c9483",
+        "#76948a",
+        "#78958b",
+        "#7b978f",
+        "#829d90",
+        "#859e95",
+        "#8aa39b",
+        "#95816d",
+        "#99866f",
+        "#9c8a77",
+        "#a28c77",
+        "#9f9075",
+        "#a79079",
+        "#a7917c",
+        "#ae967f",
+        "#9c9285",
+        "#94a397",
+        "#91a79f",
+        "#95aaa1",
+        "#96aca4",
+        "#b09882",
+        "#b49c83",
+        "#aa9c8b",
+        "#a9ac9f",
+        "#b89f87",
+        "#b2a694",
+        "#98afa7",
+        "#9bb2ab",
+        "#a1b5ad",
+        "#a2b8b1",
+        "#a3b9b2",
+        "#a6bab2",
+        "#a8bbb4",
+        "#abbdb6",
+        "#aebfb9",
+        "#afc2ba",
+        "#b3c3bc",
+        "#b7c7bf",
+        "#bac9c2",
+        "#bccac3",
+        "#bfccc4",
+        "#c3cfc7",
+        "#c7d1c9",
+        "#c9d3cb"
+      ],
+      "sourceKind": "built-in-imagegen",
+      "runtimeFile": "assets/art/backgrounds/ac-bg-road_v001.png",
+      "byteSize": 35956,
+      "sha256": "97767b362dde05cb69d9edb1daaf3a2462f66632fd8ad631a6b8622f48c4a54a",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "background",
+      "contentIds": [],
+      "sourceCredit": "Built-in image_gen; original and prompts retained; approved local normalization",
+      "licenseStatus": "Generated for project; no third-party bitmap copied",
+      "file": "backgrounds/ac-bg-road_v001.png"
+    },
+    {
+      "assetId": "AC-BG-COURTYARD",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgb",
+      "width": 256,
+      "height": 144,
+      "frameCount": 1,
+      "anchorPx": [
+        0,
+        0
+      ],
+      "revision": "v001",
+      "palette": [
+        "#4d5b4d",
+        "#566056",
+        "#596958",
+        "#66655b",
+        "#696866",
+        "#66755e",
+        "#6c776d",
+        "#746e66",
+        "#747c65",
+        "#7a7569",
+        "#817a6a",
+        "#777b7b",
+        "#847f78",
+        "#7f8969",
+        "#868977",
+        "#8d8877",
+        "#8f9572",
+        "#8e867f",
+        "#888784",
+        "#908882",
+        "#8f8b86",
+        "#8f8f8a",
+        "#8c9a92",
+        "#968b83",
+        "#97917f",
+        "#998f86",
+        "#9a9188",
+        "#9a948d",
+        "#9f958d",
+        "#9d9c7d",
+        "#a3988d",
+        "#a3998f",
+        "#a29a91",
+        "#a79c91",
+        "#a59c93",
+        "#a79f94",
+        "#aca094",
+        "#8da19b",
+        "#91a7a0",
+        "#a0a39e",
+        "#aca399",
+        "#b1a59a",
+        "#98ada5",
+        "#9db1ad",
+        "#adaea7",
+        "#b6ada2",
+        "#a4b8b5",
+        "#adbcb8",
+        "#b0c2bf",
+        "#b6c7c6",
+        "#bcafa0",
+        "#c0b4a6",
+        "#c2b9af",
+        "#c5bbb0",
+        "#bac9c8",
+        "#bfcac8",
+        "#c0cece",
+        "#c5d2d2",
+        "#cad5d5",
+        "#c9d7d7",
+        "#ced9d9",
+        "#d5dddd",
+        "#d8e0df",
+        "#dbe2e1"
+      ],
+      "sourceKind": "built-in-imagegen",
+      "runtimeFile": "assets/art/backgrounds/ac-bg-courtyard_v001.png",
+      "byteSize": 39934,
+      "sha256": "d7ce356fbc44559856e48e3182eb9eea71a63e6cd3f8fc24940f9a1504e74edb",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "background",
+      "contentIds": [],
+      "sourceCredit": "Built-in image_gen; original and prompts retained; approved local normalization",
+      "licenseStatus": "Generated for project; no third-party bitmap copied",
+      "file": "backgrounds/ac-bg-courtyard_v001.png"
+    },
+    {
+      "assetId": "AC-FX-SLASH",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 680,
+      "height": 520,
+      "frameWidth": 136,
+      "frameHeight": 104,
+      "columns": 5,
+      "frameCount": 24,
+      "anchorPx": [
+        44,
+        92
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.75,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 136,
+          "y": 0,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 272,
+          "y": 0,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 408,
+          "y": 0,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 544,
+          "y": 0,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 0,
+          "y": 104,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 136,
+          "y": 104,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 272,
+          "y": 104,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 408,
+          "y": 104,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 544,
+          "y": 104,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 0,
+          "y": 208,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 136,
+          "y": 208,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 272,
+          "y": 208,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 408,
+          "y": 208,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 544,
+          "y": 208,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 0,
+          "y": 312,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 136,
+          "y": 312,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 272,
+          "y": 312,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 408,
+          "y": 312,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 544,
+          "y": 312,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 0,
+          "y": 416,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 136,
+          "y": 416,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 272,
+          "y": 416,
+          "w": 136,
+          "h": 104
+        },
+        {
+          "x": 408,
+          "y": 416,
+          "w": 136,
+          "h": 104
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "pixelfx-render",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "melee/sword-slash",
+      "sourceModuleSHA256": "3abcde4466df41bddd1da0c9c9824aa2450185de39c61c3b7d156272dcc9327a",
+      "options": {
+        "seed": 2,
+        "light": 0.6,
+        "palette": [
+          "#1a3b38",
+          "#275f56",
+          "#478b78",
+          "#89baa4",
+          "#c7d5b5",
+          "#f3edcc",
+          "#fff7df"
+        ]
+      },
+      "revision": "v001",
+      "runtimeFile": "assets/art/effects/ac-fx-slash_v001.png",
+      "metadataFile": "effects/ac-fx-slash_v001.json",
+      "byteSize": 51108,
+      "metadataByteSize": 13739,
+      "sha256": "83b10cf66164eb36e071c91ad2a157b5d4a2054fa42e8b58d9fc028c593b148b",
+      "metadataSha256": "2307695ae404efd8515cf9675e67a73cf15213b38e4377ff69c08957da0e1953",
+      "licenseStatus": "MIT notices preserved; gallery font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "checks": {
+        "upstreamChecker": "passed",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "unverified",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "effect",
+      "contentIds": [],
+      "sourceCredit": "PixelFX 0.3.0; Patch, Hugo Duprez; upstream NOTICE including Hollow Crown retained",
+      "file": "effects/ac-fx-slash_v001.png"
+    },
+    {
+      "assetId": "AC-FX-HIT",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 544,
+      "height": 320,
+      "frameWidth": 136,
+      "frameHeight": 80,
+      "columns": 4,
+      "frameCount": 16,
+      "anchorPx": [
+        44,
+        64
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.5,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 136,
+          "y": 0,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 272,
+          "y": 0,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 408,
+          "y": 0,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 80,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 136,
+          "y": 80,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 272,
+          "y": 80,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 408,
+          "y": 80,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 160,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 136,
+          "y": 160,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 272,
+          "y": 160,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 408,
+          "y": 160,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 136,
+          "y": 240,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 272,
+          "y": 240,
+          "w": 136,
+          "h": 80
+        },
+        {
+          "x": 408,
+          "y": 240,
+          "w": 136,
+          "h": 80
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "pixelfx-render",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "impacts/hit-spark",
+      "sourceModuleSHA256": "b0f2d0e5337ab2fff3a6a8995e6404fed72512bdcd1bc92838a60bf879bc732a",
+      "options": {
+        "seed": 4,
+        "light": 0.55,
+        "palette": [
+          "#3f352b",
+          "#665036",
+          "#967241",
+          "#c29a5b",
+          "#dfbc74",
+          "#f0d8a3",
+          "#fff4d8"
+        ]
+      },
+      "revision": "v001",
+      "runtimeFile": "assets/art/effects/ac-fx-hit_v001.png",
+      "metadataFile": "effects/ac-fx-hit_v001.json",
+      "byteSize": 17484,
+      "metadataByteSize": 6991,
+      "sha256": "ecf370ae173f490af9d61058c1a82fb998f3076f4559cffe3f4eea159ee0081b",
+      "metadataSha256": "589d48227dffa521c10927455cd07ef00892d26e8b8f01de6499061f93e2c381",
+      "licenseStatus": "MIT notices preserved; gallery font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "checks": {
+        "upstreamChecker": "passed",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "unverified",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "effect",
+      "contentIds": [],
+      "sourceCredit": "PixelFX 0.3.0; Patch, Hugo Duprez; upstream NOTICE including Hollow Crown retained",
+      "file": "effects/ac-fx-hit_v001.png"
+    },
+    {
+      "assetId": "AC-FX-GUARD",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 1000,
+      "height": 784,
+      "frameWidth": 200,
+      "frameHeight": 112,
+      "columns": 5,
+      "frameCount": 31,
+      "anchorPx": [
+        100,
+        96
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 1,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 0,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 0,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 0,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 0,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 112,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 112,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 112,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 112,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 112,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 224,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 224,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 224,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 224,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 224,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 336,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 336,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 336,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 336,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 336,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 448,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 448,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 448,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 448,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 448,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 560,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 200,
+          "y": 560,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 400,
+          "y": 560,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 600,
+          "y": 560,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 800,
+          "y": 560,
+          "w": 200,
+          "h": 112
+        },
+        {
+          "x": 0,
+          "y": 672,
+          "w": 200,
+          "h": 112
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "pixelfx-render",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "impacts/parry",
+      "sourceModuleSHA256": "ba31c0c5ee19e032ee3de7f1db57846200683529db52d383623ddc4b240941ca",
+      "options": {
+        "seed": 11,
+        "light": 0.5,
+        "palette": [
+          "#3d3528",
+          "#655134",
+          "#927340",
+          "#ba9556",
+          "#d7b970",
+          "#eed6a1",
+          "#fff4dc"
+        ]
+      },
+      "revision": "v001",
+      "runtimeFile": "assets/art/effects/ac-fx-guard_v001.png",
+      "metadataFile": "effects/ac-fx-guard_v001.json",
+      "byteSize": 67920,
+      "metadataByteSize": 12651,
+      "sha256": "77aeaeb06b3ed9e77030429b3b6c11d6b66fc8d398599d732640752411b5b471",
+      "metadataSha256": "73c94e9af1454630a83ed7f3b35c9c40df64dda56f3c5481af92641dd120cab4",
+      "licenseStatus": "MIT notices preserved; gallery font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "checks": {
+        "upstreamChecker": "passed",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "unverified",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "effect",
+      "contentIds": [],
+      "sourceCredit": "PixelFX 0.3.0; Patch, Hugo Duprez; upstream NOTICE including Hollow Crown retained",
+      "file": "effects/ac-fx-guard_v001.png"
+    },
+    {
+      "assetId": "UI-ICO-HOME",
+      "label": "홈",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-home_v001.svg",
+      "byteSize": 254,
+      "sha256": "f05e6038bd510f86a957d40c872147d5a2585bd0b5abdcca2e9982601d01087d",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-home_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-MAP",
+      "label": "지도",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-map_v001.svg",
+      "byteSize": 278,
+      "sha256": "bfadb56e3bfed621aeab1e19a9e3463aae6d1a01e12747403b5015a5fb6b9115",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-map_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-LEARNING",
+      "label": "배움",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-learning_v001.svg",
+      "byteSize": 310,
+      "sha256": "2ee42cdb84e3a43d11db98d24048a7b03d53b17ee5805cfb3120c5305cedf52d",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-learning_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-CODEX",
+      "label": "도감",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-codex_v001.svg",
+      "byteSize": 301,
+      "sha256": "3c53974c7e1440758409325306d3a6dd22ac395bb8a73b66bb4523d0c9f193ae",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-codex_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-CHRONICLE",
+      "label": "생애 기록",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-chronicle_v001.svg",
+      "byteSize": 342,
+      "sha256": "d5545c0e1dc8effc85d4b539a83c6594d48180afe5d03d582ce3c477f6f51f8b",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-chronicle_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-BACK",
+      "label": "이전",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-back_v001.svg",
+      "byteSize": 237,
+      "sha256": "6b24f593e550ddd4c795ca3bda5c831dfe29b522184b0543ecc1bf3b07769ea6",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-back_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-CLOSE",
+      "label": "닫기",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-close_v001.svg",
+      "byteSize": 236,
+      "sha256": "3be8e2c6352c1de364c02b1590f6fcd4f9b0cf611432ba9389bc2b0cf13ffc85",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-close_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-CHEVRON",
+      "label": "다음 항목",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-chevron_v001.svg",
+      "byteSize": 228,
+      "sha256": "ca25b58a9c60d82342b2dab9d6ee806ce1716ccc9deba7bbbf5ca4659f980b12",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-chevron_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-LOCK",
+      "label": "잠김",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-lock_v001.svg",
+      "byteSize": 297,
+      "sha256": "f0518ba75391fce168a81e78ce2aecaf3010a1e12001da0ec99aa3d4158b89d8",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-lock_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-WARNING",
+      "label": "주의",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-warning_v001.svg",
+      "byteSize": 308,
+      "sha256": "f2775ee28d811f7d5bd9028662d3f0b1ca6fd7524c79fa2b9708107d2da94035",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-warning_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-SAVE-OK",
+      "label": "저장 성공",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-save-ok_v001.svg",
+      "byteSize": 350,
+      "sha256": "b77648f58de33aef5a334b66c2b91f30d00c973a8679b3832302423d3f773d7c",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-save-ok_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-SAVE-ERROR",
+      "label": "저장 실패",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-save-error_v001.svg",
+      "byteSize": 358,
+      "sha256": "2c4a807a791843659eb3c69ca2d27e3ae1b39e00ef6d0458a979cb2acf6123b0",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-save-error_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-INFO",
+      "label": "정보",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-info_v001.svg",
+      "byteSize": 321,
+      "sha256": "d71983436c06ea5ab1d6347f68157f09ae13e7eb0cca4ec49e51b531243d7e5e",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-info_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-CHECK",
+      "label": "선택·완료",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-check_v001.svg",
+      "byteSize": 230,
+      "sha256": "ae9c047bbef11313e2d4414a6add2a98ae710c563736757707ecfc97731bb218",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-check_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-SKIP",
+      "label": "연출 생략",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-skip_v001.svg",
+      "byteSize": 241,
+      "sha256": "2a618bc3785886e999e0c3c58f4db8783306ae93f8ec3364298ed61d3ab0bdb0",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-skip_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-SLOW",
+      "label": "연출 감속",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-slow_v001.svg",
+      "byteSize": 259,
+      "sha256": "7ca3e56f02ee109cd3d2551f47fa93c9bcdc8e6daf680f3fe1e17badc35167d1",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-slow_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-MOTION-OFF",
+      "label": "감소 모션",
+      "priority": "P0",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "frameCount": 1,
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-motion-off_v001.svg",
+      "byteSize": 251,
+      "sha256": "edbc69bd4d6205480151f1b8c34cea8b07b7ea31bd608825c60e70771972ab87",
+      "checks": {
+        "xml": "pending",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "static": "passed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "contentIds": [],
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-motion-off_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-01",
+      "label": "수련",
+      "contentIds": [
+        "ACT-01"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-01_v001.svg",
+      "byteSize": 301,
+      "sha256": "b4d6b84b63fad55e8f3d6b28a4d207c12c049e70332047a1d3499e3d62ffc293",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-01_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-02",
+      "label": "스승에게 배우기",
+      "contentIds": [
+        "ACT-02"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-02_v001.svg",
+      "byteSize": 318,
+      "sha256": "6bfefd12ae8f3cd693a57678c313f9829c5f4a11bd90700d8c86ebe38b7f8405",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-02_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-03",
+      "label": "지역 의뢰",
+      "contentIds": [
+        "ACT-03"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-03_v001.svg",
+      "byteSize": 314,
+      "sha256": "a17605f267be6a0d7a1f03bcd681b4927503e7a78daf8fd22ee8948bf368783e",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-03_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-04",
+      "label": "상단 호송",
+      "contentIds": [
+        "ACT-04"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-04_v001.svg",
+      "byteSize": 336,
+      "sha256": "d4c9b11fb0ef47f1f294821eb6308d2cacea8a96ff3d1a92438f774a3d52bc2d",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-04_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-05",
+      "label": "휴식·치료",
+      "contentIds": [
+        "ACT-05"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-05_v001.svg",
+      "byteSize": 263,
+      "sha256": "ae0dd12beb69c29f3e601a111d6f24b0ba4c514671f16f7b50afb1e5846752e3",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-05_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-06",
+      "label": "교류 비무",
+      "contentIds": [
+        "ACT-06"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-06_v001.svg",
+      "byteSize": 319,
+      "sha256": "812d90de50f7e1a72c1089f1c5f8fa5b72dd04a42a9cb23953d6bf4101fc29d2",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-06_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-07",
+      "label": "숙련·기예",
+      "contentIds": [
+        "ACT-07"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-07_v001.svg",
+      "byteSize": 297,
+      "sha256": "6ecf9b75c0eac20a0116b56432cf4fd0cd7fa25da3574b0a17f61a936cc1ebfa",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-07_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-08",
+      "label": "문파 해금 의뢰",
+      "contentIds": [
+        "ACT-08"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-08_v001.svg",
+      "byteSize": 339,
+      "sha256": "3d7d58b48576c2878256dfd69a1a3ff8c6a077a02f8f57e621b682eb104febde",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-08_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-09",
+      "label": "강적 재도전",
+      "contentIds": [
+        "ACT-09"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-09_v001.svg",
+      "byteSize": 316,
+      "sha256": "b167dcb995d1d9b205584f54762da844d1574b30bef164909872f257166d1dbb",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-09_v001.svg"
+    },
+    {
+      "assetId": "UI-ICO-ACT-10",
+      "label": "장기 폐관",
+      "contentIds": [
+        "ACT-10"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "viewBox": [
+        0,
+        0,
+        24,
+        24
+      ],
+      "frameCount": 1,
+      "anchorNormalized": [
+        0.5,
+        0.5
+      ],
+      "revision": "v001",
+      "sourceKind": "codex-authored-vector",
+      "externalMaterial": false,
+      "runtimeFile": "assets/art/ui/ui-ico-act-10_v001.svg",
+      "byteSize": 299,
+      "sha256": "0917f8ec7c2406b35bd8d5b0ed69fff1aef13556ec830933e7be6bf0283e004a",
+      "checks": {
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-applicable",
+        "browserInteraction": "blocked-by-file-url-policy"
+      },
+      "kind": "ui-icon",
+      "sourceCredit": "Codex-authored SVG geometry; no external icon package",
+      "licenseStatus": "Project-authored vector; no external material",
+      "file": "ui/ui-ico-act-10_v001.svg"
+    },
+    {
+      "assetId": "AC-FX-FAST",
+      "label": "청풍쾌검",
+      "contentIds": [
+        "P-S01",
+        "P-M01",
+        "P-01"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 384,
+      "height": 400,
+      "frameWidth": 96,
+      "frameHeight": 80,
+      "columns": 4,
+      "frameCount": 18,
+      "anchorPx": [
+        20,
+        64
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.58,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "project-authored-pixelfx-geometry",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "murim/cheongpung-fast",
+      "sourceModuleSHA256": "2415c48beb7e1c2401348712873e7a4f84314cdddcc06112adc530be191ddc21",
+      "options": {
+        "palette": [
+          "#163f3b",
+          "#28665c",
+          "#559b89",
+          "#93cbbc",
+          "#bce5d8",
+          "#e1f4e8",
+          "#f6fff4"
+        ],
+        "seed": 3
+      },
+      "revision": "v001",
+      "file": "effects/ac-fx-fast_v001.png",
+      "runtimeFile": "assets/art/effects/ac-fx-fast_v001.png",
+      "metadataFile": "effects/ac-fx-fast_v001.json",
+      "byteSize": 2863,
+      "metadataByteSize": 11104,
+      "sha256": "460dee9089448513661a3e2dcd30be650a2d686448d8e8fa7a3040501233b1bc",
+      "metadataSha256": "8bc5240c06c80e4376502f30acda757930d9abea89ba20709b7d93a483b718cc",
+      "licenseStatus": "Project-authored geometry; PixelFX MIT renderer/helper notices retained; gallery/font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "visibleBounds": {
+        "x0": 23,
+        "y0": 22,
+        "x1": 76,
+        "y1": 52,
+        "width": 54,
+        "height": 31
+      },
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          55,
+          55,
+          55,
+          100,
+          100,
+          250
+        ],
+        "releaseAtAttackStartMs": 165,
+        "visualContactEffectFrame": 2,
+        "visualContactAtAttackStartMs": 231,
+        "effectDisplayDurationMs": 594,
+        "presentationBeatMs": 850,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      },
+      "checks": {
+        "upstreamChecker": "passed",
+        "deterministic": "passed-two-full-renders-and-sheet-comparison",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-performed",
+        "registration": "listed-in-manifest; not selected by scene-final.mjs at inspection"
+      }
+    },
+    {
+      "assetId": "AC-FX-FLOW",
+      "label": "유운검법",
+      "contentIds": [
+        "P-S02",
+        "P-M02",
+        "P-01"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 480,
+      "height": 400,
+      "frameWidth": 96,
+      "frameHeight": 80,
+      "columns": 5,
+      "frameCount": 25,
+      "anchorPx": [
+        20,
+        64
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.8,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "project-authored-pixelfx-geometry",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "murim/yuun-flow",
+      "sourceModuleSHA256": "983bd1ad5567d44b9d3ad9084eb05542bffaf93d758262e94622f26bb085b44e",
+      "options": {
+        "palette": [
+          "#233f51",
+          "#466b82",
+          "#6b9bb6",
+          "#9cc6d9",
+          "#c8e6ef",
+          "#e5f7fa",
+          "#fbffff"
+        ],
+        "seed": 5
+      },
+      "revision": "v001",
+      "file": "effects/ac-fx-flow_v001.png",
+      "runtimeFile": "assets/art/effects/ac-fx-flow_v001.png",
+      "metadataFile": "effects/ac-fx-flow_v001.json",
+      "byteSize": 4569,
+      "metadataByteSize": 13622,
+      "sha256": "34cd9210f2564e0a5da9827bda76e3329080b9e0d5ee809b5c5c1cf74bcb04c7",
+      "metadataSha256": "65261ea28ad93852a476e3351fb4b2d821a5aac0fda412c0d896667c87d4044f",
+      "licenseStatus": "Project-authored geometry; PixelFX MIT renderer/helper notices retained; gallery/font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "visibleBounds": {
+        "x0": 21,
+        "y0": 23,
+        "x1": 78,
+        "y1": 52,
+        "width": 58,
+        "height": 30
+      },
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          100,
+          100,
+          100,
+          220,
+          180,
+          150
+        ],
+        "releaseAtAttackStartMs": 300,
+        "visualContactEffectFrame": 6,
+        "visualContactAtAttackStartMs": 498,
+        "effectDisplayDurationMs": 825,
+        "presentationBeatMs": 1250,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      },
+      "checks": {
+        "upstreamChecker": "passed",
+        "deterministic": "passed-two-full-renders-and-sheet-comparison",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-performed",
+        "registration": "listed-in-manifest; not selected by scene-final.mjs at inspection"
+      }
+    },
+    {
+      "assetId": "AC-FX-HEAVY",
+      "label": "진악중검",
+      "contentIds": [
+        "S-S01",
+        "S-M01",
+        "S-01"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 480,
+      "height": 480,
+      "frameWidth": 96,
+      "frameHeight": 80,
+      "columns": 5,
+      "frameCount": 30,
+      "anchorPx": [
+        20,
+        64
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.96,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 400,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 400,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 400,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 400,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 400,
+          "w": 96,
+          "h": 80
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "project-authored-pixelfx-geometry",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "murim/jinak-heavy",
+      "sourceModuleSHA256": "6668164c07c931f2efe63dd8e43c2be277bf26c563ac9e0b44da6261e885d0f2",
+      "options": {
+        "palette": [
+          "#2c201b",
+          "#493126",
+          "#6b4632",
+          "#946748",
+          "#b28b64",
+          "#d4b38b",
+          "#f2dcc0"
+        ],
+        "seed": 7
+      },
+      "revision": "v001",
+      "file": "effects/ac-fx-heavy_v001.png",
+      "runtimeFile": "assets/art/effects/ac-fx-heavy_v001.png",
+      "metadataFile": "effects/ac-fx-heavy_v001.json",
+      "byteSize": 5469,
+      "metadataByteSize": 15575,
+      "sha256": "b10b9ccac62212257d7ed36c488d7411fac3b2578f73599b6c7489ad0ca4dfb6",
+      "metadataSha256": "c7f53eb8729b2b6e69bbe3391d8fd9e81c29f6acf8f41a366e67aa20859a09bd",
+      "licenseStatus": "Project-authored geometry; PixelFX MIT renderer/helper notices retained; gallery/font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "visibleBounds": {
+        "x0": 23,
+        "y0": 16,
+        "x1": 76,
+        "y1": 54,
+        "width": 54,
+        "height": 39
+      },
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          150,
+          150,
+          150,
+          220,
+          220,
+          250
+        ],
+        "releaseAtAttackStartMs": 450,
+        "visualContactEffectFrame": 6,
+        "visualContactAtAttackStartMs": 648,
+        "effectDisplayDurationMs": 990,
+        "presentationBeatMs": 1600,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      },
+      "checks": {
+        "upstreamChecker": "passed",
+        "deterministic": "passed-two-full-renders-and-sheet-comparison",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-performed",
+        "registration": "listed-in-manifest; not selected by scene-final.mjs at inspection"
+      }
+    },
+    {
+      "assetId": "AC-FX-FEINT",
+      "label": "흑영환검",
+      "contentIds": [
+        "S-S02",
+        "S-M02",
+        "S-01"
+      ],
+      "priority": "P1",
+      "status": "ready-for-integration",
+      "format": "png-rgba+json",
+      "width": 480,
+      "height": 400,
+      "frameWidth": 96,
+      "frameHeight": 80,
+      "columns": 5,
+      "frameCount": 23,
+      "anchorPx": [
+        20,
+        64
+      ],
+      "facing": "right",
+      "allowMirror": true,
+      "trim": false,
+      "loop": false,
+      "fps": 30,
+      "sourceDurationSeconds": 0.74,
+      "frameRects": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 0,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 80,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 160,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 288,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 384,
+          "y": 240,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 0,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 96,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        },
+        {
+          "x": 192,
+          "y": 320,
+          "w": 96,
+          "h": 80
+        }
+      ],
+      "frameDurationsMs": [
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33,
+        33
+      ],
+      "sourceKind": "project-authored-pixelfx-geometry",
+      "sourceRepo": "https://github.com/patch-gg/pixelfx",
+      "sourceVersion": "0.3.0",
+      "sourceCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+      "sourceEffectId": "murim/heugyeong-feint",
+      "sourceModuleSHA256": "74ba4c1212d4e97908cc101fb80a3b5bdc5cdd858ce02e8a85f0f523be5b5a48",
+      "options": {
+        "palette": [
+          "#30213f",
+          "#553c6b",
+          "#7b5e96",
+          "#a086ba",
+          "#c5aed9",
+          "#e7d6ef",
+          "#fcf3ff"
+        ],
+        "seed": 11
+      },
+      "revision": "v001",
+      "file": "effects/ac-fx-feint_v001.png",
+      "runtimeFile": "assets/art/effects/ac-fx-feint_v001.png",
+      "metadataFile": "effects/ac-fx-feint_v001.json",
+      "byteSize": 4320,
+      "metadataByteSize": 13043,
+      "sha256": "0e90310d02c6f3ec24cbe14b632beb07b21a9358fa91167d1df21b11079afe9b",
+      "metadataSha256": "879e276b2d1de5f44c34b7a5b43de44f6b41eae0574fa39a11642b1610868a5b",
+      "licenseStatus": "Project-authored geometry; PixelFX MIT renderer/helper notices retained; gallery/font excluded",
+      "presentationOnly": true,
+      "renderLayer": "front",
+      "visibleBounds": {
+        "x0": 26,
+        "y0": 22,
+        "x1": 75,
+        "y1": 53,
+        "width": 50,
+        "height": 32
+      },
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          100,
+          100,
+          100,
+          300,
+          180,
+          180
+        ],
+        "releaseAtAttackStartMs": 300,
+        "visualContactEffectFrame": 8,
+        "visualContactAtAttackStartMs": 564,
+        "effectDisplayDurationMs": 759,
+        "presentationBeatMs": 1200,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      },
+      "checks": {
+        "upstreamChecker": "passed",
+        "deterministic": "passed-two-full-renders-and-sheet-comparison",
+        "static": "passed",
+        "visual": "passed-static-contact",
+        "gameIntegration": "not-performed",
+        "temporalPlayback": "not-performed",
+        "registration": "listed-in-manifest; not selected by scene-final.mjs at inspection"
+      }
+    }
+  ],
+  "validationEvidence": {
+    "png": "art/review/ASPEC-v002/static-png-checks.json",
+    "svg": "art/review/ASPEC-v002/static-svg-checks.v002.json",
+    "actionPreview": "art/review/ASPEC-v002/action-contact.v002.png",
+    "uiPreview": "art/review/ASPEC-v002/ui-contact.v002.png",
+    "pixelFxCheck": "art/review/ASPEC-v002/pixelfx/upstream-check.log",
+    "browser": "file URL navigation rejected; not bypassed",
+    "gameIntegration": "not performed"
+  },
+  "skillVfxMap": "skill-vfx-map.v001.json"
+}
