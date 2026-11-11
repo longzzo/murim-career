@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "deliveryRevision": "ART-P0-P1-v002",
+  "decisions": [
+    "D-026",
+    "D-027",
+    "D-028"
+  ],
+  "status": "assets exported and manifest-listed; scene selection and game replay pending",
+  "originAliases": {
+    "P-01": "P01",
+    "S-01": "S01"
+  },
+  "defaults": {
+    "SAMJAE": "AC-FX-SLASH",
+    "HERMIT": "AC-FX-SLASH",
+    "unknownSkill": "AC-FX-SLASH"
+  },
+  "defaultNotes": "SAMJAE uses the basic slash. HERMIT fallback is presentation only; AC-FX-BURST is deferred, not a new sect approval.",
+  "mappings": [
+    {
+      "skillId": "P-S01",
+      "mentorId": "P-M01",
+      "originId": "P-01",
+      "runtimeOriginId": "P01",
+      "label": "청풍쾌검",
+      "assetId": "AC-FX-FAST",
+      "presentationOnly": true,
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          55,
+          55,
+          55,
+          100,
+          100,
+          250
+        ],
+        "releaseAtAttackStartMs": 165,
+        "visualContactEffectFrame": 2,
+        "visualContactAtAttackStartMs": 231,
+        "effectDisplayDurationMs": 594,
+        "presentationBeatMs": 850,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      }
+    },
+    {
+      "skillId": "P-S02",
+      "mentorId": "P-M02",
+      "originId": "P-01",
+      "runtimeOriginId": "P01",
+      "label": "유운검법",
+      "assetId": "AC-FX-FLOW",
+      "presentationOnly": true,
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          100,
+          100,
+          100,
+          220,
+          180,
+          150
+        ],
+        "releaseAtAttackStartMs": 300,
+        "visualContactEffectFrame": 6,
+        "visualContactAtAttackStartMs": 498,
+        "effectDisplayDurationMs": 825,
+        "presentationBeatMs": 1250,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      }
+    },
+    {
+      "skillId": "S-S01",
+      "mentorId": "S-M01",
+      "originId": "S-01",
+      "runtimeOriginId": "S01",
+      "label": "진악중검",
+      "assetId": "AC-FX-HEAVY",
+      "presentationOnly": true,
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          150,
+          150,
+          150,
+          220,
+          220,
+          250
+        ],
+        "releaseAtAttackStartMs": 450,
+        "visualContactEffectFrame": 6,
+        "visualContactAtAttackStartMs": 648,
+        "effectDisplayDurationMs": 990,
+        "presentationBeatMs": 1600,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      }
+    },
+    {
+      "skillId": "S-S02",
+      "mentorId": "S-M02",
+      "originId": "S-01",
+      "runtimeOriginId": "S01",
+      "label": "흑영환검",
+      "assetId": "AC-FX-FEINT",
+      "presentationOnly": true,
+      "presentationTiming": {
+        "status": "proposal; integrate and verify in game",
+        "attackFrames": [
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "attackFrameDurationsMs": [
+          100,
+          100,
+          100,
+          300,
+          180,
+          180
+        ],
+        "releaseAtAttackStartMs": 300,
+        "visualContactEffectFrame": 8,
+        "visualContactAtAttackStartMs": 564,
+        "effectDisplayDurationMs": 759,
+        "presentationBeatMs": 1200,
+        "targetFootGapPx": 50,
+        "notes": "First forward-strike pose is sprite frame 11. Variable timing is separate from shared clips.frameMs. No extra hits, damage rolls, clones, map destruction or simulation delays."
+      }
+    }
+  ],
+  "restrictions": [
+    "Only replay recorded combat events; never derive hits or damage from the VFX JSON.",
+    "Three visual cuts still mean one recorded attack.",
+    "Flow/parry appearance is not a guard event; use guard reaction only when the recorded event permits it.",
+    "Feint is a trajectory, not a body clone. Heavy is a local impact, not terrain destruction.",
+    "Failure, reduced motion, skip and speed changes must not alter combat results, rewards, save or lifespan."
+  ],
+  "integrationNotes": [
+    "Runtime art.mjs loads all manifest-listed images; this file does not wire battle skill selection.",
+    "Existing data.mjs labels are provisional; keep IDs while replacing names per common D-026..028.",
+    "scene-final.mjs currently chooses AC-FX-SLASH directly. Four new effects require selection by recorded skill ID.",
+    "Compact traces assume about 50px foot gap in a 256x144 stage; proposed approach positions do not change combat range.",
+    "Scene fixed 1000ms turn can truncate heavy/flow effects. Use presentationBeatMs or controlled intentional tail cut; do not advance simulation time.",
+    "Per-frame timing arrays below are advisory and require a scene helper; the current sprite helper accepts one frameMs number."
+  ]
+}
