@@ -50,7 +50,7 @@ async function includeAsset(file, expectedHash, pattern) {
 }
 
 for (const asset of manifest.assets) {
-  await includeAsset(asset.file, asset.sha256, /^(?:backgrounds|characters|effects|ui)\/[a-z0-9_-]+\.(?:png|svg)$/i);
+  await includeAsset(asset.file, asset.sha256, /^(?:(?:backgrounds|characters|effects|ui)\/[a-z0-9_-]+\.(?:png|svg)|(?:home|items)\/[a-z0-9_-]+\.png)$/i);
   if (asset.metadataFile) {
     await includeAsset(asset.metadataFile, asset.metadataSha256, /^effects\/[a-z0-9_-]+\.json$/i);
   }

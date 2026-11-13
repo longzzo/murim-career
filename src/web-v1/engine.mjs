@@ -1,4 +1,5 @@
-import {DATA,VERSION,REALMS,THRESHOLDS,ASSISTS,validateData} from './data.mjs';
+import {DATA,VERSION,LEGACY_DATA,LEGACY_VERSION,REALMS,THRESHOLDS,ASSISTS,ECONOMY,validateData} from './data.mjs';
+import {hasInventory,startInventory,validateInventory,grantItem,equippedForBattle,wearWeapon,manageInventory,inventoryView} from './inventory.mjs';
 const clone=x=>structuredClone(x);
 const addUnique=(xs,x)=>{if(!xs.includes(x))xs.push(x);};
 const requireThat=(condition,message)=>{if(!condition)throw Error(message);};
@@ -7,21 +8,31 @@ export const RECAP_QUOTE='조금만 더 시간이 있었더라면, 새로운 경
 export function random(s){let x=s.rng>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;s.rng=x>>>0||1;return s.rng/4294967296;}
 function note(s,text){s.life.log.push({month:s.life.month,text});if(s.life.log.length>240)s.life.log.shift();}
 export function newGame(options={},previous=null){
+ return createGame(options,previous,VERSION,DATA);
+}
+export function newLegacyGame(options={}){
+ return createGame(options,null,LEGACY_VERSION,LEGACY_DATA);
+}
+function createGame(options,previous,version,data){
  const meta=previous?clone(previous.meta):{unlocks:[],clues:[],history:[],successes:[]};
  const old=previous?.life;
  const origin=options.origin||old?.origin||'P-01';
  const mentor=options.mentor||old?.mentor||DATA.mentors.find(m=>m.origin===origin)?.id;
  requireThat(DATA.mentors.some(m=>m.id===mentor&&m.origin===origin),'출신과 스승이 맞지 않습니다.');
- const s={versions:clone(VERSION),content:clone(DATA),revision:0,commands:[],initialSeed:(Number(options.seed)>>>0)||1729,rng:(Number(options.seed)>>>0)||1729,phase:'home',pending:null,queue:[],active:null,result:null,nextAction:0,life:null,meta};
+ const s={versions:clone(version),content:clone(data),revision:0,commands:[],initialSeed:(Number(options.seed)>>>0)||1729,rng:(Number(options.seed)>>>0)||1729,phase:'home',pending:null,queue:[],active:null,result:null,nextAction:0,life:null,meta};
  const seq=(previous?.life.seq||0)+1;
  const trait=options.regress?old.trait:options.trait&&options.trait!=='random'?options.trait:(random(s)<.5?'천무지체':'약응체');
  requireThat(['천무지체','약응체'].includes(trait),'체질 오류');
  s.life={id:`life-${seq}`,seq,name:String(options.name||old?.name||'무명').trim().slice(0,16)||'무명',origin,mentor,inclination:options.inclination||old?.inclination||'inner',month:0,limit:528,realm:0,xp:0,foundation:{inner:0,outer:0},money:100,fame:0,trust:0,npc:0,skills:{SAMJAE:10000},loadout:{primary:'SAMJAE',aux:[]},disabled:[],assists:[],trait,traitKnown:false,insight:false,breakthroughs:[],injury:0,lightMonths:0,rejuvenated:false,herbApplied:false,realmExtension:false,world:{id:random(s)<.5?'W-E02':'W-M02',checked:[],occurred:false,resolved:false},seen:[],occurrences:[],debt:[],quest:0,success:null,ending:null,leader:false,regression:!!options.regress,log:[]};
+ if(hasInventory(s))startInventory(s);
  note(s,options.regress?'기억을 품고 새 생애를 시작했다. 실력과 배움은 다시 쌓아야 한다.':'삼재검법으로 강호의 첫걸음을 내디뎠다.');
  validateState(s);return s;
 }
 export function validateState(s){
- requireThat(s&&s.versions?.save===VERSION.save&&s.versions?.rules===VERSION.rules,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
+ const v=s?.versions;
+ const legacy=v?.rules===LEGACY_VERSION.rules&&['web-v1.0',LEGACY_VERSION.content].includes(v.content);
+ requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
+  (v?.rules===VERSION.rules&&v.save===VERSION.save&&v.content===VERSION.content),'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
  validateData(s.content);
  requireThat(s.content.version===s.versions.content,'콘텐츠 버전 불일치');
@@ -41,14 +52,21 @@ export function validateState(s){
  if(s.phase==='event')requireThat(s.content.events.some(x=>x.id===s.pending?.id),'사건 참조 손상');
  if(s.phase==='ended')requireThat(!!l.ending&&!s.active&&!s.pending,'종료 상태 손상');
  if(s.naturalRecapCandidate){const c=s.naturalRecapCandidate;requireThat(s.phase==='grace'&&validRecapFact(s,c),'회고 후보 상태 손상');}
+ if(s.pending)requireThat(typeof s.pending.token==='string'&&s.pending.token.length>0,'사건 기록 오류');
+ if(!legacy)validateInventory(s);
+ else requireThat(l.inventory===undefined&&s.content.items===undefined,'기존 생애에 새 소지품이 포함되어 있습니다.');
  return true;
+}
+export function migrateSave(state){
+ validateState(state);
+ return state.versions.save===VERSION.save?state:{...clone(state),versions:{...state.versions,save:VERSION.save}};
 }
 function offeredTarget(s,target){
  return (s.life.breakthroughOffers||[]).some(x=>x.targetRealm===target)||s.life.occurrences.some(x=>x.startsWith(`${s.life.id}/realm-${target}/`))||
   (s.pending?.id==='V-004'&&s.life.realm+1===target);
 }
 function validRecapFact(s,c){return c.schemaVersion===1&&c.lifeId===s.life.id&&c.month===s.life.month&&c.targetRealm===s.life.realm+1&&c.targetRealm<5&&c.eligibleBefore===false&&c.eligibleAfter===true&&typeof c.token==='string'&&c.token.startsWith(`${s.life.id}/realm-${c.targetRealm}/`)&&!offeredTarget(s,c.targetRealm);}
-function finishLife(s,cause){
+function finishLife(s,cause,weapon=null){
  const l=s.life;if(l.ending)return;
  const candidate=s.naturalRecapCandidate;
  const recap=cause==='natural'&&candidate&&validRecapFact(s,candidate)?{...clone(candidate),quoteKey:RECAP_QUOTE_KEY,cause}:null;
@@ -56,6 +74,7 @@ function finishLife(s,cause){
  delete s.naturalRecapCandidate;delete s.resumePhase;
  const record={id:l.id,name:l.name,origin:l.origin,mentor:l.mentor,age:16+Math.floor(l.month/12),realm:REALMS[l.realm],cause,success:l.success,regression:l.regression};
  if(recap)record.recap=recap;
+ if(weapon)record.finalWeapon=clone(weapon);
  if(!s.meta.history.some(x=>x.id===l.id))s.meta.history.push(record);
  note(s,cause==='battle'?'전투에서 생애를 마쳤다.':'자연의 흐름 속에 생애를 마쳤다.');
 }
@@ -96,8 +115,12 @@ export function attackDistribution(s){
  return [...(p?[{id:p,weight:main}]:[]),...aux.map(id=>({id,weight:(1-main)*Math.max(1,l.skills[id]/1000)/sum}))];
 }
 function injuryFactor(l){return(l.injury===2?.8:1)*(l.rejuvenated?.85:1);}
-export function power(s){const l=s.life;return(8+l.realm*4)*attackDistribution(s).reduce((n,x)=>n+x.weight*(1+(l.skills[x.id]||0)/200000),0)*injuryFactor(l);}
-export function risk(s,enemy='rival'){const key=enemy.startsWith('ambush')?'ambush':enemy;const e=s.content.enemies[key]||s.content.enemies.rival;const ratio=power(s)/((8+e.realm*4)*(1+e.mastery/200));return{level:ratio>=2?'우세':ratio>=1.1?'유리':ratio>=.8?'접전':'위험',enemy:e.name,mode:e.mode,reason:`${REALMS[s.life.realm]}의 기반과 실제 무공 숙련${s.life.injury===2?' · 심한 부상':''}${s.life.rejuvenated?' · 연장 후 약화':''}`};}
+const basicAttack=(life,weapon)=>8+life.realm*4+(weapon?.attack??0);
+function playerPower(l,distribution,base){
+ return base*distribution.reduce((n,x)=>n+x.weight*(1+(l.skills[x.id]||0)/200000),0)*injuryFactor(l);
+}
+export function power(s){return playerPower(s.life,attackDistribution(s),basicAttack(s.life,equippedForBattle(s)));}
+export function risk(s,enemy='rival'){const key=enemy.startsWith('ambush')?'ambush':enemy;const e=s.content.enemies[key]||s.content.enemies.rival;const weapon=equippedForBattle(s),ratio=power(s)/((8+e.realm*4)*(1+e.mastery/200));return{level:ratio>=2?'우세':ratio>=1.1?'유리':ratio>=.8?'접전':'위험',enemy:e.name,mode:e.mode,reason:`${REALMS[s.life.realm]}의 기반과 실제 무공 숙련${weapon?' · 무기 공격력 +'+weapon.attack:''}${s.life.injury===2?' · 심한 부상':''}${s.life.rejuvenated?' · 연장 후 약화':''}`};}
 function styleMultiplier(a,b,gap){if(a==='neutral'||b==='neutral'||gap>=2)return 1;const ring=['쾌','중','강','환','유'];const ix=ring.indexOf(a),iy=ring.indexOf(b),v=gap===0?.1:.05;return(ix+1)%5===iy?1+v:(iy+1)%5===ix?1-v:1;}
 export function resolveBattle(s,enemyKey){
  const baseKey=enemyKey.startsWith('ambush')?'ambush':enemyKey;
@@ -105,15 +128,16 @@ export function resolveBattle(s,enemyKey){
  if(enemyKey==='ambushTerrain')e.mastery=Math.max(0,e.mastery-5);
  if(enemyKey==='ambushLight')e.mastery=Math.max(0,e.mastery-10);
  const l=s.life,dist=attackDistribution(s),aux=dist.filter(x=>x.id!==l.loadout.primary&&x.id!=='BASIC').length,battleRisk=risk(s,baseKey);
+ const weapon=equippedForBattle(s),base=basicAttack(l,weapon);
  const diversity=aux?[1,.98,.95,.92][Math.min(3,aux)]:1;
  let hp=l.injury===2?80:100,enemyHp=100;const turns=[];
- const own=power(s),opp=(8+e.realm*4)*(1+e.mastery/200),over=own>=opp*2,under=opp>=own*2;
+ const own=playerPower(l,dist,base),opp=(8+e.realm*4)*(1+e.mastery/200),over=own>=opp*2,under=opp>=own*2;
  let outcome=null;
  for(let round=0;round<128;round++){
   const pick=random(s);let cumulative=0,id=dist.at(-1).id;
   for(const d of dist){cumulative+=d.weight;if(pick<cumulative){id=d.id;break;}}
   const skill=s.content.skills.find(x=>x.id===id)||{name:'기본 대응',style:'neutral'};
-  let damage=Math.max(1,Math.floor((8+l.realm*4)*(1+(l.skills[id]||0)/200000)*injuryFactor(l)*diversity*styleMultiplier(skill.style,e.style,Math.abs(l.realm-e.realm))*(.9+random(s)*.2)));
+  let damage=Math.max(1,Math.floor(base*(1+(l.skills[id]||0)/200000)*injuryFactor(l)*diversity*styleMultiplier(skill.style,e.style,Math.abs(l.realm-e.realm))*(.9+random(s)*.2)));
   let received=Math.max(1,Math.floor(opp*styleMultiplier(e.style,skill.style,Math.abs(l.realm-e.realm))*(.9+random(s)*.2)));
   if(over)received=0;if(under)damage=Math.min(damage,1);
   hp=Math.max(0,hp-received);enemyHp=Math.max(0,enemyHp-damage);
@@ -122,6 +146,7 @@ export function resolveBattle(s,enemyKey){
   if(e.mode==='encounter'&&hp<35&&round>=2&&random(s)<.35){outcome='escape';break;}
  }
  requireThat(outcome,'전투가 종료되지 않았습니다. 검증 오류입니다.');
+ const usedWeapon=weapon?wearWeapon(s,weapon):null;
  addUnique(s.meta.unlocks,e.faction);l.insight=true;
  if(outcome==='win'){
   if(over&&random(s)<.1){l.injury=Math.max(l.injury,1);l.lightMonths=6;}
@@ -130,14 +155,16 @@ export function resolveBattle(s,enemyKey){
  }else if(e.mode==='duel'){l.injury=2;if(outcome==='mutual')outcome='loss';}
  else if(outcome==='loss'||outcome==='mutual'){
   if(outcome==='mutual'&&baseKey==='leader')addUnique(s.meta.clues,'최종 상대 격파 업적');
-  finishLife(s,'battle');
+  finishLife(s,'battle',usedWeapon);
  }else if(outcome==='escape'){l.injury=2;addUnique(l.debt,'잃어버린 호송의 신뢰');}
- const result={id:`${l.id}/battle-${l.occurrences.length}-${l.month}-${l.log.length}`,enemy:e.name,enemyId:e.id,enemyKey:baseKey,mode:e.mode,outcome,turns,reason:battleRisk.reason};
+ const result={id:usedWeapon?.battleId??`${l.id}/battle-${l.occurrences.length}-${l.month}-${l.log.length}`,enemy:e.name,enemyId:e.id,enemyKey:baseKey,mode:e.mode,outcome,turns,reason:battleRisk.reason};
+ if(usedWeapon)result.weapon=usedWeapon;
  note(s,`${e.name}: ${outcome==='win'?'승리':outcome==='escape'?'도주':outcome==='mutual'?'동반 사망':'패배'} · 실제 발동 무공 ${[...new Set(turns.map(t=>t.skill))].join(', ')}`);
  s.result={title:e.name,text:'전투 결과를 기록했습니다.',battle:result};return result;
 }
 function completeAction(s){
  const a=s.active,l=s.life,id=a.id;s.active=null;s.phase='result';
+ const gains=a.itemGains??[];
  let text='진행한 시간과 성과를 기록했습니다.',battle=null;
  if(id==='ACT-02'){
   const m=s.content.mentors.find(x=>x.id===l.mentor);
@@ -145,9 +172,13 @@ function completeAction(s){
   else if(!l.assists.includes(m.assist)){l.assists.push(m.assist);text=`${ASSISTS[m.assist]}의 기초를 배웠습니다.`;}
   else{text='익힌 검의 원리를 사부와 되짚었습니다.';l.skills[m.skill]+=10000;l.insight=true;}
  }else if(id==='ACT-03'){
-  l.money+=30;l.fame++;l.trust++;l.npc++;
+  l.money+=ECONOMY.commission;l.fame++;l.trust++;l.npc++;
+  if(hasInventory(s)){
+   const gain=grantItem(s,'WPN-FORGED',l.id+'/'+a.key+'/ACT-03');
+   if(gain){gains.push(gain);note(s,gain.name+'을(를) 의뢰 보수로 받았습니다.');}
+  }
   if(l.debt.length){const debt=l.debt.shift();text=`의뢰를 마치고 ${debt}의 은원을 수습했습니다.`;}else text='의뢰 완료 · 재화 +30 · 명성 +1 · 문파 신뢰 +1';
- }else if(id==='ACT-04'){l.money+=50;l.fame+=2;l.npc++;text='호송 완료 · 재화 +50 · 명성 +2';}
+ }else if(id==='ACT-04'){l.money+=ECONOMY.escort;l.fame+=2;l.npc++;text='호송 완료 · 재화 +50 · 명성 +2';}
  else if(id==='ACT-05'){if(a.paid){l.injury=0;l.lightMonths=0;text='치료를 마쳤습니다.';}else{if(l.injury===1)l.injury=0;text='무료 휴식으로 기력을 가다듬었습니다. 심한 부상에는 치료가 필요합니다.';}}
  else if(id==='ACT-06'){battle=resolveBattle(s,'novice');if(battle.outcome==='win')l.fame+=2;text='비무로 실전의 계기를 얻었습니다.';}
  else if(id==='ACT-07'&&a.target==='assist'){
@@ -161,6 +192,10 @@ function completeAction(s){
  }else if(id==='ACT-09'){battle=resolveBattle(s,a.target||'rival');text=battle.outcome==='win'?'도전에서 승리했습니다.':'도전의 결과를 기록했습니다.';}
  if(l.ending)return;
  s.result={title:s.content.actions.find(x=>x.id===id).name+' 완료',text,battle,actionId:id};note(s,text);
+ if(hasInventory(s)&&id==='ACT-03')s.result.completionMoney=ECONOMY.commission;
+ if(hasInventory(s)&&id==='ACT-04')s.result.completionMoney=ECONOMY.escort;
+ if(hasInventory(s)&&a.paid)s.result.paidMoney=ECONOMY.treatment;
+ if(gains.length)s.result.itemGains=gains;
 }
 function advance(s){
  requireThat(s.phase==='journey'&&s.active,'진행할 행동이 없습니다.');
@@ -194,7 +229,7 @@ function advance(s){
  }
  throw Error('진행 안전 한도를 초과했습니다.');
 }
-function applyEffect(s,type,value){const l=s.life;
+function applyEffect(s,type,value,source){const l=s.life;
  if(type==='npc')l.npc+=value;
  else if(type==='extra'){if(s.active)s.active.duration+=value;}
  else if(type==='heal'){if(l.assists.includes('medicine')&&l.trait==='약응체'){l.injury=0;l.npc++;}else if(l.injury===1)l.injury=0;}
@@ -205,7 +240,18 @@ function applyEffect(s,type,value){const l=s.life;
  else if(type==='insight')l.insight=true;
  else if(type==='learn'){if(l.skills[value]===undefined)l.skills[value]=10000;}
  else if(type==='herb'){
-  if(random(s)<(value===2?.8:.45)){if(!l.herbApplied){l.limit+=12;l.herbApplied=true;note(s,'영초의 효험으로 수명이 1년 늘었다.');}addUnique(s.meta.clues,'영초의 효험');}else{l.injury=Math.max(1,l.injury);l.lightMonths=6;note(s,'영초는 얻지 못하고 물러났다.');}
+  if(random(s)<(value===2?.8:.45)){
+   if(hasInventory(s)){
+    const gain=grantItem(s,'CON-HERB',source);
+    if(gain){
+     if(s.active)(s.active.itemGains??=[]).push(gain);
+     note(s,'영초 1개를 소지품에 보관했습니다.');
+    }
+   }else{
+    if(!l.herbApplied){l.limit+=12;l.herbApplied=true;note(s,'영초의 효험으로 수명이 1년 늘었다.');}
+    addUnique(s.meta.clues,'영초의 효험');
+   }
+  }else{l.injury=Math.max(1,l.injury);l.lightMonths=6;note(s,'영초는 얻지 못하고 물러났다.');}
  }else if(type==='resolveThreat')l.world.resolved=true;
  else if(type==='battle')resolveBattle(s,value);
  else if(type==='breakthrough'){
@@ -227,7 +273,9 @@ function choose(s,id){
  }
  s.pending=null;s.phase=s.active?'journey':'home';
  if(e.id==='V-004'&&c.id==='decline'&&s.active)s.active.breakDeclined=s.life.realm;
- for(const [type,value]of c.effects){applyEffect(s,type,value);if(s.life.ending)break;}
+ const prefix=s.life.id+'/';
+ const source=pending.token.startsWith(prefix)?pending.token:prefix+pending.token;
+ for(const [type,value]of c.effects){applyEffect(s,type,value,source);if(s.life.ending)break;}
  if(s.life.ending)return;
  note(s,`${e.name}: ${c.label}`);
  if(e.id==='A-001'&&c.id==='medicine'&&!s.life.traitKnown){s.life.traitKnown=true;addUnique(s.meta.clues,s.life.trait);}
@@ -251,7 +299,7 @@ export function transition(input,command){
   requireThat(s.phase==='home'&&!s.active&&!l.ending,'현재 행동을 바꿀 수 없습니다.');
   const def=s.content.actions.find(x=>x.id===command.action);requireThat(def,'없는 행동');
   const target=command.target||allowedTargets(s,def.id)[0];requireThat(allowedTargets(s,def.id).includes(target),'행동 대상 자격이 없습니다.');
-  const paid=def.id==='ACT-05'&&l.money>=20;if(paid)l.money-=20;
+  const paid=def.id==='ACT-05'&&l.money>=ECONOMY.treatment;if(paid)l.money-=ECONOMY.treatment;
   s.active={id:def.id,key:`action-${++s.nextAction}`,target,duration:def.months,baseDuration:def.months,elapsed:0,xpCredited:0,masteryCredited:0,skill:l.loadout.primary,randomChecked:false,breakDeclined:-1,paid};
   if(target==='leader'){l.leader=true;note(s,'지지와 실력을 인정받고 우두머리 결전에 나섰다.');}
   s.result=null;s.phase='journey';note(s,`${def.name}을 확정했다. 기간 ${def.months}개월, 중간에 교체할 수 없다.`);
@@ -259,6 +307,8 @@ export function transition(input,command){
  else if(command.type==='choose')choose(s,command.choice);
  else if(command.type==='ack'){
   requireThat(s.phase==='result','확인할 결과가 없습니다.');s.phase='home';showQueue(s);
+ }else if(['equipWeapon','repairWeapon','useHerb'].includes(command.type)){
+  note(s,manageInventory(s,command));
  }else if(command.type==='loadout'){
   requireThat(s.phase==='home','행동 중에는 구성을 바꿀 수 없습니다.');
   requireThat(l.skills[command.primary]!==undefined,'배우지 않은 주력');
@@ -290,7 +340,11 @@ export function publicView(s){
  view.recapQuote=s.phase==='ended'?view.history.find(x=>x.id===l.id)?.recapQuote||null:null;
  view.origins=clone(s.content.origins||[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}]);
  view.originName=view.origins.find(x=>x.id===l.origin)?.name||l.origin;
- if(view.pending){for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);}}
+ view.inventory=inventoryView(s);
+ view.knowsMentorSkill=l.skills[view.mentor.skill]!==undefined;
+ view.knowsMentorAssist=l.assists.includes(view.mentor.assist);
+ if(view.result?.itemGains)view.result.itemGains=view.result.itemGains.map(({name,quantity})=>({name,quantity}));
+ if(view.pending){for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);c.extraMonths=definition.effects.filter(([type])=>type==='extra').reduce((sum,[,months])=>sum+months,0);}}
  if(view.pending?.id==='W-E02'){const fight=view.pending.choices.find(c=>c.id==='fight');fight.label=l.origin==='P-01'?'토벌 원정에 참여한다':'공격에 맞서 방어한다';}
  return view;
 }

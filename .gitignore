@@ -31,6 +31,10 @@
 !/src/web-v1/assets/art/effects/
 !/src/web-v1/assets/art/effects/*.png
 !/src/web-v1/assets/art/effects/*.json
+!/src/web-v1/assets/art/home/
+!/src/web-v1/assets/art/home/*.png
+!/src/web-v1/assets/art/items/
+!/src/web-v1/assets/art/items/*.png
 !/src/web-v1/assets/art/ui/
 !/src/web-v1/assets/art/ui/*.svg
 !/src/web-v1/assets/art/licenses/

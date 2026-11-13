@@ -7,14 +7,14 @@
   "status": "asset delivery ready; static review passed; new skill scene mapping and real gameplay verification pending",
   "counts": {
     "P0Images": 24,
-    "P1Images": 14,
+    "P1Images": 21,
     "P1Deferred": 11
   },
   "budget": {
     "P0ImageBytes": 274126,
-    "allImageBytes": 294449,
+    "allImageBytes": 1042991,
     "effectJsonBytes": 86725,
-    "decodedRgbaBytes": 9400064,
+    "decodedRgbaBytes": 11944192,
     "imageBudgetBytes": 819200,
     "decodedBudgetBytes": 25165824
   },
@@ -1985,12 +1985,12 @@
         0.5,
         0.5
       ],
-      "revision": "v001",
+      "revision": "v002",
       "sourceKind": "codex-authored-vector",
       "externalMaterial": false,
-      "runtimeFile": "assets/art/ui/ui-ico-act-04_v001.svg",
-      "byteSize": 336,
-      "sha256": "d4c9b11fb0ef47f1f294821eb6308d2cacea8a96ff3d1a92438f774a3d52bc2d",
+      "runtimeFile": "assets/art/ui/ui-ico-act-04_v002.svg",
+      "byteSize": 505,
+      "sha256": "75c567ccfa64ad024b6d8427fea82e21332cb284fa3a401e3f71ff65fa1fedde",
       "checks": {
         "static": "passed",
         "visual": "passed-static-contact",
@@ -1998,10 +1998,23 @@
         "temporalPlayback": "not-applicable",
         "browserInteraction": "blocked-by-file-url-policy"
       },
-      "kind": "ui-icon",
+      "kind": "ui",
       "sourceCredit": "Codex-authored SVG geometry; no external icon package",
       "licenseStatus": "Project-authored vector; no external material",
-      "file": "ui/ui-ico-act-04_v001.svg"
+      "file": "ui/ui-ico-act-04_v002.svg",
+      "sourceFile": "art/staging/experience-flow-v001/source/ui-ico-act-04_v002.svg",
+      "provenance": {
+        "method": "Project-authored SVG paths and two wheel circles. Redrew the cart silhouette by hand.",
+        "references": [
+          "EXP-01 v1 §5–6",
+          "assets/art/ui/ui-ico-act-04_v001.svg",
+          "art/review/ASPEC-v002/ui-contact.v002.png"
+        ],
+        "externalMaterial": false,
+        "license": "Project-authored vector. Existing asset and notices retained.",
+        "previousRuntimeFile": "assets/art/ui/ui-ico-act-04_v001.svg",
+        "previousSHA256": "d4c9b11fb0ef47f1f294821eb6308d2cacea8a96ff3d1a92438f774a3d52bc2d"
+      }
     },
     {
       "assetId": "UI-ICO-ACT-05",
@@ -3330,6 +3343,169 @@
         "temporalPlayback": "not-performed",
         "registration": "listed-in-manifest; not selected by scene-final.mjs at inspection"
       }
+    },
+    {
+      "assetId": "UI-ILL-A001",
+      "kind": "ui",
+      "format": "svg",
+      "width": 720,
+      "height": 240,
+      "file": "ui/ui-ill-a001_v001.svg",
+      "runtimeFile": "assets/art/ui/ui-ill-a001_v001.svg",
+      "revision": "v001",
+      "byteSize": 3310,
+      "sha256": "ea4c4200d6b774e93c52feca6731ea36a61cbb0ce7446e5865642cd92fa32ee9",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v001/source/ui-ill-a001_v001.svg",
+      "provenance": {
+        "method": "Project-authored SVG paths, circles and ellipses drawn by hand from the written event brief.",
+        "references": [
+          "EXP-01 v1 §5–6",
+          "10-공통기준/06-UI와아트기준.md"
+        ],
+        "externalMaterial": false,
+        "license": "Project-authored vector. No imported artwork."
+      }
+    },
+    {
+      "assetId": "UI-CHR-PLAYER",
+      "kind": "ui",
+      "format": "png",
+      "width": 512,
+      "height": 640,
+      "file": "home/ui-chr-player_v001.png",
+      "runtimeFile": "assets/art/home/ui-chr-player_v001.png",
+      "revision": "v001",
+      "byteSize": 220641,
+      "sha256": "6099f504a660cd464a763f1f79b8dc22c49c97c49d153b5dba31c0895327feb2",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-chr-player.imagegen.png",
+      "sourceSHA256": "4bec29ddf1633561913f56ad1c27a6a41d2ef2fac0b5e47d6b2a98b825353d22",
+      "target": "홈 인물",
+      "provenance": {
+        "method": "ImageGen 투명 원본 보존, Lanczos 축소 및 투명 여백, RGBA",
+        "references": [
+          "EXP-01 v2 §6",
+          "assets/art/characters/ac-chr-player_v002.png"
+        ],
+        "externalMaterial": false
+      }
+    },
+    {
+      "assetId": "UI-BG-HOME",
+      "kind": "ui",
+      "format": "png",
+      "width": 720,
+      "height": 360,
+      "file": "home/ui-bg-home_v001.png",
+      "runtimeFile": "assets/art/home/ui-bg-home_v001.png",
+      "revision": "v001",
+      "byteSize": 495794,
+      "sha256": "483b3720fc16715b21cb0a7d5c4bacea68c949f8242024dbcfe738bc4433d361",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-bg-home.imagegen.png",
+      "sourceSHA256": "3f7eabf6565a94610529702843e07ccf78a2450de7402ce3b64e69fc62a3c6f2",
+      "target": "홈의 연무마당",
+      "provenance": {
+        "method": "ImageGen 원본 보존, Lanczos 리사이즈와 중앙 크롭, RGB",
+        "references": [
+          "EXP-01 v2 §6"
+        ],
+        "externalMaterial": false
+      }
+    },
+    {
+      "assetId": "UI-ITEM-WPN-TRAIN",
+      "kind": "ui",
+      "format": "png",
+      "width": 128,
+      "height": 128,
+      "file": "items/ui-item-wpn-train_v001.png",
+      "runtimeFile": "assets/art/items/ui-item-wpn-train_v001.png",
+      "revision": "v001",
+      "byteSize": 6887,
+      "sha256": "773b698f4b5f36966d6e8738952aa05852b8fcbdcb113cd2f10aa3faa28e96b4",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-item-wpn-train.imagegen.png",
+      "sourceSHA256": "42ae916bc1fe4a7cc8456def04169b2cb0954271023a5f7947bbc16d073f3b28",
+      "target": "WPN-TRAIN",
+      "provenance": {
+        "method": "ImageGen 투명 원본 보존, Lanczos 축소 및 투명 여백, RGBA",
+        "references": [
+          "EXP-01 v2 §6"
+        ],
+        "externalMaterial": false
+      }
+    },
+    {
+      "assetId": "UI-ITEM-WPN-FORGED",
+      "kind": "ui",
+      "format": "png",
+      "width": 128,
+      "height": 128,
+      "file": "items/ui-item-wpn-forged_v001.png",
+      "runtimeFile": "assets/art/items/ui-item-wpn-forged_v001.png",
+      "revision": "v001",
+      "byteSize": 8789,
+      "sha256": "d39621da9db7d396d62cc0eae35587aace1876603278b0434ee0ee29eb61f4b9",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-item-wpn-forged.imagegen.png",
+      "sourceSHA256": "c50942b9b2a98e40e09956c870494b6e7042f5c7715e307c0768aa6e56efeb2c",
+      "target": "WPN-FORGED",
+      "provenance": {
+        "method": "ImageGen 투명 원본 보존, Lanczos 축소 및 투명 여백, RGBA",
+        "references": [
+          "EXP-01 v2 §6"
+        ],
+        "externalMaterial": false
+      }
+    },
+    {
+      "assetId": "UI-ITEM-HERB",
+      "kind": "ui",
+      "format": "png",
+      "width": 128,
+      "height": 128,
+      "file": "items/ui-item-herb_v001.png",
+      "runtimeFile": "assets/art/items/ui-item-herb_v001.png",
+      "revision": "v001",
+      "byteSize": 12697,
+      "sha256": "c1a7d898264fbf2e85fb92c74bf8ce389c3d7701f8dcb8411f9718e8336e1a06",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-item-herb.imagegen.png",
+      "sourceSHA256": "7b98f7fb667033fe42a41450ae583e73e82c39cd34b7d56acd962c4aeae11c0e",
+      "target": "CON-HERB",
+      "provenance": {
+        "method": "ImageGen 투명 원본 보존, Lanczos 축소 및 투명 여백, RGBA",
+        "references": [
+          "EXP-01 v2 §6"
+        ],
+        "externalMaterial": false
+      }
+    },
+    {
+      "assetId": "UI-ICO-MONEY",
+      "kind": "ui",
+      "format": "svg",
+      "width": 24,
+      "height": 24,
+      "file": "ui/ui-ico-money_v001.svg",
+      "runtimeFile": "assets/art/ui/ui-ico-money_v001.svg",
+      "revision": "v001",
+      "byteSize": 255,
+      "sha256": "918c3d637c67bef61016d320109cbf5549f9761141c683f7e0246889f67fb77b",
+      "priority": "P1",
+      "sourceFile": "art/staging/experience-flow-v002/source/ui-ico-money_v001.svg",
+      "sourceSHA256": "918c3d637c67bef61016d320109cbf5549f9761141c683f7e0246889f67fb77b",
+      "target": "money",
+      "provenance": {
+        "method": "직접 작도한 SVG, currentColor",
+        "references": [
+          "EXP-01 v2 §6",
+          "art/review/ASPEC-v002/ui-contact.v002.png"
+        ],
+        "externalMaterial": false
+      }
     }
   ],
   "validationEvidence": {
@@ -3341,5 +3517,10 @@
     "browser": "file URL navigation rejected; not bypassed",
     "gameIntegration": "not performed"
   },
-  "skillVfxMap": "skill-vfx-map.v001.json"
+  "skillVfxMap": "skill-vfx-map.v001.json",
+  "experienceDelivery": "experience-flow-v002",
+  "experienceEvidence": {
+    "handoff": "art/staging/experience-flow-v002/HANDOFF.md",
+    "assetDelta": "art/staging/experience-flow-v002/asset-delta.json"
+  }
 }

@@ -1,4 +1,13 @@
-export const VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
+export const LEGACY_VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
+export const VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
+export const ECONOMY = {commission:30, escort:50, treatment:20};
+// INV-01 v1 test values from common plan 04. New lives snapshot these definitions.
+export const ITEMS = {
+ 'WPN-TRAIN':{type:'weapon',name:'수련검',attack:1,maxDurability:100},
+ 'WPN-FORGED':{type:'weapon',name:'정련철검',attack:3,maxDurability:60},
+ 'CON-HERB':{type:'herb',name:'영초',months:12,uses:1}
+};
+export const ITEM_RULES = {wear:5,warningRatio:.2,repairStep:10,repairPrice:2};
 export const ORIGINS = [{id:'P-01',name:'청운문'},{id:'S-01',name:'흑송방'}];
 export const REALMS = ['삼류','이류','일류','절정','초절정'];
 export const THRESHOLDS = [0,80,200,400,700];
@@ -50,7 +59,12 @@ export const ENEMIES = {
  threat:{id:'E-THREAT',name:'회차의 핵심 위협',realm:2,mastery:40,style:'중',mode:'life',faction:'F-THREAT'},
  leader:{id:'E-LEADER',name:'우두머리 결전 상대',realm:3,mastery:50,style:'강',mode:'life',faction:'F-NORMAL'}
 };
-export const DATA = {version:VERSION.content,origins:ORIGINS,actions:ACTIONS,events:EVENTS,skills:SKILLS,mentors:MENTORS,enemies:ENEMIES};
+export const LEGACY_DATA = {version:LEGACY_VERSION.content,origins:ORIGINS,actions:ACTIONS,events:EVENTS,skills:SKILLS,mentors:MENTORS,enemies:ENEMIES};
+export const DATA = {
+ ...LEGACY_DATA,version:VERSION.content,items:ITEMS,itemRules:ITEM_RULES,
+ actions:ACTIONS.map(a=>a.id==='ACT-04'?{...a,desc:'마을에 전할 곡물을 호송합니다. 길에서 생긴 일에 대응하고, 호송을 마치면 보수를 받습니다.'}:a),
+ events:EVENTS.map(e=>e.id==='A-001'?{...e,text:'곡물을 실은 상단 앞에 다친 고수가 쓰러져 있습니다. 구조를 도우면서 호송의 약속을 이어가야 합니다.'}:e)
+};
 export function validateData(d=DATA){
  if(!d||!['actions','events','skills','mentors'].every(k=>Array.isArray(d[k]))||typeof d.version!=='string')throw Error('콘텐츠 구조 오류');
  const ids=new Set(); for(const group of ['actions','events','skills','mentors']) for(const x of d[group]) {if(ids.has(x.id))throw Error('중복 ID: '+x.id);ids.add(x.id);}
