@@ -106,7 +106,10 @@ function confirmScreen(v){
  const treatment=a.id==='ACT-05';
  const reward={'ACT-03':ECONOMY.commission,'ACT-04':ECONOMY.escort}[a.id];
  const cost=treatment&&v.money>=ECONOMY.treatment?ECONOMY.treatment:0;
- return currency(v)+`<section class="card"><span class="kicker">행동 확정 전</span><h2>${esc(a.name)}</h2><p>${esc(a.desc)}</p>
+ const mentorReason=a.id==='ACT-02'&&returnFocus==='.current-situation button'&&situation(v)?.action===a.id
+  ? (v.knowsMentorSkill?'검법을 익혔고, 사부의 기예는 아직 배우지 않았습니다.':'사부의 후속 검법을 아직 배우지 않았습니다.') : '';
+ return currency(v)+`<section class="card"><span class="kicker">행동 확정 전</span><h2>${esc(a.name)}</h2>
+ ${mentorReason?`<p class="notice">${mentorReason}</p>`:''}<p>${esc(a.desc)}</p>
  <p>기본 기간 ${a.months}개월 · 이동 포함</p><p>선지출 ${cost} 재화${reward?` · 완료 보수 ${reward} 재화`:''}</p>
  ${treatment&&!cost?'<p class="notice">재화가 부족해 무료 휴식을 합니다. 심한 부상에는 치료가 필요합니다.</p>':''}
  <p class="notice">확정 후에는 이 행동을 취소하거나 다른 행동으로 바꿀 수 없습니다.</p>
@@ -221,6 +224,7 @@ function bind(){
   else if(a==='back-phase'){currentTab='home';render();focusPage('[data-ui="tab-inventory"]');}
   else if(a.startsWith('items-')){itemTab=a.slice(6);render();focusPage(focusSelector(el));}
   else if(a==='item'){previousPage={tab:currentTab,selector:focusSelector(el)};item=id;itemConfirm=null;render();focusPage();}
+  else if(a==='compare-item'){item=id;itemConfirm=null;render();focusPage();}
   else if(a==='back-item'){item=null;itemConfirm=null;currentTab=previousPage.tab;render();focusPage(previousPage.selector);}
   else if(a==='item-use'||a==='item-repair'){itemConfirm=a.slice(5);render();focusPage('[data-ui="item-cancel"]');}
   else if(a==='item-cancel'){const cancelled=itemConfirm;itemConfirm=null;render();focusPage(`[data-ui="item-${cancelled}"]`);}
@@ -241,7 +245,7 @@ function bind(){
   else if(a==='regress')perform({type:'newLife',options:{regress:true}});
   else perform({type:a});
  }));
- app.querySelectorAll('img.event-art,img.home-background,img[data-image-fallback]').forEach(el=>{
+ app.querySelectorAll('img.event-art,img.home-background,img.item-image,img[data-image-fallback]').forEach(el=>{
   el.addEventListener('error',()=>{
    if(!el.dataset.imageFallback){el.remove();return;}
    const replacement=document.createElement('span');

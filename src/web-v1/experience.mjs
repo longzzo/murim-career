@@ -21,7 +21,7 @@ export function image(id,cls='',fallback=''){
  return asset?`<img class="${cls}" src="${esc(asset.source)}" alt="" width="${asset.width}" height="${asset.height}"${fallback?` data-image-fallback="${esc(fallback)}"`:''}>`:
   fallback?`<span class="${cls} image-fallback" aria-hidden="true">${fallback}</span>`:'';
 }
-const itemImage=item=>image(itemArt[item.itemId],'item-image',item.itemId==='CON-HERB'?'葉':'劍');
+const itemImage=(item,fallback='')=>image(itemArt[item.itemId],'item-image',fallback);
 const equipped=v=>v.inventory?.weapons.find(w=>w.equipped);
 export function currency(v,caption='재화'){
  const formatted=number(v.money).replaceAll(',',',<wbr>');
@@ -64,7 +64,7 @@ export function character(v){
    <p class="main-skill">${esc(skill?.name)}</p>
    <p class="reputation">명성 ${number(v.fame)} · 문파 신뢰 ${number(v.trust)}</p>
   </div>
-  ${weapon?`<button class="equipped-preview" data-ui="item" data-id="${esc(weapon.id)}">${itemImage(weapon)}
+  ${weapon?`<button class="equipped-preview" data-ui="item" data-id="${esc(weapon.id)}">${itemImage(weapon,'劍')}
    <span><strong>${esc(weapon.name)}</strong> <span>공격력 +${weapon.effective}</span> ${weaponGauge(weapon)}
     ${weapon.needsRepair?`<span class="durability durability-low">${weapon.durability===0?'날이 무뎌짐':'내구도가 낮음'}</span>`:''}</span></button>`:''}
  </section>`;
@@ -134,6 +134,7 @@ export function itemDetail(v,id,confirmation){
   <p>무기 공격력 +${item.attack} · 현재 보정 +${item.effective}</p>${weaponGauge(item)}
   ${item.durability===0?'<p class="notice">날이 무뎌졌습니다. 기본 공격으로 전투할 수 있습니다.</p>':item.needsRepair?'<p class="notice">내구도가 낮습니다.</p>':''}
   <p>현재 장착 ${esc(current.name)} +${current.effective} · 교체 시 ${delta>=0?'+':''}${delta}</p>
+  ${bag.weapons.filter(w=>w.id!==item.id).map(w=>`<button data-ui="compare-item" data-id="${esc(w.id)}">${esc(w.name)}과 비교</button>`).join('')}
   ${last?.kind==='repair'&&last.instanceId===item.id?`<p class="badge">수리 완료 · 재화 −${number(last.cost)}</p>`:''}
   ${bag.blocked?`<p class="notice">${esc(bag.blocked)}</p>`:''}
   <button data-ui="item-equip" ${item.equipped||bag.blocked?'disabled':''}>이 무기 장착</button>
