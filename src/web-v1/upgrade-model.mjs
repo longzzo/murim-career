@@ -3,7 +3,7 @@ import {hasQi,qiDistribution,skillCost} from './qi.mjs';
 // Display-only projections. No new qualification, random draw, or save write.
 export function nextGoal(v){
  if(v.phase!=='home')return null;
- const direction=v.origin==='P-01'?'강호의 일과 은원을 정리하고 금분세수로 나아갑니다.':'실력과 지지를 쌓아 우두머리에 도전합니다.';
+ const direction=v.originRoute==='orthodox'?'강호의 일과 은원을 정리하고 금분세수로 나아갑니다.':'실력과 지지를 쌓아 우두머리에 도전합니다.';
  const goal=(title,reason,entry)=>({direction,title,reason,...entry});
  const weapon=v.inventory?.weapons.find(w=>w.equipped);
  if(v.body!=='안정')return goal('몸을 추스를 때','부상이 남아 있습니다. 회복 메뉴에서 치료 비용을 살펴보세요.',{label:'휴식·치료 살피기',action:'ACT-05',...(v.qi?{target:'default'}:{})});
@@ -19,8 +19,12 @@ export function nextGoal(v){
  if(v.guidance?.practiceSuggested)return goal('배운 검법을 시험해 볼 때','무공에서 적용 중 구성을 확인하세요. 교류 비무는 패배해도 생존하지만 부상을 입을 수 있습니다.',{label:'교류 비무 시작',action:'ACT-06'});
  if(!v.knowsMentorAssist)return goal('배움의 폭을 넓히다','검법 다음으로 사부의 기예를 익힐 수 있습니다.',{label:'사부의 기예 배우기',action:'ACT-02'});
  if(v.story?.offered)return goal('연락책의 제안을 살피다','현재 도착한 부탁의 목적과 완료 보수를 강호 활동에서 확인하세요.',{label:'도착한 제안 보기',group:'world'});
- if(v.quest<2)return goal(v.quest===0?'명문으로 향하는 단서':'명문의 시험이 남았다',v.quest===0?'첫 의뢰를 마치면 다음 시험의 단서를 얻습니다.':'첫 단계는 마쳤습니다. 의술 과제 또는 시험 비무가 남아 있습니다.',{label:'명문 의뢰 살피기',action:'ACT-08'});
- if(v.origin==='P-01')return v.realmIndex<2?
+ if(v.quest<2){
+  if(v.factions===1&&v.unlocks.includes('F-POPULAR'))return goal(v.quest===0?'이번 생애의 명문 교류':'이번 생애의 시험 과제',
+   v.quest===0?'이미 보유한 입문 자격은 유지됩니다. 이번 생애의 교류·시험 두 단계를 마치면 내공 증진약 1개를 받습니다.':'이번 생애의 의술 과제 또는 시험 비무가 남았습니다. 완료 보수는 내공 증진약 1개이며, 기존 입문 자격은 유지됩니다.',{label:'명문 교류 과제 살피기',action:'ACT-08'});
+  return goal(v.quest===0?'명문으로 향하는 단서':'명문의 시험이 남았다',v.quest===0?'첫 의뢰를 마치면 다음 시험의 단서를 얻습니다.':'첫 단계는 마쳤습니다. 의술 과제 또는 시험 비무가 남아 있습니다.',{label:'명문 의뢰 살피기',action:'ACT-08'});
+ }
+ if(v.originRoute==='orthodox')return v.realmIndex<2?
   goal('금분세수를 향한 기반','명문 의뢰를 마쳤습니다. 내공과 외공 중 필요한 기반을 골라 쌓으세요.',{label:'기반 수련 살피기',group:'training'}):
   goal('강호의 일로 인연을 잇다',v.threat.resolved?'위협을 정리했습니다. 지역 의뢰로 인연과 신뢰를 쌓을 수 있습니다.':'명문 의뢰를 마쳤습니다. 현재 할 수 있는 의뢰로 인연과 신뢰를 쌓으세요.',{label:'지역 의뢰 시작',action:'ACT-03'});
  return v.realmIndex<3?goal('결전을 향한 실력','명문 의뢰를 마쳤습니다. 내공과 외공 중 필요한 기반을 골라 돌파를 준비하세요.',{label:'기반 수련 살피기',group:'training'}):

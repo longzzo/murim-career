@@ -69,6 +69,36 @@ h2[tabindex="-1"]:focus{outline:none}
 .school-marker span{color:#226957;font-size:1.4rem}
 .school-marker small{color:#315e52}
 .school-description{display:grid;gap:.45rem}
+/* D-048 art handoff: five landmarks, separate inspected/chosen/current states. */
+.school-map{grid-template-columns:repeat(auto-fit,minmax(min(100%,8em),1fr));gap:.55rem;padding:.7rem;min-height:0}
+.school-map .school-marker{align-self:stretch;align-content:start;justify-items:start;text-align:left;padding:.6rem;gap:.35rem}
+.school-map .school-marker[data-motif=lantern]{grid-column:1/-1;background:#f7f1e7}
+.school-map .marker-top{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;min-width:0;font-size:1rem}
+.school-map .marker-top strong{font-size:1rem}
+.school-map .school-symbol,.school-description .school-symbol{display:inline-grid;place-items:center;font-size:1rem;width:2em;height:2em;flex:none;border:1px solid #a6bbb0;border-radius:50%;background:#eaf2e8;color:#216b56}
+.school-symbol svg{display:block;width:1.5em;height:1.5em}
+.school-map .marker-states{display:flex;flex-wrap:wrap;gap:.25rem;font-size:.8rem}
+.school-map .marker-states .state{display:inline-block;border-radius:5px;padding:.1rem .3rem;font-size:inherit;background:#eaf2ec;color:#285847}
+.school-map .marker-states .state-locked{background:#f3ece0;color:#654717}
+.school-map .marker-states .state-current{background:#244f42;color:#fff}
+.school-map .marker-states .state-viewing{border:1px solid #337968;background:#fff;color:#175b4b}
+.school-map .marker-states .state-selected{background:#d5ebde;color:#174f40;font-weight:700}
+.school-map .is-current{border-left:4px solid #244f42}
+.school-map .network-route{font-size:.9rem;color:#866a3c;letter-spacing:.1em}
+.school-map .marker-location{font-size:.8rem}
+.school-description{gap:.7rem;margin-top:.7rem;min-width:0}
+.school-description .description-title{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.school-description .school-teachings{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}
+.school-description .school-teachings li,.selection-summary{padding:.6rem;background:#eef3ec;border-radius:9px}
+.school-access{padding:.65rem;border-left:3px solid var(--jade);background:#edf4ef}
+.school-access.is-locked{border-color:#9c743a;background:#f8f0e2}
+.school-access .condition-icon{width:1.2em;height:1.2em;vertical-align:middle;margin-right:.35em}
+.school-detail-link{min-height:44px;margin:.3rem 0}
+#setup .mentor-choice{align-items:flex-start;min-width:0}
+#setup .mentor-choice span{min-width:0;word-break:keep-all;overflow-wrap:break-word}
+#setup fieldset{min-width:0}
+#setup .mentor-fixed{padding:.7rem;border:1px solid var(--border);border-radius:10px;background:#eef3ec;word-break:keep-all;overflow-wrap:break-word}
+@media(max-width:339px){.school-map{grid-template-columns:1fr}}
 #setup fieldset{display:grid;gap:.5rem;min-width:0;border:1px solid var(--border);border-radius:10px}
 #setup .mentor-choice{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;padding:.45rem;border:1px solid var(--border);border-radius:8px;overflow-wrap:anywhere}
 #setup .mentor-choice input{width:1.1rem;height:1.1rem;min-height:0;margin:.2rem 0}

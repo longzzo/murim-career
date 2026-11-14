@@ -1,8 +1,11 @@
 // Consumes delivered PNG/JSON/SVG only. Does not import or execute PixelFX source.
+import {FAMILIAR_SKILLS} from './factions.mjs';
 const assets=new Map();let status={revision:null,ready:false,errors:[]};
 const presentations=new Map();
 export const artAsset=id=>assets.get(id);
-export const skillPresentation=id=>presentations.get(id);
+const familiarStyle=id=>FAMILIAR_SKILLS.find(skill=>skill.id===id)?.style;
+// New names reuse the approved visual vocabulary; 강 retains the standard slash.
+export const skillPresentation=id=>presentations.get(id)??presentations.get({'쾌':'P-S01','유':'P-S02','중':'S-S01','환':'S-S02'}[familiarStyle(id)]);
 export const artStatus=()=>structuredClone(status);
 export async function loadArt(){
  try{

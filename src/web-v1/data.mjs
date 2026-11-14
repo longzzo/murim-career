@@ -1,6 +1,8 @@
+import {FAMILIAR_ORIGINS,FAMILIAR_MENTORS,FAMILIAR_SKILLS,validateFamiliarCatalog} from './factions.mjs';
 export const LEGACY_VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
 export const INVENTORY_VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
-export const VERSION = {save:2, content:'web-v1.3', rules:'web-v1.2', inventory:1, qi:1, guidance:1, story:1, recap:1, presentation:'web-v1.3'};
+export const PLAY_VERSION = {save:2, content:'web-v1.3', rules:'web-v1.2', inventory:1, qi:1, guidance:1, story:1, recap:1, presentation:'web-v1.3'};
+export const VERSION = {...PLAY_VERSION,content:'web-v1.4',presentation:'web-v1.4',factions:1};
 export const ECONOMY = {commission:30, escort:50, treatment:20, rejuvenation:80};
 export const REJUVENATION_MONTHS=120;
 // INV-01 v1 test values from common plan 04. New lives snapshot these definitions.
@@ -69,8 +71,8 @@ export const INVENTORY_DATA = {
 };
 // D-043 / D-045 first runtime trial. Snapshotted only for new lives.
 const enemyFoundations={novice:[0,0],rival:[40,40],ambush:[40,40],master:[100,100],threat:[100,100],leader:[200,200]};
-export const DATA = {
- ...INVENTORY_DATA,version:VERSION.content,
+export const PLAY_DATA = {
+ ...INVENTORY_DATA,version:PLAY_VERSION.content,
  story:{version:1,npc:{id:'NPC-GRAIN-CONTACT',name:'상단 연락책'},offers:[
   {id:'OFFER-GRAIN-01',title:'마을 배급 준비',quote:'곡물은 잘 도착했습니다. 마을에 나눌 준비도 도와주시겠습니까?',completion:'곡물을 마을에 나눌 준비를 마쳤습니다.'},
   {id:'OFFER-GRAIN-02',title:'다음 장날의 약속',quote:'지난번 배급을 도와주셨지요. 다음 장날에 쓸 물자를 거두는 일도 맡아주시겠습니까?',completion:'다음 장날에 쓸 물자를 마련해 두 번째 약속을 마쳤습니다.'}]},
@@ -83,10 +85,14 @@ export const DATA = {
   'CON-QI-RECOVER':{type:'qiMedicine',name:'내공 회복약',effect:'recover',amount:12},
   'CON-QI-CAPACITY':{type:'qiMedicine',name:'내공 증진약',effect:'capacity',amount:4}}
 };
+export const DATA = {...PLAY_DATA,version:VERSION.content,factions:1,origins:FAMILIAR_ORIGINS,mentors:FAMILIAR_MENTORS,
+ skills:[...PLAY_DATA.skills.filter(s=>!['P-S01','P-S02'].includes(s.id)),...FAMILIAR_SKILLS]};
 export function validateData(d=DATA){
  if(!d||!['actions','events','skills','mentors'].every(k=>Array.isArray(d[k]))||typeof d.version!=='string')throw Error('콘텐츠 구조 오류');
  const ids=new Set(); for(const group of ['actions','events','skills','mentors']) for(const x of d[group]) {if(ids.has(x.id))throw Error('중복 ID: '+x.id);ids.add(x.id);}
- if(d.actions.length!==10||d.events.length!==10||d.mentors.length!==4)throw Error('콘텐츠 수량 오류');
+ if(d.actions.length!==10||d.events.length!==10)throw Error('콘텐츠 수량 오류');
+ if(d.version==='web-v1.4')validateFamiliarCatalog(d);
+ else if(d.factions!==undefined||d.mentors.length!==4||MENTORS.some(expected=>!d.mentors.some(m=>m.id===expected.id&&m.origin===expected.origin)))throw Error('기존 스승 계약 오류');
  const effects=new Set(['npc','extra','heal','clue','randomStudy','battle','herb','insight','learn','breakthrough','resolveThreat','fame','debt']);
  for(const e of d.events){
   const cs=new Set();if(!Array.isArray(e.choices)||!e.choices.length)throw Error('선택 없음');
@@ -106,7 +112,7 @@ export function validateData(d=DATA){
   if(!e.choices.some(x=>!x.requires))throw Error('기본 대응 없음');
  }
  for(const a of d.actions)if(!(a.months>0&&Number.isInteger(a.months)&&Number.isFinite(a.xp)&&a.xp>=0&&Number.isFinite(a.mastery)&&a.mastery>=0&&Array.isArray(a.tags)&&a.tags.length))throw Error('기간/성장 오류');
- for(const m of d.mentors)if(!d.skills.some(x=>x.id===m.skill)||!['P-01','S-01'].includes(m.origin)||!['light','medicine','body'].includes(m.assist))throw Error('스승 참조 오류');
+ for(const m of d.mentors)if(!d.skills.some(x=>x.id===m.skill)||!(d.origins??ORIGINS).some(o=>o.id===m.origin)||!['light','medicine','body'].includes(m.assist))throw Error('스승 참조 오류');
  for(const e of Object.values(d.enemies||{}))if(!Number.isInteger(e.realm)||e.realm<0||e.realm>4||!Number.isFinite(e.mastery)||e.mastery<0||!['duel','life','encounter'].includes(e.mode)||!['F-NORMAL','F-THREAT'].includes(e.faction))throw Error('적 수치/해금 오류');
  return true;
 }

@@ -1,6 +1,7 @@
 import {SaveStore} from './storage.mjs';
 import {publicView} from './engine.mjs';
-import {MENTORS} from './data.mjs';
+import {DATA} from './data.mjs';
+import {canEnterOrigin} from './factions.mjs';
 import {playScene,stopScene} from './scene-final.mjs';
 import {loadArt,artAsset} from './art.mjs';
 import {esc,number,currency,character,situation,battleRisk,bottomNav,home,actionGroup,inventory,itemDetail,image} from './experience.mjs';
@@ -34,7 +35,7 @@ function render(){
  stopScene();const start=performance.now();
  if(!store.state||startingNew){
   document.body.classList.remove('compact-home');
-  app.innerHTML=errors()+(error?'':setupScreen(setup,setupOrigin,configuring,startingNew));bind();return;
+  app.innerHTML=errors()+(error?'':setupScreen(setup,setupOrigin,configuring,startingNew,store.state?.meta.unlocks??[]));bind();return;
  }
  const v=publicView(store.state);
  const notice=!error&&!busy&&announcement.length&&v.phase!=='result'?`<aside class="change-notice" aria-label="저장된 상태 변화"><div><strong>상태 변화</strong><div class="result-tags">${changeTags(announcement)}</div></div>${btn('닫기','dismiss-notice','', 'aria-label="상태 변화 알림 닫기"')}</aside>`:'';
@@ -58,11 +59,17 @@ function render(){
  document.documentElement.dataset.renderMs=(performance.now()-start).toFixed(2);
 }
 function bindSetup(form){
+ form.addEventListener('change',()=>{
+  const chosen=form.querySelector('[name="mentor"]:checked,input[type="hidden"][name="mentor"]');
+  const mentor=DATA.mentors.find(m=>m.id===chosen?.value&&m.origin===setup.origin);
+  form.querySelector('#chosen-teacher').textContent=mentor?.name??'아직 선택하지 않음';
+  form.querySelector('button[type="submit"]').disabled=!mentor||busy||!!error;
+ });
  form.elements.trait.addEventListener('change',()=>{
   form.querySelector('#trait-description').textContent=setupTraitDescription(form.elements.trait.value);
  });
  form.addEventListener('submit',async e=>{
-  e.preventDefault();if(busy||error)return;
+  e.preventDefault();if(busy||error||!form.reportValidity()||!form.querySelector('[name="mentor"]:checked,input[type="hidden"][name="mentor"]'))return;
   setup={...setup,...Object.fromEntries(new FormData(form))};
   const options={...setup,name:setup.name.trim()||'무명'};
   if(startingNew){await perform({type:'newLife',options});return;}
@@ -79,7 +86,7 @@ function homeScreen(v,notice){
 }
 function chronicleScreen(v){
  return `<h2>기록</h2>${v.canRejuvenate?btn('반로환동 방법 살피기','review','wide','data-id="renewal"'):''}${guidanceHelp(v)}${promiseHistory(v)}${changeHistory(v)}<details open><summary>이번 생애의 발자취</summary>${logs(v)}</details>
- <details class="past-lives"><summary>지난 생애</summary>${v.history.length?`<ul>${v.history.map(h=>`<li>${esc(h.name)} · ${h.age}세 · ${esc(h.realm)}${h.recapQuote?`<p>${esc(h.recapQuote)}</p>`:''}${promiseHistory(h)}</li>`).join('')}</ul>`:'<p class="empty">지난 생애 기록 없음</p>'}</details>
+ <details class="past-lives"><summary>지난 생애</summary>${v.history.length?`<ul>${v.history.map(h=>`<li>${esc(h.name)} · ${esc(h.originName)} · ${esc(h.mentorName)} · ${h.age}세 · ${esc(h.realm)}${h.recapQuote?`<p>${esc(h.recapQuote)}</p>`:''}${promiseHistory(h)}</li>`).join('')}</ul>`:'<p class="empty">지난 생애 기록 없음</p>'}</details>
  ${v.canRetire&&!v.success?btn('금분세수 살피기','review','wide','data-id="retire"'):''}
  ${v.success?btn('생애 마무리 살피기','review','wide','data-id="finish"'):''}`;
 }
@@ -103,7 +110,7 @@ function recordScreen(v){const draft=displayedLoadout();return `<h2>배움과 �
  <p class="ua-error">${esc(error)}</p><button class="wide" type="submit" data-focus="apply-loadout">공격 구성 적용</button></form>
  <div class="divider"><h3>도감의 단서</h3>${v.clues.length?`<p class="muted">${v.clues.map(esc).join(' · ')}</p>`:'<p class="empty">앞으로 만날 일들이 기록됩니다.</p>'}</div>`;}
 function mapScreen(v){
- return `${storyPanel(v)}<h2>강호 약도</h2>${schoolMap(mapOrigin??v.origin,v.origin,v.origins)}
+ return `${storyPanel(v)}<h2>강호 약도</h2>${schoolMap(mapOrigin??v.origin,{id:v.origin,name:v.originName},v.schools)}
  <h3>문파 해금</h3><p>일반 문파 · ${v.unlocks.includes('F-NORMAL')?'해금':'잠김 · 실제 접전 결과 필요'}</p>
  <p>명문 · ${v.unlocks.includes('F-POPULAR')?'해금':'잠김 · 의뢰 단계 '+v.quest+'/2'}</p>
  <p class="notice">${v.threat.resolved?'이번 생애의 핵심 위협을 해결했습니다.':v.threat.occurred?'핵심 위협이 남아 있습니다. 강적 도전에서 다시 맞설 수 있습니다.':'회차의 핵심 위협은 아직 드러나지 않았습니다.'}</p>
@@ -180,10 +187,10 @@ function endedScreen(v){
  ${lastAction?`<p>마지막 행동 · ${esc(lastAction)}</p>`:''}
   ${battle?`<h3>${esc(battle.enemy)} · ${outcomes[battle.outcome]}</h3>`:''}
  <p class="notice">${ending}</p>${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
- return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
+ return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>${esc(v.originName)} · ${esc(v.mentor.name)}</p><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
  <p>${v.success==='retirement'?'금분세수의 성공을 남겼습니다.':v.success==='conquest'?'승리하고 생존해 정복의 성공을 남겼습니다.':'발견과 해금은 다음 생애에도 남습니다.'}</p></section>
  ${v.recapQuote?`<blockquote class="notice">${esc(v.recapQuote)}</blockquote>`:''}
- <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 능력과 재화는 새로 시작합니다.</p>
+ <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 새 생애는 새 문파 목록에서 선택하고, 회귀는 원래 출신·사부·규칙을 유지합니다. 능력과 재화는 새로 시작합니다.</p>
  <div class="choices">${btn('새 생애 · 문파 고르기','new-life-map','primary')}${btn('기억을 품고 회귀','review-regression')}${btn('마지막 순간 돌아보기','close-recap')}</div>
  ${review==='regression'?`<section class="item-confirm"><h3>이 생애의 기억을 품고 회귀할까요?</h3><div class="row">${btn('돌아가기','cancel-regression')}${btn('회귀 확정','regress','primary')}</div></section>`:''}</section>
  ${changeHistory(v)}<details class="card recap-details"><summary>기억할 선택과 인연</summary>${promiseHistory({story:record?.story})}${logs(v)}</details>`;
@@ -285,11 +292,16 @@ function bind(){
    if(!store.state||startingNew)setupOrigin=id;
    else mapOrigin=id;
    render();focusPage(focusSelector(el));
+   document.querySelector('#change-status').textContent=DATA.origins.find(o=>o.id===id).name+' 설명을 열었습니다. 입문 선택은 바뀌지 않았습니다.';
   }
+  else if(a==='school-detail')focusPage('.school-description h3');
+  else if(a==='school-back')focusPage(`[data-ui="school"][data-id="${id}"]`);
   else if(a==='school-select'){
-   const same=setup.origin===setupOrigin;
-   setup={...setup,origin:setupOrigin,mentor:same?setup.mentor:MENTORS.find(entry=>entry.origin===setupOrigin).id};
-   configuring=true;render();focusPage();
+   if(!canEnterOrigin(DATA,setupOrigin,store.state?.meta.unlocks??[]))return;
+   const same=setup.origin===setupOrigin&&DATA.mentors.some(m=>m.id===setup.mentor&&m.origin===setupOrigin);
+   const mentors=DATA.mentors.filter(m=>m.origin===setupOrigin);
+   setup={...setup,origin:setupOrigin,mentor:same?setup.mentor:mentors.length===1?mentors[0].id:null};
+   configuring=true;render();focusPage(mentors.length===1?'h2':'[name="mentor"]');
   }
   else if(a==='setup-map'){
    setup={...setup,...Object.fromEntries(new FormData(el.closest('form')))};

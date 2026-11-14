@@ -40,8 +40,8 @@ export function battleRisk(value){
 }
 export function actionCard(v,a,{recommended=false,target}={}){
  if(a.id==='ACT-08'&&v.quest===2)return `<div class="action-card"><h3>${image('UI-ICO-'+a.id,'menu-icon')}${esc(a.name)}</h3>
-  <p class="badge">완료</p><p>이 생애의 명문 해금을 마쳤습니다.</p>
-  <button class="wide" data-ui="start-action" data-id="ACT-08" data-target="default" disabled>명문 해금 완료</button></div>`;
+  <p class="badge">완료</p><p>${v.factions===1?'이번 생애의 명문 교류·시험을 마쳤습니다.':'이 생애의 명문 해금을 마쳤습니다.'}</p>
+  <button class="wide" data-ui="start-action" data-id="ACT-08" data-target="default" disabled>${v.factions===1?'교류·시험 완료':'명문 해금 완료'}</button></div>`;
  if(a.id==='ACT-05'&&v.qi)return recoveryCard(v,target);
  const cost=a.id==='ACT-05'&&v.money>=ECONOMY.treatment?ECONOMY.treatment:0;
  const reward=a.id==='ACT-03'?ECONOMY.commission:a.id==='ACT-04'?ECONOMY.escort:0;

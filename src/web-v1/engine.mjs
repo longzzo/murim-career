@@ -1,10 +1,12 @@
-import {DATA,VERSION,INVENTORY_DATA,INVENTORY_VERSION,LEGACY_DATA,LEGACY_VERSION,REALMS,THRESHOLDS,ASSISTS,ECONOMY,REJUVENATION_MONTHS,validateData} from './data.mjs';
+import {DATA,VERSION,PLAY_VERSION,INVENTORY_DATA,INVENTORY_VERSION,LEGACY_DATA,LEGACY_VERSION,REALMS,THRESHOLDS,ASSISTS,ECONOMY,REJUVENATION_MONTHS,validateData} from './data.mjs';
+import {originRoute,canEnterOrigin,schoolChoices} from './factions.mjs';
 import {hasInventory,startInventory,validateInventory,grantItem,equippedForBattle,wearWeapon,manageInventory,inventoryView} from './inventory.mjs';
 import {hasQi,startQi,validateQi,maxQi,maxHp,qiView,qiDistribution,skillCost,qiRisk,fightQi,grantMedicine,useMedicine,MEDICINES} from './qi.mjs';
 import {hasGuidance,startGuidance,validateGuidance,learnedGuidance,battleGuidance,practiceGuidance,manageGuidance,guidanceView} from './guidance.mjs';
 import {hasStory,startStory,validateStory,requireOffer,acceptOffer,decideOffer,storyCompletion,closeStory,storyView,savedStoryView} from './story.mjs';
 import {startActionSummary,recordActionSummary,actionSummary,validateActionSummaries} from './action-summary.mjs';
 const clone=x=>structuredClone(x);
+const legacyOriginLabels=[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}];
 const addUnique=(xs,x)=>{if(!xs.includes(x))xs.push(x);};
 const requireThat=(condition,message)=>{if(!condition)throw Error(message);};
 export const RECAP_QUOTE_KEY='new-breakthrough-unreached';
@@ -72,6 +74,12 @@ function recordEnding(before,after){
  if(after.life.lastActionSummary)record.actionSummary=clone(after.life.lastActionSummary);
 }
 export function newGame(options={},previous=null){
+ if(options.regress){
+  requireThat(previous,'회귀할 생애가 없습니다.');
+  const old=previous.life;
+  requireThat((!options.origin||options.origin===old.origin)&&(!options.mentor||options.mentor===old.mentor),'회귀는 원래 출신과 사부를 유지합니다.');
+  return createGame({...options,origin:old.origin,mentor:old.mentor},previous,previous.versions,previous.content);
+ }
  return createGame(options,previous,VERSION,DATA);
 }
 export function newInventoryGame(options={}){
@@ -81,11 +89,14 @@ export function newLegacyGame(options={}){
  return createGame(options,null,LEGACY_VERSION,LEGACY_DATA);
 }
 function createGame(options,previous,version,data){
+ validateData(data);
  const meta=previous?clone(previous.meta):{unlocks:[],clues:[],history:[],successes:[]};
  const old=previous?.life;
- const origin=options.origin||old?.origin||'P-01';
- const mentor=options.mentor||old?.mentor||DATA.mentors.find(m=>m.origin===origin)?.id;
- requireThat(DATA.mentors.some(m=>m.id===mentor&&m.origin===origin),'출신과 스승이 맞지 않습니다.');
+ const origin=options.origin||data.origins?.[0]?.id||'P-01';
+ const mentor=options.mentor||data.mentors.find(m=>m.origin===origin)?.id;
+ requireThat(data.mentors.some(m=>m.id===mentor&&m.origin===origin),'출신과 스승이 맞지 않습니다.');
+ requireThat(!data.factions||canEnterOrigin(data,origin,meta.unlocks),'잠긴 문파입니다. 해금 후 새 생애에서 선택할 수 있습니다.');
+ if(previous&&!options.regress)meta.history=meta.history.map(record=>({...record,...historyNames(record,previous.content)}));
  const s={versions:clone(version),content:clone(data),revision:0,commands:[],initialSeed:(Number(options.seed)>>>0)||1729,rng:(Number(options.seed)>>>0)||1729,phase:'home',pending:null,queue:[],active:null,result:null,nextAction:0,life:null,meta};
  const seq=(previous?.life.seq||0)+1;
  const trait=options.regress?old.trait:options.trait&&options.trait!=='random'?options.trait:(random(s)<.5?'천무지체':'약응체');
@@ -102,12 +113,16 @@ export function validateState(s){
  const v=s?.versions;
  const legacy=v?.rules===LEGACY_VERSION.rules&&['web-v1.0',LEGACY_VERSION.content].includes(v.content);
  const inventory=v?.rules===INVENTORY_VERSION.rules&&v.save===2&&v.content===INVENTORY_VERSION.content;
+ const qiVersion=v?.rules===VERSION.rules&&v.save===2&&v.qi===1&&
+  (v.content===PLAY_VERSION.content&&v.factions===undefined||v.content===VERSION.content&&v.factions===1);
  requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
-  inventory||(v?.rules===VERSION.rules&&v.save===VERSION.save&&v.content===VERSION.content&&v.qi===1),'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
+  inventory||qiVersion,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
  validateData(s.content);
  requireThat(s.content.version===s.versions.content,'콘텐츠 버전 불일치');
  const l=s.life;
+ requireThat(!!originRoute(s.content,l?.origin),'문파 경로 참조 손상');
+ if(v.factions===1)requireThat(v.presentation==='web-v1.4'&&canEnterOrigin(s.content,l?.origin,s.meta.unlocks),'문파 버전/해금 상태 손상');
  requireThat(l&&Number.isInteger(l.month)&&l.month>=0&&Number.isFinite(l.limit)&&l.limit>=0,'시간 상태 손상');
  requireThat(Number.isInteger(l.realm)&&l.realm>=0&&l.realm<5&&Number.isFinite(l.xp)&&l.xp>=0,'성장 상태 손상');
  requireThat(['home','journey','event','result','grace','ended'].includes(s.phase),'진행 상태 손상');
@@ -147,6 +162,10 @@ function offeredTarget(s,target){
   (s.pending?.id==='V-004'&&s.life.realm+1===target);
 }
 function validRecapFact(s,c){return c.schemaVersion===1&&c.lifeId===s.life.id&&c.month===s.life.month&&c.targetRealm===s.life.realm+1&&c.targetRealm<5&&c.eligibleBefore===false&&c.eligibleAfter===true&&typeof c.token==='string'&&c.token.startsWith(`${s.life.id}/realm-${c.targetRealm}/`)&&!offeredTarget(s,c.targetRealm);}
+function historyNames(record,content){return {
+ originName:record.originName??(content.origins??legacyOriginLabels).find(o=>o.id===record.origin)?.name??LEGACY_DATA.origins.find(o=>o.id===record.origin)?.name??record.origin,
+ mentorName:record.mentorName??content.mentors.find(m=>m.id===record.mentor)?.name??LEGACY_DATA.mentors.find(m=>m.id===record.mentor)?.name??record.mentor
+};}
 function finishLife(s,cause,weapon=null){
  const l=s.life;if(l.ending)return;
  const candidate=s.naturalRecapCandidate;
@@ -155,6 +174,7 @@ function finishLife(s,cause,weapon=null){
  closeStory(s);
  delete s.naturalRecapCandidate;delete s.resumePhase;
  const record={id:l.id,name:l.name,origin:l.origin,mentor:l.mentor,age:16+Math.floor(l.month/12),realm:REALMS[l.realm],cause,success:l.success,regression:l.regression};
+ if(s.versions.factions===1)Object.assign(record,historyNames(record,s.content));
  if(recap)record.recap=recap;
  if(weapon)record.finalWeapon=clone(weapon);
  if(hasStory(s))record.story=clone(l.story);
@@ -291,18 +311,21 @@ function completeAction(s){
  else if(id==='ACT-07'&&a.target==='assist'){
   const m=s.content.mentors.find(x=>x.id===l.mentor);addUnique(l.assists,m.assist);text=`${ASSISTS[m.assist]}를 배웠습니다.`;
  }else if(id==='ACT-08'){
+  const hadPopular=s.meta.unlocks.includes('F-POPULAR');
   if(l.quest===0){l.quest=1;addUnique(s.meta.clues,'명문 입문 의뢰의 단서');text='첫 단계를 마쳤습니다. 다음 의뢰에서 시험을 치릅니다.';}
   else if(l.quest===1){
    if(l.assists.includes('medicine')){l.quest=2;addUnique(s.meta.unlocks,'F-POPULAR');text='의술 과제를 마치고 명문을 해금했습니다.';}
    else{battle=resolveBattle(s,'rival');if(battle.outcome==='win'){l.quest=2;addUnique(s.meta.unlocks,'F-POPULAR');text='시험 비무를 마치고 명문을 해금했습니다.';}else text='시험에서 배움을 얻었습니다. 첫 단계는 유지되어 재도전할 수 있습니다.';}
+   if(s.versions.factions===1&&l.quest===2)text=`이번 생애의 ${battle?'시험 비무':'의술 과제'}를 마쳤습니다.${hadPopular?'':' 새 명문 입문 자격을 해금했습니다.'}`;
    if(hasQi(s)&&l.quest===2){
     const gain=grantMedicine(s,'CON-QI-CAPACITY',l.id+'/'+a.key+'/ACT-08/CON-QI-CAPACITY');
-    if(gain)gains.push(gain);
+    if(gain){gains.push(gain);if(s.versions.factions===1)text+=` ${gain.name} ${gain.quantity}개를 받았습니다.`;}
    }
-  }else text='이미 명문 해금을 마쳤습니다.';
+  }else text=s.versions.factions===1?'이번 생애의 명문 교류·시험을 이미 마쳤습니다.':'이미 명문 해금을 마쳤습니다.';
  }else if(id==='ACT-09'){battle=resolveBattle(s,a.target||'rival');text=battle.outcome==='win'?'도전에서 승리했습니다.':'도전의 결과를 기록했습니다.';}
  if(l.ending)return;
- s.result={title:s.content.actions.find(x=>x.id===id).name+' 완료',text,battle,actionId:id};note(s,text);
+ const title=id==='ACT-08'&&s.versions.factions===1?(l.quest===2?'명문 교류·시험 완료':'명문 교류·시험 진행'):s.content.actions.find(x=>x.id===id).name+' 완료';
+ s.result={title,text,battle,actionId:id};note(s,text);
  if(hasGuidance(s))s.result.actionKey=l.id+'/'+a.key;
  storyCompletion(s,a);
  if(hasInventory(s)&&id==='ACT-03')s.result.completionMoney=ECONOMY.commission;
@@ -395,7 +418,7 @@ function choose(s,id){
  naturalBoundary(s);
 }
 export function allowedTargets(s,action){
- const l=s.life;if(action==='ACT-09')return ['rival',...(l.world.occurred&&!l.world.resolved?['threat']:[]),...(l.origin==='S-01'&&l.realm>=3&&l.fame>=6&&l.trust>=3&&!l.success?['leader']:[])];
+ const l=s.life;if(action==='ACT-09')return ['rival',...(l.world.occurred&&!l.world.resolved?['threat']:[]),...(originRoute(s.content,l.origin)==='unorthodox'&&l.realm>=3&&l.fame>=6&&l.trust>=3&&!l.success?['leader']:[])];
  if(action==='ACT-01')return ['inner','outer'];
  if(action==='ACT-05'&&hasQi(s))return ['default','breathing'];
  if(action==='ACT-07')return ['skill','assist'];return ['default'];
@@ -446,7 +469,7 @@ export function transition(input,command){
   const aux=command.aux||[];requireThat(aux.every(x=>l.skills[x]!==undefined&&x!==command.primary)&&new Set(aux).size===aux.length,'잘못된 보조');
   l.loadout={primary:command.primary,aux};
  }else if(command.type==='retire'){
-  requireThat(s.phase==='home'&&l.origin==='P-01'&&l.realm>=2&&l.world.resolved&&!l.debt.length,'금분세수 자격이 없습니다.');
+  requireThat(s.phase==='home'&&originRoute(s.content,l.origin)==='orthodox'&&l.realm>=2&&l.world.resolved&&!l.debt.length,'금분세수 자격이 없습니다.');
   recordSuccess(s,'retirement');s.result={title:'금분세수',text:'위협과 은원을 정리하고 성공을 기록했습니다. 생애는 계속할 수 있습니다.'};s.phase='result';naturalBoundary(s);
  }else if(command.type==='finish'){
   requireThat(s.phase==='home'&&l.success,'성공 기록 뒤 행동을 마친 상태에서 마무리할 수 있습니다.');finishLife(s,'retired');
@@ -470,15 +493,22 @@ export function transition(input,command){
 }
 export function publicView(s){
  const l=s.life;
- const view={revision:s.revision,phase:s.phase,name:l.name,origin:l.origin,mentor:s.content.mentors.find(x=>x.id===l.mentor),age:16+Math.floor(l.month/12),season:['봄','여름','가을','겨울'][Math.floor(l.month%12/3)],worldYear:Math.floor(l.month/12)+1,realm:REALMS[l.realm],realmIndex:l.realm,xp:Math.floor(l.xp/1000),money:l.money,fame:l.fame,trust:l.trust,npc:l.npc,body:l.injury===2?'심한 부상':l.injury===1?'가벼운 상처':'안정',warning:l.injury===2?'몸을 돌보며 도전에 신중할 때입니다.':(16+Math.floor(l.month/12))>=50?'몸이 예전 같지 않습니다. 긴 수련은 부담이 됩니다.':'강호의 일에는 늘 변수가 따릅니다.',trait:l.traitKnown?l.trait:'아직 알아차리지 못한 체질',rejuvenated:l.rejuvenated,canRejuvenate:!l.ending&&!l.rejuvenated&&l.breakthroughs.length>=2,canRetire:l.origin==='P-01'&&l.realm>=2&&l.world.resolved&&!l.debt.length,success:l.success,ending:l.ending,skills:Object.entries(l.skills).map(([id,value])=>({...s.content.skills.find(x=>x.id===id),mastery:Math.floor(value/1000)})),loadout:clone(l.loadout),assists:l.assists.map(x=>ASSISTS[x]),actions:s.content.actions.map(x=>({...x,targets:allowedTargets(s,x.id),risk:risk(s,x.id==='ACT-09'?'rival':'novice')})),active:s.active?{id:s.active.id,name:s.content.actions.find(x=>x.id===s.active.id).name,elapsed:s.active.elapsed,duration:s.active.duration}:null,pending:s.pending?{...s.content.events.find(x=>x.id===s.pending.id),choices:s.content.events.find(x=>x.id===s.pending.id).choices.map(x=>({id:x.id,label:x.label,allowed:canChoose(l,x),reason:x.requires==='mediation'?'명성4 · 인연3 필요':x.requires?`${ASSISTS[x.requires]} 필요`:''}))}:null,result:clone(s.result),log:clone(l.log),debt:clone(l.debt),threat:{occurred:l.world.occurred,resolved:l.world.resolved},quest:l.quest,unlocks:clone(s.meta.unlocks),clues:clone(s.meta.clues),history:clone(s.meta.history),regression:l.regression};
+ const view={revision:s.revision,phase:s.phase,name:l.name,origin:l.origin,mentor:s.content.mentors.find(x=>x.id===l.mentor),age:16+Math.floor(l.month/12),season:['봄','여름','가을','겨울'][Math.floor(l.month%12/3)],worldYear:Math.floor(l.month/12)+1,realm:REALMS[l.realm],realmIndex:l.realm,xp:Math.floor(l.xp/1000),money:l.money,fame:l.fame,trust:l.trust,npc:l.npc,body:l.injury===2?'심한 부상':l.injury===1?'가벼운 상처':'안정',warning:l.injury===2?'몸을 돌보며 도전에 신중할 때입니다.':(16+Math.floor(l.month/12))>=50?'몸이 예전 같지 않습니다. 긴 수련은 부담이 됩니다.':'강호의 일에는 늘 변수가 따릅니다.',trait:l.traitKnown?l.trait:'아직 알아차리지 못한 체질',rejuvenated:l.rejuvenated,canRejuvenate:!l.ending&&!l.rejuvenated&&l.breakthroughs.length>=2,canRetire:originRoute(s.content,l.origin)==='orthodox'&&l.realm>=2&&l.world.resolved&&!l.debt.length,success:l.success,ending:l.ending,skills:Object.entries(l.skills).map(([id,value])=>({...s.content.skills.find(x=>x.id===id),mastery:Math.floor(value/1000)})),loadout:clone(l.loadout),assists:l.assists.map(x=>ASSISTS[x]),actions:s.content.actions.map(x=>({...x,targets:allowedTargets(s,x.id),risk:risk(s,x.id==='ACT-09'?'rival':'novice')})),active:s.active?{id:s.active.id,name:s.content.actions.find(x=>x.id===s.active.id).name,elapsed:s.active.elapsed,duration:s.active.duration}:null,pending:s.pending?{...s.content.events.find(x=>x.id===s.pending.id),choices:s.content.events.find(x=>x.id===s.pending.id).choices.map(x=>({id:x.id,label:x.label,allowed:canChoose(l,x),reason:x.requires==='mediation'?'명성4 · 인연3 필요':x.requires?`${ASSISTS[x.requires]} 필요`:''}))}:null,result:clone(s.result),log:clone(l.log),debt:clone(l.debt),threat:{occurred:l.world.occurred,resolved:l.world.resolved},quest:l.quest,unlocks:clone(s.meta.unlocks),clues:clone(s.meta.clues),history:clone(s.meta.history),regression:l.regression};
  // Internal boundary facts never enter the display model, including historical records.
- view.history=s.meta.history.map(({recap,story,...record})=>({...record,...(story?{story:savedStoryView(story,s.content.story)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
+ view.history=s.meta.history.map(({recap,story,...record})=>({...record,...historyNames(record,s.content),...(story?{story:savedStoryView(story,s.content.story)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
  view.recapQuote=s.phase==='ended'?view.history.find(x=>x.id===l.id)?.recapQuote||null:null;
  view.ageMonths=l.month%12;
  view.changes=clone(l.changes??[]);
  view.actionSummary=s.active?.summary?actionSummary(s,s.active):clone(s.result?.actionSummary??null);
  view.battleRisks=Object.fromEntries(['novice',...allowedTargets(s,'ACT-09')].map(target=>[target,risk(s,target)]));
- view.origins=clone(s.content.origins||[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}]);
+ view.origins=clone(s.content.origins??legacyOriginLabels);
+ view.originRoute=originRoute(s.content,l.origin);
+ view.factions=s.versions.factions;
+ view.schools=schoolChoices(DATA,s.meta.unlocks);
+ if(view.factions===1&&s.meta.unlocks.includes('F-POPULAR')){
+  const quest=view.actions.find(a=>a.id==='ACT-08');quest.name='명문 교류 의뢰';
+  quest.desc='기존 입문 자격은 유지됩니다. 이번 생애의 교류·시험 두 단계를 마치면 내공 증진약 1개를 받습니다.';
+ }
  view.originName=view.origins.find(x=>x.id===l.origin)?.name||l.origin;
  view.inventory=inventoryView(s);
  view.qi=qiView(s);
@@ -500,6 +530,6 @@ export function publicView(s){
  view.knowsMentorAssist=l.assists.includes(view.mentor.assist);
  if(view.result?.itemGains)view.result.itemGains=view.result.itemGains.map(({name,quantity})=>({name,quantity}));
  if(view.pending){for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);c.extraMonths=definition.effects.filter(([type])=>type==='extra').reduce((sum,[,months])=>sum+months,0);}}
- if(view.pending?.id==='W-E02'){const fight=view.pending.choices.find(c=>c.id==='fight');fight.label=l.origin==='P-01'?'토벌 원정에 참여한다':'공격에 맞서 방어한다';}
+ if(view.pending?.id==='W-E02'){const fight=view.pending.choices.find(c=>c.id==='fight');fight.label=originRoute(s.content,l.origin)==='orthodox'?'토벌 원정에 참여한다':'공격에 맞서 방어한다';}
  return view;
 }
