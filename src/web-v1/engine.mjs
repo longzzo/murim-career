@@ -3,6 +3,7 @@ import {hasInventory,startInventory,validateInventory,grantItem,equippedForBattl
 import {hasQi,startQi,validateQi,maxQi,maxHp,qiView,qiDistribution,skillCost,qiRisk,fightQi,grantMedicine,useMedicine,MEDICINES} from './qi.mjs';
 import {hasGuidance,startGuidance,validateGuidance,learnedGuidance,battleGuidance,practiceGuidance,manageGuidance,guidanceView} from './guidance.mjs';
 import {hasStory,startStory,validateStory,requireOffer,acceptOffer,decideOffer,storyCompletion,closeStory,storyView,savedStoryView} from './story.mjs';
+import {startActionSummary,recordActionSummary,actionSummary,validateActionSummaries} from './action-summary.mjs';
 const clone=x=>structuredClone(x);
 const addUnique=(xs,x)=>{if(!xs.includes(x))xs.push(x);};
 const requireThat=(condition,message)=>{if(!condition)throw Error(message);};
@@ -68,6 +69,7 @@ function recordEnding(before,after){
  const actionId=before.active?.id??after.result?.actionId??before.result?.actionId??after.life.lastActionId;
  const action=after.content.actions.find(entry=>entry.id===actionId);
  if(action)record.lastAction=action.name;
+ if(after.life.lastActionSummary)record.actionSummary=clone(after.life.lastActionSummary);
 }
 export function newGame(options={},previous=null){
  return createGame(options,previous,VERSION,DATA);
@@ -133,6 +135,7 @@ export function validateState(s){
  else requireThat(l.qi===undefined&&v.qi===undefined&&s.content.qiRules===undefined,'기존 생애에 새 내공 규칙이 포함되어 있습니다.');
  validateGuidance(s);
  validateStory(s);
+ validateActionSummaries(s);
  return true;
 }
 export function migrateSave(state){
@@ -410,6 +413,7 @@ export function transition(input,command){
   requireThat(s.phase==='home'&&!s.active&&!l.ending,'현재 행동을 바꿀 수 없습니다.');
   const offer=command.type==='acceptOffer'?requireOffer(s,command.offerId):null;
   const def=s.content.actions.find(x=>x.id===(offer?'ACT-03':command.action));requireThat(def,'없는 행동');
+  requireThat(def.id!=='ACT-08'||l.quest<2,'이미 명문 해금을 마쳤습니다.');
   const target=command.target||allowedTargets(s,def.id)[0];requireThat(allowedTargets(s,def.id).includes(target),'행동 대상 자격이 없습니다.');
   const breathing=hasQi(s)&&def.id==='ACT-05'&&target==='breathing';
   if(breathing)requireThat(l.qi.current<maxQi(s),'내공이 이미 가득 찼습니다.');
@@ -417,6 +421,7 @@ export function transition(input,command){
   const paid=def.id==='ACT-05'&&!breathing&&l.money>=ECONOMY.treatment;if(paid)l.money-=ECONOMY.treatment;
   l.lastActionId=def.id;
   s.active={id:def.id,key:`action-${++s.nextAction}`,target,duration:months,baseDuration:months,elapsed:0,xpCredited:0,masteryCredited:0,skill:hasQi(s)&&l.loadout.primary==='BASIC'?'SAMJAE':l.loadout.primary,randomChecked:false,breakDeclined:-1,paid};
+  s.active.summary=startActionSummary(input,s.active);
   if(offer)acceptOffer(s,offer,s.active);
   if(target==='leader'){l.leader=true;note(s,'지지와 실력을 인정받고 우두머리 결전에 나섰다.');}
   s.result=null;s.phase='journey';note(s,`${breathing?'운기 회복':def.name}을 확정했다. 기간 ${months}개월, 중간에 교체할 수 없다.`);
@@ -424,7 +429,7 @@ export function transition(input,command){
  else if(command.type==='choose')choose(s,command.choice);
  else if(command.type==='ack'){
   requireThat(s.phase==='result','확인할 결과가 없습니다.');
-  if(command.destination)requireThat(['record','duel','rest','training','world'].includes(command.destination),'다음 화면 오류');
+  if(command.destination)requireThat(['record','inventory','duel','rest','training','world'].includes(command.destination),'다음 화면 오류');
   if(command.guideRead)manageGuidance(s,{read:command.guideRead});
   s.phase='home';showQueue(s);
  }else if(command.type==='guidance'){
@@ -459,6 +464,7 @@ export function transition(input,command){
  }else throw Error('허용되지 않은 명령');
  s.revision++;s.commands.push(command.id);
  recordChanges(input,s,command);
+ recordActionSummary(input,s);
  recordEnding(input,s);
  validateState(s);return s;
 }
@@ -470,6 +476,7 @@ export function publicView(s){
  view.recapQuote=s.phase==='ended'?view.history.find(x=>x.id===l.id)?.recapQuote||null:null;
  view.ageMonths=l.month%12;
  view.changes=clone(l.changes??[]);
+ view.actionSummary=s.active?.summary?actionSummary(s,s.active):clone(s.result?.actionSummary??null);
  view.battleRisks=Object.fromEntries(['novice',...allowedTargets(s,'ACT-09')].map(target=>[target,risk(s,target)]));
  view.origins=clone(s.content.origins||[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}]);
  view.originName=view.origins.find(x=>x.id===l.origin)?.name||l.origin;
@@ -478,6 +485,7 @@ export function publicView(s){
  view.guidance=guidanceView(s);
  view.story=storyView(s);
  if(view.qi){
+  view.qi.canRestorePaidSkill=qiDistribution(s,view.qi.max).some(({id})=>skillCost(s,id)>view.qi.current);
   for(const skill of view.skills){skill.cost=skillCost(s,skill.id);skill.affordable=skill.cost<=view.qi.current;}
   view.skills.unshift({id:'BASIC',name:'기본 외공',style:'neutral',type:'attack',mastery:Math.floor(l.skills.SAMJAE/1000),cost:0,affordable:true,basic:true});
   view.inventory.medicines=view.qi.medicines;

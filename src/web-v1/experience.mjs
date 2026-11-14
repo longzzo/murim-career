@@ -1,5 +1,6 @@
 import {artAsset} from './art.mjs';
 import {ECONOMY} from './data.mjs';
+import {nextGoal} from './upgrade-model.mjs';
 
 export const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export const number=value=>new Intl.NumberFormat('ko-KR',{maximumFractionDigits:20}).format(value);
@@ -38,6 +39,9 @@ export function battleRisk(value){
  return `<div class="combat-risk ${value.mode==='duel'?'':'combat-life'}"><div class="combat-heading"><span>${image(value.mode==='duel'?'UI-ICO-ACT-06':'UI-ICO-WARNING','menu-icon')}${mode}</span><strong>전력 ${esc(value.level)}</strong></div><p>${consequence}</p><p class="risk-reason">${esc(value.reason)}</p>${value.comparison?`<details><summary>비교 기준</summary><p>${esc(value.comparison)} 상대 최대 생명력 ${value.enemyHp} · 내공 ${value.enemyQi}</p></details>`:''}</div>`;
 }
 export function actionCard(v,a,{recommended=false,target}={}){
+ if(a.id==='ACT-08'&&v.quest===2)return `<div class="action-card"><h3>${image('UI-ICO-'+a.id,'menu-icon')}${esc(a.name)}</h3>
+  <p class="badge">완료</p><p>이 생애의 명문 해금을 마쳤습니다.</p>
+  <button class="wide" data-ui="start-action" data-id="ACT-08" data-target="default" disabled>명문 해금 완료</button></div>`;
  if(a.id==='ACT-05'&&v.qi)return recoveryCard(v,target);
  const cost=a.id==='ACT-05'&&v.money>=ECONOMY.treatment?ECONOMY.treatment:0;
  const reward=a.id==='ACT-03'?ECONOMY.commission:a.id==='ACT-04'?ECONOMY.escort:0;
@@ -72,23 +76,7 @@ function recoveryCard(v,target){
  }).join('');
 }
 
-export function situation(v){
- if(v.phase!=='home')return null;
- if(v.body!=='안정')return {title:'몸을 추스를 때',label:'휴식·치료 살피기',action:'ACT-05',...(v.qi?{target:'default'}:{})};
- if(equipped(v)?.durability===0)return {title:'무기를 손볼 때',label:'장착 무기 살피기',item:equipped(v).id};
- if(v.success)return {title:'강호에 이름을 남기다',label:'생애 마무리 살피기',review:'finish'};
- if(v.canRetire)return {title:'금분세수를 앞두고',label:'금분세수 살피기',review:'retire'};
- if(v.qi&&v.qi.current<Math.max(4,v.skills.find(k=>k.id===v.loadout.primary)?.cost??4))return {title:'운기로 내공을 채울 때',label:'운기 회복',action:'ACT-05',target:'breathing'};
- const targets=v.actions.find(a=>a.id==='ACT-09').targets;
- if(targets.includes('leader'))return {title:'우두머리에게 도전',label:'결전 살피기',action:'ACT-09',target:'leader'};
- if(v.threat.occurred&&!v.threat.resolved&&targets.includes('threat'))return {title:'강호에 닥친 위협',label:'위협 대응 살피기',action:'ACT-09',target:'threat'};
- if(v.debt.length)return {title:'남은 은원을 풀다',label:'지역 의뢰 살피기',action:'ACT-03'};
- if(v.guidance?.practiceSuggested)return {title:'배운 검법을 시험해 볼 때',label:'교류 비무 살피기',group:'duel'};
- if(v.quest===1)return {title:'명문의 시험이 남았다',label:'시험 살피기',action:'ACT-08'};
- if(!v.knowsMentorSkill)return {title:'사부의 후속 검법을 익힐 때',label:'후속 검법 배우기',action:'ACT-02'};
- if(!v.knowsMentorAssist)return {title:'배움의 폭을 넓히다',label:'사부의 기예 배우기',action:'ACT-02'};
- return {title:'다음 발걸음을 정하다',label:'강호 활동 보기',group:'world'};
-}
+export const situation=nextGoal;
 
 export function bottomNav(tab){
  return `<nav class="bottom-nav" aria-label="강호 메뉴">${destinations.map(([id,name,icon])=>
@@ -126,7 +114,7 @@ export function home(v,notice=''){
  const marker=next.action?`UI-ICO-${next.action}`:next.item?'UI-ICO-CODEX':next.review?'UI-ICO-CHRONICLE':'UI-ICO-MAP';
  const attrs=next.item?`data-ui="item" data-id="${esc(next.item)}"`:next.review?`data-ui="review" data-id="${next.review}"`:
   `data-ui="group" data-id="${next.group}"`;
- return currency(v)+character(v)+`<section class="current-situation"><h2>${image(marker,'menu-icon')}${next.title}</h2>
+ return currency(v)+character(v)+`<section class="current-situation ua-goal"><p class="ua-kicker">${esc(next.direction)}</p><h2>${image(marker,'menu-icon')}${esc(next.title)}</h2><p>${esc(next.reason)}</p>
   ${v.age>=50&&v.body!=='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
   ${next.group==='duel'&&v.guidance?.practiceSuggested?'<p>교류 비무는 패배해도 생존합니다. 부상을 입을 수 있습니다.</p>':''}
   ${next.action?actionCard(v,v.actions.find(a=>a.id===next.action),{recommended:true,target:next.target}):`<button class="primary wide" ${attrs}>${next.label}</button>`}</section>${notice}

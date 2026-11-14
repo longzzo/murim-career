@@ -111,3 +111,20 @@ h2[tabindex="-1"]:focus{outline:none}
 /* Let these decisions wrap into full rows as the button text grows. */
 .item-confirm:is([aria-label="내공 약 사용 확인"],[aria-label="영초 사용 확인"])>.row>button{flex:1 1 8em;min-width:min(100%,8em);word-break:keep-all;overflow-wrap:normal}
 .recorded-battle>.row>button{flex:1 1 5em;min-width:min(100%,5em);word-break:keep-all;overflow-wrap:normal}
+
+/* Upgrade A: staged art CONTRACT / preview.css, scoped to the existing runtime. */
+.ua-goal{background:#edf3eb;border-color:#b2c9b7}.ua-kicker{font-size:.85rem;color:#426259;font-weight:700}
+.ua-goal p,.ua-whole p,.ua-next p,.ua-applied p,.ua-draft p{word-break:keep-all;overflow-wrap:break-word}
+.ua-applied,.ua-draft,.ua-whole{display:grid;gap:.65rem;min-width:0;padding:.85rem;margin:.65rem 0;border-radius:12px}
+.ua-applied,.ua-whole{border-left:4px solid #087568;background:#ecf4f0}.ua-draft{border:1px dashed #8b9c90}
+.ua-draft-status{color:#7b4a15;font-weight:700}.ua-draft-preview{padding:.65rem;background:#f0f4f1;border-radius:10px}
+.ua-draft .row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.6rem;align-items:center;min-height:44px}
+.ua-draft input.fit{width:20px;height:20px;min-height:0}.ua-draft select{width:100%;min-width:0}
+.ua-error{color:#8e3226;border-left:3px solid #b44a36;padding-left:.6rem}.ua-error:empty{display:none}
+.ua-facts{display:grid;gap:.5rem}.ua-fact{padding:.65rem .75rem;background:#edf4ef;border-radius:10px;color:#203a40}
+.ua-fact strong{font-size:1.1em}.ua-next{display:grid;gap:.5rem;padding:.6rem 0;border-top:1px solid #cbdad5}
+.ua-next h3{color:#426259}.ua-period{display:flex;flex-wrap:wrap;gap:.4rem}.ua-period span{padding:.2rem .5rem;background:#edf2ef;border-radius:6px}
+.ua-detail{border-top:1px solid #cbdad5;margin-top:.5rem;padding-top:.2rem;min-width:0}.ua-detail summary{min-height:44px;align-content:center;color:#345a54;word-break:keep-all;overflow-wrap:break-word}
+.ua-last{padding:.65rem;background:#f4f5f2;border:1px solid #cbdad5;border-radius:8px}
+.ua-draft button,.ua-next button{min-height:44px;word-break:keep-all;overflow-wrap:break-word}
+.ua-draft :focus-visible,.ua-detail summary:focus-visible,.ua-next button:focus-visible{outline:3px solid #ad6421;outline-offset:3px}

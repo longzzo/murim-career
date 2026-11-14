@@ -8,11 +8,16 @@ import {schoolMap,setupScreen,setupTraitDescription,rejuvenation,changeTags,chan
 import {resourceBattlePanel,battleResources} from './battle-ui.mjs';
 import {guidancePanel,guidanceHelp} from './guidance-ui.mjs';
 import {storyPanel,promiseHistory,storyResult} from './story-ui.mjs';
+import {loadoutPreview} from './upgrade-model.mjs';
+import {wholeSummary,combatSummary,nextPanel,configurationSummary} from './upgrade-ui.mjs';
 const app=document.querySelector('#app'),store=new SaveStore();
 let busy=false,error='',battleConfirm=null,currentTab='home',group=null,review=null;
 let item=null,itemTab='weapon',itemConfirm=null,previousPage=null,returnFocus=null;
 let setup={name:'',trait:'random',inclination:'inner'},setupOrigin=null,configuring=false,startingNew=false;
 let mapOrigin=null,recapOpen=false,announcement=[];
+let loadoutDraft=null;
+const editingLocked=()=>busy||!!error||!!store.pending;
+const displayedLoadout=()=>store.pending?.command.type==='loadout'?store.pending.command:loadoutDraft??store.state.life.loadout;
 const btn=(text,action,cls='',extra='')=>{const id={skip:'UI-ICO-SKIP',slow:'UI-ICO-SLOW',cancel:'UI-ICO-BACK'}[action],a=id&&artAsset(id);return `<button class="${cls}" data-ui="${action}" ${extra}>${a?`<img class="button-icon" src="${esc(a.source)}" alt="" width="20" height="20">`:''}${esc(text)}</button>`;};
 function errors(){return error?`<section class="card error" role="alert"><h2>진행을 멈췄습니다</h2><p>${esc(error)}</p><p class="muted">${store.pending?.command.type==='startAction'?'행동이 시작되지 않았습니다. 이전 저장을 유지했습니다.':store.pending?.command.type==='advance'?'여정의 다음 진행은 저장되지 않았습니다. 마지막으로 저장된 시점이 유지됩니다.':'확정 저장되지 않은 결과를 진행하지 않습니다.'}</p>${store.pending?btn('같은 저장 다시 시도','retry','primary'):btn('최신 저장 불러오기','reload','primary')}</section>`:'';}
 function replayBattle(canvas,battle,options){
@@ -48,7 +53,7 @@ function render(){
  else body=homeScreen(v,cleanHome?notice:'');
  document.body.classList.toggle('compact-home',cleanHome);
  app.innerHTML=errors()+`<p class="save${cleanHome?' visually-hidden':''}" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 기록 '+v.revision}</p>`+body+(cleanHome?'':notice);
- bind();if(error||busy)app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"])').forEach(b=>b.disabled=true);
+ bind();if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),#loadout select,#loadout input').forEach(b=>b.disabled=true);
  const canvas=app.querySelector('canvas');if(canvas)replayBattle(canvas,v.result?.battle);
  document.documentElement.dataset.renderMs=(performance.now()-start).toFixed(2);
 }
@@ -85,13 +90,17 @@ function reviewScreen(v){
  <p>${finish?'이미 남긴 성공을 기록하고 이 생애를 마칩니다.':'은원을 정리한 성공을 기록합니다. 성공 뒤에도 이 생애를 이어갈 수 있습니다.'}</p>
  <div class="row">${btn('계속 지내기','cancel')}${btn(finish?'생애 마무리 확정':'금분세수 확정',review,'primary')}</div></section>`;
 }
-function recordScreen(v){return `<h2>배움과 인연</h2><p>주 스승 · <strong>${esc(v.mentor.name)}</strong></p><p class="muted">체질 · ${esc(v.trait)}<br>기예 · ${v.assists.length?v.assists.map(esc).join(' · '):'아직 배우지 않음'}<br>기반 경험 ${v.xp} · ${v.realm}<br>은거 고수 인연 ${v.npc}</p>
- <form id="loadout">
- <label>주력 무공<select name="primary" aria-describedby="primary-mastery">${v.skills.map(s=>`<option value="${s.id}" data-mastery="${s.mastery}" data-cost="${s.cost??''}" data-basic="${!!s.basic}" data-affordable="${s.affordable!==false}" ${s.id===v.loadout.primary?'selected':''}>${esc(s.name)}${v.qi?` · 내공 ${s.cost}`:''}</option>`).join('')}</select></label>
- <p class="muted" id="primary-mastery"></p>
+function recordScreen(v){const draft=displayedLoadout();return `<h2>배움과 인연</h2><p>주 스승 · <strong>${esc(v.mentor.name)}</strong></p><p class="muted">체질 · ${esc(v.trait)}<br>기예 · ${v.assists.length?v.assists.map(esc).join(' · '):'아직 배우지 않음'}<br>기반 경험 ${v.xp} · ${v.realm}<br>은거 고수 인연 ${v.npc}</p>
+ <section class="ua-applied"><h3>적용 중 구성</h3>${configurationSummary(loadoutPreview(store.state,v.loadout))}</section>
+ <form id="loadout" class="ua-draft"><h3>구성 편집</h3>
+ <p class="ua-draft-status" role="status">${editingLocked()?(busy?'저장 중 · 이 후보의 편집을 잠갔습니다.':store.pending?.command.type==='loadout'?'재시도 대기 · 아래 후보를 그대로 저장합니다.':'저장 확인 전에는 편집할 수 없습니다.'):loadoutDraft?'편집 중 · 아직 적용되지 않았습니다.':'적용 중 구성과 같습니다.'}</p>
+ <label>주력 무공<select name="primary" aria-describedby="primary-mastery">${v.skills.map(s=>`<option value="${s.id}" data-mastery="${s.mastery}" data-cost="${s.cost??''}" data-basic="${!!s.basic}" data-affordable="${s.affordable!==false}" ${s.id===draft.primary?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+ <p id="primary-mastery"></p>
  <p class="muted">보조 공격 무공 · 배운 개수만으로 불이익을 받지 않습니다.</p>
- ${v.skills.filter(s=>!s.basic).map(s=>`<label class="row"><input class="fit" type="checkbox" name="aux" value="${s.id}" ${v.loadout.aux.includes(s.id)?'checked':''}><span>${esc(s.name)}${v.qi?` · 내공 <strong>${s.cost}</strong>${s.affordable?'':' · 현재 잔량 부족'}`:''}</span></label>`).join('')}
- <button class="wide" type="submit">공격 구성 적용</button></form>
+ ${v.skills.filter(s=>!s.basic).map(s=>`<label class="row"><input class="fit" type="checkbox" name="aux" value="${s.id}" ${draft.aux.includes(s.id)?'checked':''}><span>${esc(s.name)}${v.qi?` · 내공 <strong>${s.cost}</strong>${s.affordable?'':' · 현재 잔량 부족'}`:''}</span></label>`).join('')}
+ <div class="ua-draft-preview">${configurationSummary(loadoutPreview(store.state,draft))}</div>
+ <p>적용하면 다음 새 전투부터 사용합니다. 저장된 전투 재생에는 소급하지 않습니다.</p>
+ <p class="ua-error">${esc(error)}</p><button class="wide" type="submit" data-focus="apply-loadout">공격 구성 적용</button></form>
  <div class="divider"><h3>도감의 단서</h3>${v.clues.length?`<p class="muted">${v.clues.map(esc).join(' · ')}</p>`:'<p class="empty">앞으로 만날 일들이 기록됩니다.</p>'}</div>`;}
 function mapScreen(v){
  return `${storyPanel(v)}<h2>강호 약도</h2>${schoolMap(mapOrigin??v.origin,v.origin,v.origins)}
@@ -116,7 +125,7 @@ function journeyScreen(v){
  ${v.age>=50||v.body==='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
  <progress class="journey-progress" aria-label="여정 진행" value="${v.active.elapsed}" max="${v.active.duration}"></progress>
  ${v.story?.offers.some(o=>o.status==='accepted')?storyPanel(v):''}
- ${v.result?.battle?battlePanel(v):''}${btn('여정 계속','advance','primary wide')}${inspectInventory()}</section>`;
+ ${v.result?.battle?battlePanel(v):''}${btn('여정 계속','advance','primary wide')}${v.actionSummary?`<details class="ua-detail"><summary>진행 중 전체 성과</summary>${wholeSummary(v.actionSummary)}</details>`:''}${inspectInventory()}</section>`;
 }
 function eventScreen(v){
  const e=v.pending;
@@ -138,15 +147,18 @@ function resultScreen(v){
  const next=situation({...v,phase:'home'});
  const changes=announcement.length?announcement:result?.changes??[];
  return currency(v)+`<section class="card result-card"><h2>${esc(result?.title||'행동 결과')}${battle?' · '+outcome[battle.outcome]:''}</h2>
- ${battle?battlePanel(v):v.guidance?.active.includes('learning')?image('UI-ICO-LEARNING','learning-mark'):character(v)}
- <div class="result-tags"><span class="badge">현재 재화 ${number(v.money)}</span>
+ ${battle?combatSummary(battle):wholeSummary(result?.actionSummary)}
+ ${nextPanel(v)}
+ ${battle?battlePanel(v):v.guidance?.active.includes('learning')?image('UI-ICO-LEARNING','learning-mark'):''}
+ <details class="ua-detail ua-last"><summary>마지막 변화와 지급 기록</summary><p>마지막 저장 전이의 변화입니다. 전체 성과에 더하지 않습니다.</p><div class="result-tags"><span class="badge">현재 재화 ${number(v.money)}</span>
  ${delta?`<span class="badge">완료 보수 +${delta} 재화</span>`:''}
  ${result?.paidMoney?`<span class="badge">선지출 −${result.paidMoney} 재화</span>`:''}
  ${skill?`<span class="badge">현재 숙련 ${skill.mastery}</span>`:''}<span class="badge">${esc(v.body)}</span>
  ${(result?.itemGains??[]).map(g=>`<span class="badge">${esc(g.name)} +${g.quantity}개</span>`).join('')}
  ${weapon?`<span class="badge">${esc(weapon.name)} · 공격력 +${weapon.attack} · 내구 ${weapon.startDurability} → ${weapon.endDurability}</span>`:''}
  ${changeTags(changes.filter(entry=>
-  !(entry.label==='재화'&&delta)&&entry.label!==weapon?.name+' 내구'&&!(result?.itemGains??[]).some(g=>entry.label===g.name+' 보유')))}</div>
+  !(entry.label==='재화'&&delta)&&entry.label!==weapon?.name+' 내구'&&!(result?.itemGains??[]).some(g=>entry.label===g.name+' 보유')))}</div></details>
+ ${battle&&result?.actionSummary?`<details class="ua-detail"><summary>행동 전체 성과</summary>${wholeSummary(result.actionSummary)}</details>`:''}
  <p>${esc(battle?.reason||result?.text)}</p>
  ${guidancePanel(v)}
  ${storyResult(v)}
@@ -157,7 +169,7 @@ function resultScreen(v){
 }
 const outcomes={win:'승리',loss:'패배',escape:'도주',mutual:'동반 사망'};
 function graceScreen(v){
- if(review!=='grace-end')return currency(v)+rejuvenation(v,{grace:true});
+ if(review!=='grace-end')return currency(v)+rejuvenation(v,{grace:true})+wholeSummary(v.actionSummary);
  return currency(v)+`<section class="card"><h2>이 생애를 마칠까요?</h2><p>반로환동 없이 지금까지의 여정을 마칩니다.</p><div class="row">${btn('방법 비교로 돌아가기','grace-back')}${btn('생애 마무리 확정','declineGrace','danger')}</div></section>`;
 }
 function endedScreen(v){
@@ -167,7 +179,7 @@ function endedScreen(v){
  if(!recapOpen)return currency(v)+`<section class="card ending"><h2>생애의 마침표</h2>
  ${lastAction?`<p>마지막 행동 · ${esc(lastAction)}</p>`:''}
   ${battle?`<h3>${esc(battle.enemy)} · ${outcomes[battle.outcome]}</h3>`:''}
- <p class="notice">${ending}</p>${btn('회고 보기','open-recap','primary wide')}${battle?battlePanel(v):''}</section>`;
+ <p class="notice">${ending}</p>${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
  return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
  <p>${v.success==='retirement'?'금분세수의 성공을 남겼습니다.':v.success==='conquest'?'승리하고 생존해 정복의 성공을 남겼습니다.':'발견과 해금은 다음 생애에도 남습니다.'}</p></section>
  ${v.recapQuote?`<blockquote class="notice">${esc(v.recapQuote)}</blockquote>`:''}
@@ -179,7 +191,7 @@ function endedScreen(v){
 function logs(v){return `<ul class="log">${v.log.slice(-40).reverse().map(x=>`<li><small>${16+Math.floor(x.month/12)}세 ${x.month%12}개월</small>${esc(x.text)}</li>`).join('')}</ul>`;}
 async function perform(command){
  if(busy||error)return;
- const keepFocus=document.activeElement?.dataset.ui?focusSelector(document.activeElement):'h2';
+ const keepFocus=command.type==='loadout'?'[data-focus="apply-loadout"]':document.activeElement?.dataset.ui?focusSelector(document.activeElement):'h2';
  announcement=[];
  busy=true;render();
  try{
@@ -219,10 +231,11 @@ function committed(command){
  const type=command.type;
  if(type==='ack'||type==='startAction'||type==='acceptOffer'||type==='newLife'||type==='rejuvenate'){currentTab='home';group=null;}
  if(type==='ack'&&command.destination&&store.state.phase==='home'){
-  if(command.destination==='record')currentTab='record';else group=command.destination;
+  if(['record','inventory'].includes(command.destination))currentTab=command.destination;else group=command.destination;
  }
  if(type==='offerDecision'&&command.decision==='defer'){currentTab='home';group=null;}
  if(type==='newLife'){item=null;itemConfirm=null;mapOrigin=null;recapOpen=false;startingNew=false;configuring=false;}
+ if(['loadout','newLife','startAction','acceptOffer'].includes(type))loadoutDraft=null;
  if(['retire','finish','rejuvenate','declineGrace','newLife'].includes(type))review=null;
  if(type==='startAction'||type==='choose')battleConfirm=null;
  if(type==='repairWeapon'||type==='useHerb'||type==='useMedicine')itemConfirm=null;
@@ -241,16 +254,31 @@ function bind(){
  const loadout=app.querySelector('#loadout');
  if(loadout){
   const primary=loadout.elements.primary;
-  const showMastery=()=>{const d=primary.selectedOptions[0].dataset;loadout.querySelector('#primary-mastery').textContent=
-   (d.basic==='true'?'삼재검법 기초 숙련 ':'숙련 ')+d.mastery+(d.cost!==''?` · ${d.basic==='true'?'내공 소모 없음 · 낮은 피해':'내공 비용 '+d.cost}${d.affordable==='false'?' · 현재 잔량 부족, 구성은 가능':''}`:'');};
-  primary.addEventListener('change',showMastery);showMastery();
+  const showMastery=()=>{const selected=primary.selectedOptions[0],d=selected.dataset;loadout.querySelector('#primary-mastery').textContent=
+   selected.textContent+(d.cost!==''?` · 발동 비용 ${d.cost} · 현재 내공 ${store.state.life.qi.current}`:'')+
+   ' · '+(d.basic==='true'?'삼재검법 기초 숙련 ':'숙련 ')+d.mastery+(d.basic==='true'?' · 내공 소모 없음 · 낮은 피해':d.affordable==='false'?' · 현재 잔량 부족, 구성은 가능':'');};
+  showMastery();
+  loadout.addEventListener('change',()=>{
+   if(editingLocked()){
+    const draft=displayedLoadout();primary.value=draft.primary;
+    for(const box of loadout.querySelectorAll('[name="aux"]'))box.checked=draft.aux.includes(box.value);
+    showMastery();return;
+   }
+   const f=new FormData(loadout),candidatePrimary=f.get('primary');
+   loadoutDraft={primary:candidatePrimary,aux:f.getAll('aux').filter(id=>id!==candidatePrimary)};
+   for(const box of loadout.querySelectorAll('[name="aux"]')){if(box.value===candidatePrimary)box.checked=false;box.disabled=box.value===candidatePrimary;}
+   loadout.querySelector('.ua-draft-status').textContent='편집 중 · 아직 적용되지 않았습니다.';
+   loadout.querySelector('.ua-draft-preview').innerHTML=configurationSummary(loadoutPreview(store.state,loadoutDraft));
+   showMastery();
+  });
+  for(const box of loadout.querySelectorAll('[name="aux"]'))box.disabled=box.value===primary.value;
  }
- app.querySelector('#loadout')?.addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.currentTarget),primary=f.get('primary');perform({type:'loadout',primary,aux:f.getAll('aux').filter(x=>x!==primary)});});
+ app.querySelector('#loadout')?.addEventListener('submit',e=>{e.preventDefault();if(editingLocked())return;const f=new FormData(e.currentTarget),primary=f.get('primary');perform({type:'loadout',primary,aux:f.getAll('aux').filter(x=>x!==primary)});});
  app.querySelector('#battle-round')?.addEventListener('change',e=>replayBattle(app.querySelector('canvas'),store.state.result.battle,{round:Number(e.target.value)}));
  app.querySelectorAll('[data-ui]').forEach(el=>el.addEventListener('click',async()=>{
   const a=el.dataset.ui,id=el.dataset.id;
-  if(a==='retry'){if(busy)return;try{busy=true;error='';const command=store.pending.command;await store.retry();committed(command);collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage();}return;}
-  if(a==='reload'){if(busy)return;try{busy=true;store.blocked=null;store.pending=null;await (store.db?store.read():store.open());error='';item=null;battleConfirm=null;review=null;announcement=[];if(store.state?.phase!=='ended')startingNew=false;}catch(e){error=e.message;}finally{busy=false;render();focusPage();}return;}
+  if(a==='retry'){if(busy)return;let retried;try{busy=true;error='';retried=store.pending.command;await store.retry();committed(retried);collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
+  if(a==='reload'){if(busy)return;try{busy=true;store.blocked=null;store.pending=null;await (store.db?store.read():store.open());error='';item=null;battleConfirm=null;review=null;announcement=[];loadoutDraft=null;if(store.state?.phase!=='ended')startingNew=false;}catch(e){error=e.message;}finally{busy=false;render();focusPage();}return;}
   if(error||busy)return;
   announcement=[];document.querySelector('#change-status').textContent='';
   if(a==='school'){
@@ -273,6 +301,7 @@ function bind(){
   }
   else if(a==='start-action')perform({type:'startAction',action:id,target:el.dataset.target});
   else if(a==='guide-next')perform({type:'ack',destination:id,guideRead:publicView(store.state).guidance.active});
+  else if(a==='result-next')perform({type:'ack',destination:id});
   else if(a==='story-next')perform({type:'ack',destination:'world'});
   else if(a==='offer-accept')perform({type:'acceptOffer',offerId:id});
   else if(a==='offer-decline')perform({type:'offerDecision',offerId:id,decision:'decline'});
