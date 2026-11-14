@@ -1,0 +1,100 @@
+import {artAsset,artStatus,skillPresentation} from './art.mjs';
+import {turnPresentation,timedFrame} from './scene-timing.mjs';
+
+// Only recorded, executed actions produce timeline entries. No rule functions are imported.
+export function qiTimeline(battle,getAsset=artAsset,getMapping=skillPresentation){
+ let total=0;const entries=[];
+ for(const turn of battle.turns){
+  let values={...turn.before};
+  for(const side of [turn.first,turn.first==='player'?'opponent':'player']){
+   const action=turn[side];if(!action)continue;
+   const plan=turnPresentation({skillId:action.skillId,damage:action.damage,received:0},getAsset,getMapping);
+   const before={...values},begun={...values,[side==='player'?'qi':'enemyQi']:action.qiAfter};
+   values={...begun,[side==='player'?'enemyHp':'hp']:Math.max(0,begun[side==='player'?'enemyHp':'hp']-action.damage)};
+   entries.push({start:total,turn,side,action,plan,before,begun,after:{...values}});total+=plan.duration;
+  }
+ }
+ return {entries,total};
+}
+export function qiFrameAt(timeline,elapsed,finished=false){
+ const entry=timeline.entries.find(e=>elapsed<e.start+e.plan.duration)??timeline.entries.at(-1);
+ const local=elapsed-entry.start;
+ const phase=finished?'finished':local<entry.plan.approach?'ready':local<entry.plan.contact?'attack':'hit';
+ const values=finished?entry.after:phase==='ready'?entry.before:phase==='attack'?entry.begun:entry.after;
+ return {entry,local,phase,values};
+}
+export function playQiScene(canvas,battle,onCaption,{speed=1,finish=false,round=null,onFrame=()=>{}}={}){
+ const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+ const ready=artStatus().ready;
+ // Fallback timing is deterministic and uses the same executed-action record.
+ const fallbackAsset=id=>({assetId:id,frameDurationsMs:[80,80,80,80,80,80]});
+ const timeline=qiTimeline(battle,ready?artAsset:fallbackAsset,ready?skillPresentation:()=>null);
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const background=ready?artAsset(battle.mode==='duel'||battle.enemyKey==='leader'?'AC-BG-COURTYARD':'AC-BG-ROAD'):null;
+ let stopped=false,frame=0,start=null,lastLabel='';
+ function sprite(id,x,flip,clipName,time,custom){
+  const a=artAsset(id),clip=a.clips[clipName]??a.clips.idle;
+  const frames=custom?.frames??clip.frames,durations=custom?.durations??frames.map(()=>clip.frameMs);
+  const index=timedFrame(frames,durations,time,{loop:clip.loop});
+  ctx.save();ctx.translate(Math.round(x),120);if(flip)ctx.scale(-1,1);
+  ctx.drawImage(a.image,index%a.columns*a.frameWidth,Math.floor(index/a.columns)*a.frameHeight,a.frameWidth,a.frameHeight,
+   -a.anchorPx[0],-a.anchorPx[1],a.frameWidth,a.frameHeight);ctx.restore();
+ }
+ function effect(id,x,flip,time){
+  if(time<0)return;const a=artAsset(id);if(!a)return;
+  let left=time,index=-1;for(let i=0;i<a.frameCount;i++){left-=a.frameDurationsMs[i];if(left<0){index=i;break;}}
+  if(index<0)return;const r=a.frameRects[index];ctx.save();ctx.translate(x,120);if(flip)ctx.scale(-1,1);
+  ctx.drawImage(a.image,r.x,r.y,r.w,r.h,-a.anchorPx[0],-a.anchorPx[1],r.w,r.h);ctx.restore();
+ }
+ function draw(elapsed,finished=false){
+  const state=qiFrameAt(timeline,elapsed,finished),{entry:e,local,phase,values}=state,p=e.plan;
+  canvas.dataset.drawCount=String(Number(canvas.dataset.drawCount??0)+1);
+  canvas.dataset.turn=String(e.turn.round);canvas.dataset.actor=finished?'none':e.side;canvas.dataset.phase=phase;
+  canvas.dataset.skill=e.action.skillId;canvas.dataset.executed='true';
+  canvas.dataset.hp=String(values.hp);canvas.dataset.enemyHp=String(values.enemyHp);
+  canvas.dataset.qi=String(values.qi);canvas.dataset.enemyQi=String(values.enemyQi);
+  const approaching=!reduced&&!finished&&e===timeline.entries[0]&&local<p.approach;
+  const move=approaching?Math.max(0,local/p.approach):1,px=56+47*move,ex=200-47*move;
+  canvas.dataset.playerX=String(px);canvas.dataset.enemyX=String(ex);
+  ctx.clearRect(0,0,256,144);
+  if(background)ctx.drawImage(background.image,0,0,256,144);
+  else{ctx.fillStyle='#d3dfce';ctx.fillRect(0,0,256,144);}
+  let pc='idle',ec='idle',pt=0,et=0;
+  if(approaching){pc='approach';ec='approach';pt=et=local;}
+  else if(!reduced&&!finished){
+   if(local>=p.approach&&local<p.attackEnd){
+    if(e.side==='player'){pc='attack';pt=local-p.approach;}else{ec='attack';et=local-p.approach;}
+   }
+   if(local>=p.contact&&local<p.contact+200){
+    if(e.side==='player'){ec='hit';et=local-p.contact;}else{pc='hit';pt=local-p.contact;}
+   }
+  }
+  if(finished||local>=p.contact+200){if(values.hp===0)pc='down';if(values.enemyHp===0)ec='down';}
+  if(finished){if(values.hp>0&&battle.outcome==='win')pc='victory';if(values.enemyHp>0&&battle.outcome==='loss')ec='victory';pt=et=1000;}
+  canvas.dataset.playerPose=pc;canvas.dataset.enemyPose=ec;
+  if(ready){
+   sprite('AC-CHR-PLAYER',px,false,pc,pt,pc==='attack'?p:null);
+   sprite('AC-CHR-HUMAN',ex,true,ec,et,ec==='attack'?p:null);
+   if(!reduced&&!finished){
+    effect(p.effectId,e.side==='player'?px:ex,e.side!=='player',local-p.release);
+    effect('AC-FX-HIT',e.side==='player'?ex:px,e.side==='player',local-p.contact);
+   }
+  }else{
+   for(const [x,pose,color]of [[px,pc,'#407b72'],[ex,ec,'#99704e']]){
+    ctx.fillStyle=color;ctx.fillRect(x-7,pose==='down'?112:80,14,pose==='down'?7:40);
+    if(pose==='attack')ctx.fillRect(x,88,18,3);
+   }
+  }
+  const who=e.side==='player'?'나':battle.enemy;
+  const caption=finished?`기록된 결과: ${{win:'승리',loss:'패배',escape:'도주'}[battle.outcome]}`:
+   `${e.turn.round}합 · ${who} ${e.action.skill} · 내공 ${e.action.qiBefore} → ${phase==='ready'?e.action.qiBefore:e.action.qiAfter} · ${phase==='hit'?e.action.damage+' 피해':phase==='attack'?'공격 중':'발동 준비'}`;
+  if(caption!==lastLabel){lastLabel=caption;onCaption(caption);}
+  onFrame({round:e.turn.round,side:e.side,action:e.action,phase,values,finished});
+ }
+ if(round!==null){const e=timeline.entries.filter(e=>e.turn.round===round).at(-1);if(e)draw(e.start+e.plan.duration-.001,round===battle.turns.at(-1).round);return()=>{stopped=true;};}
+ if(finish||reduced){draw(timeline.total,true);return()=>{stopped=true;};}
+ draw(0);
+ function tick(now){if(stopped)return;if(start===null)start=now;const elapsed=Math.min(timeline.total,(now-start)*speed);draw(elapsed,elapsed>=timeline.total);if(elapsed<timeline.total)frame=requestAnimationFrame(tick);}
+ frame=requestAnimationFrame(tick);
+ return()=>{stopped=true;cancelAnimationFrame(frame);};
+}

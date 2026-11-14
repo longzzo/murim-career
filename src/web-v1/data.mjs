@@ -1,6 +1,8 @@
 export const LEGACY_VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
-export const VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
-export const ECONOMY = {commission:30, escort:50, treatment:20};
+export const INVENTORY_VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
+export const VERSION = {save:2, content:'web-v1.3', rules:'web-v1.2', inventory:1, qi:1, guidance:1, story:1, recap:1, presentation:'web-v1.3'};
+export const ECONOMY = {commission:30, escort:50, treatment:20, rejuvenation:80};
+export const REJUVENATION_MONTHS=120;
 // INV-01 v1 test values from common plan 04. New lives snapshot these definitions.
 export const ITEMS = {
  'WPN-TRAIN':{type:'weapon',name:'수련검',attack:1,maxDurability:100},
@@ -60,10 +62,26 @@ export const ENEMIES = {
  leader:{id:'E-LEADER',name:'우두머리 결전 상대',realm:3,mastery:50,style:'강',mode:'life',faction:'F-NORMAL'}
 };
 export const LEGACY_DATA = {version:LEGACY_VERSION.content,origins:ORIGINS,actions:ACTIONS,events:EVENTS,skills:SKILLS,mentors:MENTORS,enemies:ENEMIES};
-export const DATA = {
- ...LEGACY_DATA,version:VERSION.content,items:ITEMS,itemRules:ITEM_RULES,
+export const INVENTORY_DATA = {
+ ...LEGACY_DATA,version:INVENTORY_VERSION.content,items:ITEMS,itemRules:ITEM_RULES,
  actions:ACTIONS.map(a=>a.id==='ACT-04'?{...a,desc:'마을에 전할 곡물을 호송합니다. 길에서 생긴 일에 대응하고, 호송을 마치면 보수를 받습니다.'}:a),
  events:EVENTS.map(e=>e.id==='A-001'?{...e,text:'곡물을 실은 상단 앞에 다친 고수가 쓰러져 있습니다. 구조를 도우면서 호송의 약속을 이어가야 합니다.'}:e)
+};
+// D-043 / D-045 first runtime trial. Snapshotted only for new lives.
+const enemyFoundations={novice:[0,0],rival:[40,40],ambush:[40,40],master:[100,100],threat:[100,100],leader:[200,200]};
+export const DATA = {
+ ...INVENTORY_DATA,version:VERSION.content,
+ story:{version:1,npc:{id:'NPC-GRAIN-CONTACT',name:'상단 연락책'},offers:[
+  {id:'OFFER-GRAIN-01',title:'마을 배급 준비',quote:'곡물은 잘 도착했습니다. 마을에 나눌 준비도 도와주시겠습니까?',completion:'곡물을 마을에 나눌 준비를 마쳤습니다.'},
+  {id:'OFFER-GRAIN-02',title:'다음 장날의 약속',quote:'지난번 배급을 도와주셨지요. 다음 장날에 쓸 물자를 거두는 일도 맡아주시겠습니까?',completion:'다음 장날에 쓸 물자를 마련해 두 번째 약속을 마쳤습니다.'}]},
+ qiRules:{version:1,baseQi:16,innerRate:.4,baseHp:100,outerLinear:.05,outerQuadratic:.0005,
+  basicScale:.6,breathingMonths:1,riskThresholds:[.95,1.05,1.5]},
+ skills:SKILLS.map(skill=>({...skill,cost:skill.id==='SAMJAE'?4:7})),
+ enemies:Object.fromEntries(Object.entries(ENEMIES).map(([key,enemy])=>[key,{...enemy,
+  foundation:{inner:enemyFoundations[key][0]*1000,outer:enemyFoundations[key][1]*1000},cost:enemy.style==='neutral'?4:7}])),
+ items:{...ITEMS,
+  'CON-QI-RECOVER':{type:'qiMedicine',name:'내공 회복약',effect:'recover',amount:12},
+  'CON-QI-CAPACITY':{type:'qiMedicine',name:'내공 증진약',effect:'capacity',amount:4}}
 };
 export function validateData(d=DATA){
  if(!d||!['actions','events','skills','mentors'].every(k=>Array.isArray(d[k]))||typeof d.version!=='string')throw Error('콘텐츠 구조 오류');

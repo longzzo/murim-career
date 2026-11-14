@@ -1,10 +1,13 @@
 import {artAsset,artStatus,skillPresentation} from './art.mjs';
 import {turnPresentation,timedFrame} from './scene-timing.mjs';
 import {playScene as fallback,stopScene as stopFallback} from './scene.mjs';
+import {playQiScene} from './qi-scene.mjs';
 let cancel=()=>{};
 export function stopScene(){cancel();cancel=()=>{};stopFallback();}
-export function playScene(canvas,battle,onCaption,{speed=1}={}){
+export function playScene(canvas,battle,onCaption,options={}){
+ const {speed=1}=options;
  stopScene();
+ if(battle?.resources){cancel=playQiScene(canvas,battle,onCaption,options);return cancel;}
  if(!artStatus().ready){canvas.dataset.art='fallback';return fallback(canvas,battle,onCaption,{speed});}
  canvas.dataset.art=artStatus().revision;const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
  const background=artAsset(battle?.mode==='duel'||battle?.enemyKey==='leader'?'AC-BG-COURTYARD':'AC-BG-ROAD');

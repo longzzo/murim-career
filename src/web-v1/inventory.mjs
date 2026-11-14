@@ -1,8 +1,8 @@
-import {VERSION} from './data.mjs';
+import {VERSION,INVENTORY_VERSION} from './data.mjs';
 
 const integer = (n,min,max=Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(n)&&n>=min&&n<=max;
 const requireItem = (condition,message) => {if(!condition)throw Error(message);};
-export const hasInventory = state => state.versions.rules===VERSION.rules;
+export const hasInventory = state => [INVENTORY_VERSION.rules,VERSION.rules].includes(state.versions.rules);
 const herbId = 'CON-HERB';
 
 export function startInventory(state) {
