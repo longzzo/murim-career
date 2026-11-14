@@ -1,10 +1,15 @@
 import {esc} from './experience.mjs';
 
+export function replayControls(button){
+ return `<div class="battle-top"><h3>전투 재생</h3><p class="replay-speed badge" role="status">기본 · 1×</p></div><div class="row">${button('빠르게 4×','fast','','aria-pressed="false"')}${button('연출 생략','skip')}</div>`;
+}
+export function replayReview(button,content=''){
+ return `<details class="replay-review"><summary>천천히 · 다시보기 · 합 기록</summary><div class="row">${button('느리게 0.5×','slow','','aria-pressed="false"')}${button('처음부터 다시 보기','replay')}</div>${content}</details>`;
+}
 export function resourceBattlePanel(battle,button){
- return `<section class="recorded-battle"><canvas width="256" height="144" aria-label="기록된 선후공의 도트 전투" role="img"></canvas>
+ return `<section class="recorded-battle">${replayControls(button)}<p class="muted">반복 공격은 짧게 표시합니다. 공격·자원 기록은 모두 유지됩니다.</p><canvas width="256" height="144" aria-label="기록된 선후공의 도트 전투" role="img"></canvas>
  <div class="battle-resources" aria-label="기록된 합의 자원"></div><p class="battle-caption">저장된 공격 순서로 재생합니다.</p>
- <div class="row">${button('연출 생략','skip')}${button('빠르게 보기','fast')}${button('느리게 보기','slow')}</div>
- <label>합 기록 살펴보기<select id="battle-round">${battle.turns.map(t=>`<option value="${t.round}">${t.round}합 · ${t.first==='player'?'내 선공':'상대 선공'}</option>`).join('')}</select></label>
+ ${replayReview(button,`<label>합 기록 살펴보기<select id="battle-round">${battle.turns.map(t=>`<option value="${t.round}">${t.round}합 · ${t.first==='player'?'내 선공':'상대 선공'}</option>`).join('')}</select></label>`)}
  <details><summary>실제 발동 무공과 소모</summary><p>${esc(battle.reason)}</p><ol class="battle-log">${battle.turns.map(t=>`<li><strong>${t.round}합 · ${t.first==='player'?'내 선공':'상대 선공'}</strong>${[t.first,t.first==='player'?'opponent':'player'].map(side=>actionText(t[side],side==='player'?'나':battle.enemy)).join('')}</li>`).join('')}</ol></details></section>`;
 }
 function actionText(a,name){

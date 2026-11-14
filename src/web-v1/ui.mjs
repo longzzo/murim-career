@@ -2,11 +2,11 @@ import {SaveStore} from './storage.mjs';
 import {publicView} from './engine.mjs';
 import {DATA} from './data.mjs';
 import {canEnterOrigin} from './factions.mjs';
-import {playScene,stopScene} from './scene-final.mjs';
+import {playScene,stopScene,setSceneSpeed,finishScene,resumeScene} from './scene-final.mjs';
 import {loadArt,artAsset} from './art.mjs';
 import {esc,number,currency,character,situation,battleRisk,bottomNav,home,actionGroup,inventory,itemDetail,image} from './experience.mjs';
 import {schoolMap,setupScreen,setupTraitDescription,rejuvenation,changeTags,changeHistory} from './life-screens.mjs';
-import {resourceBattlePanel,battleResources} from './battle-ui.mjs';
+import {resourceBattlePanel,battleResources,replayControls,replayReview} from './battle-ui.mjs';
 import {guidancePanel,guidanceHelp} from './guidance-ui.mjs';
 import {storyPanel,promiseHistory,storyResult} from './story-ui.mjs';
 import {loadoutPreview} from './upgrade-model.mjs';
@@ -24,12 +24,23 @@ function errors(){return error?`<section class="card error" role="alert"><h2>진
 function replayBattle(canvas,battle,options){
  const caption=app.querySelector('.battle-caption');
  let lastFrame='';
- playScene(canvas,battle,text=>{if(caption.textContent!==text)caption.textContent=text;},{...options,onFrame:frame=>{
+ playScene(canvas,battle,text=>{if(caption.textContent!==text)caption.textContent=text;},{...options,onState:updateReplaySpeed,onFrame:frame=>{
   const key=JSON.stringify([frame.round,frame.side,frame.phase,frame.values,frame.finished]);
   if(key===lastFrame)return;lastFrame=key;
   const panel=app.querySelector('.battle-resources');if(panel)panel.innerHTML=battleResources(battle,frame);
   const select=app.querySelector('#battle-round');if(select)select.value=String(frame.round);
  }});
+ updateReplaySpeed();
+}
+function updateReplaySpeed(){
+ const canvas=app.querySelector('canvas'),speed=Number(canvas?.dataset.speed)||1;
+ const reviewing=canvas?.dataset.paused==='true'&&canvas?.dataset.phase!=='finished';
+ const label=app.querySelector('.replay-speed');if(label)label.textContent=`${canvas?.dataset.phase==='finished'?'완료':reviewing?'합 기록 조회':speed===4?'빠름':speed===.5?'느림':'기본'} · ${speed}×`;
+ const replay=app.querySelector('[data-ui="replay"]');if(replay)replay.textContent=reviewing?'이 합 다음부터 이어보기':'처음부터 다시 보기';
+ for(const [action,value,text]of [['fast',4,'빠르게 4×'],['slow',.5,'느리게 0.5×']]){
+  const button=app.querySelector(`[data-ui="${action}"]`);if(!button)continue;
+  button.textContent=speed===value?'기본 1×':text;button.setAttribute('aria-pressed',String(speed===value));
+ }
 }
 function render(){
  stopScene();const start=performance.now();
@@ -144,7 +155,7 @@ function eventScreen(v){
 }
 function battlePanel(v){
  if(v.result.battle.resources)return resourceBattlePanel(v.result.battle,btn);
- return `<div><canvas width="256" height="144" aria-label="도트 자동 전투 장면" role="img"></canvas><p class="battle-caption muted">이미 확정한 전투를 재생합니다.</p><div class="row">${btn('연출 생략','skip')}${btn('느리게 보기','slow')}</div><details><summary>실제 발동 무공과 전투 원인</summary><p class="muted">${esc(v.result.battle.reason)}</p><ol class="muted">${v.result.battle.turns.map(t=>`<li>${t.round}합 · ${esc(t.skill)} · 피해 ${t.damage} / 피격 ${t.received}</li>`).join('')}</ol></details></div>`;
+ return `<div class="recorded-battle">${replayControls(btn)}<canvas width="256" height="144" aria-label="도트 자동 전투 장면" role="img"></canvas><p class="battle-caption muted">이미 확정한 전투를 재생합니다.</p>${replayReview(btn)}<details><summary>실제 발동 무공과 전투 원인</summary><p class="muted">${esc(v.result.battle.reason)}</p><ol class="muted">${v.result.battle.turns.map(t=>`<li>${t.round}합 · ${esc(t.skill)} · 피해 ${t.damage} / 피격 ${t.received}</li>`).join('')}</ol></details></div>`;
 }
 function resultScreen(v){
  const result=v.result,battle=result?.battle,weapon=battle?.weapon;
@@ -281,7 +292,7 @@ function bind(){
   for(const box of loadout.querySelectorAll('[name="aux"]'))box.disabled=box.value===primary.value;
  }
  app.querySelector('#loadout')?.addEventListener('submit',e=>{e.preventDefault();if(editingLocked())return;const f=new FormData(e.currentTarget),primary=f.get('primary');perform({type:'loadout',primary,aux:f.getAll('aux').filter(x=>x!==primary)});});
- app.querySelector('#battle-round')?.addEventListener('change',e=>replayBattle(app.querySelector('canvas'),store.state.result.battle,{round:Number(e.target.value)}));
+ app.querySelector('#battle-round')?.addEventListener('change',e=>{const canvas=app.querySelector('canvas');replayBattle(canvas,store.state.result.battle,{round:Number(e.target.value),speed:Number(canvas.dataset.speed)||1});});
  app.querySelectorAll('[data-ui]').forEach(el=>el.addEventListener('click',async()=>{
   const a=el.dataset.ui,id=el.dataset.id;
   if(a==='retry'){if(busy)return;let retried;try{busy=true;error='';retried=store.pending.command;await store.retry();committed(retried);collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
@@ -366,12 +377,20 @@ function bind(){
   else if(a==='item-equip')perform({type:'equipWeapon',instanceId:item});
   else if(a==='choose')perform({type:'choose',choice:el.dataset.id});
   else if(a==='skip'){
-   if(store.state.result?.battle?.resources)replayBattle(app.querySelector('canvas'),store.state.result.battle,{finish:true});
-   else stopScene();
+   finishScene();
+   updateReplaySpeed();
    app.querySelector('.battle-caption').textContent='연출을 생략했습니다. 기록된 결과와 보상은 같습니다.';
+   focusPage('h2');
   }
-  else if(a==='fast')replayBattle(app.querySelector('canvas'),store.state.result.battle,{speed:4});
-  else if(a==='slow'){const v=publicView(store.state);replayBattle(app.querySelector('canvas'),v.result.battle,{speed:.5});}
+  else if(a==='fast'||a==='slow'){
+   const selected=a==='fast'?4:.5,current=Number(app.querySelector('canvas').dataset.speed)||1;
+   setSceneSpeed(current===selected?1:selected);updateReplaySpeed();
+  }
+  else if(a==='replay'){
+   const canvas=app.querySelector('canvas');
+   if(canvas.dataset.paused==='true'&&canvas.dataset.phase!=='finished'){resumeScene();updateReplaySpeed();}
+   else replayBattle(canvas,store.state.result.battle,{speed:Number(canvas.dataset.speed)||1});
+  }
   else if(a.startsWith('rejuvenate-'))perform({type:'rejuvenate',method:a.slice(11)});
   else if(a==='regress')perform({type:'newLife',options:{regress:true}});
   else perform({type:a});

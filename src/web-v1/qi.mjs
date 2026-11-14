@@ -108,9 +108,11 @@ export function qiDistribution(s,current=s.life.qi.current){
 export const skillCost=(s,id)=>id==='BASIC'?0:s.content.skills.find(k=>k.id===id)?.cost??Infinity;
 function actors(s,enemy,weapon){
  const l=s.life,r=s.content.qiRules;
+ if(enemy.hpOverride!==undefined)requireQi(s.content.version==='web-v1.5'&&enemy.id==='E-NOVICE'&&enemy.mode==='duel'&&integer(enemy.hpOverride,1),'초보 비무 생명력 정의 오류');
+ const opponentHp=enemy.hpOverride??health(enemy.foundation,r);
  const player={name:l.name,realm:l.realm,hp:Math.floor(maxHp(s)*(l.injury===2?.8:1)),maxHp:maxHp(s),maxQi:maxQi(s),qi:l.qi.current,
   power:(8+l.realm*4+(weapon?.attack??0))*(l.injury===2?.8:1)*(l.rejuvenated?.85:1)};
- const opponent={name:enemy.name,realm:enemy.realm,hp:health(enemy.foundation,r),maxHp:health(enemy.foundation,r),
+ const opponent={name:enemy.name,realm:enemy.realm,hp:opponentHp,maxHp:opponentHp,
   maxQi:capacity(enemy.foundation,r),qi:capacity(enemy.foundation,r),power:8+enemy.realm*4};
  player.options=current=>{
   const distribution=qiDistribution(s,current),aux=distribution.filter(o=>o.id!==l.loadout.primary&&o.id!=='BASIC').length;

@@ -114,7 +114,7 @@ export function validateState(s){
  const legacy=v?.rules===LEGACY_VERSION.rules&&['web-v1.0',LEGACY_VERSION.content].includes(v.content);
  const inventory=v?.rules===INVENTORY_VERSION.rules&&v.save===2&&v.content===INVENTORY_VERSION.content;
  const qiVersion=v?.rules===VERSION.rules&&v.save===2&&v.qi===1&&
-  (v.content===PLAY_VERSION.content&&v.factions===undefined||v.content===VERSION.content&&v.factions===1);
+  (v.content===PLAY_VERSION.content&&v.factions===undefined||['web-v1.4',VERSION.content].includes(v.content)&&v.factions===1);
  requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
   inventory||qiVersion,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
@@ -122,7 +122,7 @@ export function validateState(s){
  requireThat(s.content.version===s.versions.content,'콘텐츠 버전 불일치');
  const l=s.life;
  requireThat(!!originRoute(s.content,l?.origin),'문파 경로 참조 손상');
- if(v.factions===1)requireThat(v.presentation==='web-v1.4'&&canEnterOrigin(s.content,l?.origin,s.meta.unlocks),'문파 버전/해금 상태 손상');
+ if(v.factions===1)requireThat(v.presentation===v.content&&canEnterOrigin(s.content,l?.origin,s.meta.unlocks),'문파 버전/해금 상태 손상');
  requireThat(l&&Number.isInteger(l.month)&&l.month>=0&&Number.isFinite(l.limit)&&l.limit>=0,'시간 상태 손상');
  requireThat(Number.isInteger(l.realm)&&l.realm>=0&&l.realm<5&&Number.isFinite(l.xp)&&l.xp>=0,'성장 상태 손상');
  requireThat(['home','journey','event','result','grace','ended'].includes(s.phase),'진행 상태 손상');

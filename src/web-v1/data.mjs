@@ -2,7 +2,7 @@ import {FAMILIAR_ORIGINS,FAMILIAR_MENTORS,FAMILIAR_SKILLS,validateFamiliarCatalo
 export const LEGACY_VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
 export const INVENTORY_VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
 export const PLAY_VERSION = {save:2, content:'web-v1.3', rules:'web-v1.2', inventory:1, qi:1, guidance:1, story:1, recap:1, presentation:'web-v1.3'};
-export const VERSION = {...PLAY_VERSION,content:'web-v1.4',presentation:'web-v1.4',factions:1};
+export const VERSION = {...PLAY_VERSION,content:'web-v1.5',presentation:'web-v1.5',factions:1};
 export const ECONOMY = {commission:30, escort:50, treatment:20, rejuvenation:80};
 export const REJUVENATION_MONTHS=120;
 // INV-01 v1 test values from common plan 04. New lives snapshot these definitions.
@@ -86,13 +86,18 @@ export const PLAY_DATA = {
   'CON-QI-CAPACITY':{type:'qiMedicine',name:'내공 증진약',effect:'capacity',amount:4}}
 };
 export const DATA = {...PLAY_DATA,version:VERSION.content,factions:1,origins:FAMILIAR_ORIGINS,mentors:FAMILIAR_MENTORS,
+ enemies:{...PLAY_DATA.enemies,novice:{...PLAY_DATA.enemies.novice,hpOverride:65}},
  skills:[...PLAY_DATA.skills.filter(s=>!['P-S01','P-S02'].includes(s.id)),...FAMILIAR_SKILLS]};
 export function validateData(d=DATA){
  if(!d||!['actions','events','skills','mentors'].every(k=>Array.isArray(d[k]))||typeof d.version!=='string')throw Error('콘텐츠 구조 오류');
  const ids=new Set(); for(const group of ['actions','events','skills','mentors']) for(const x of d[group]) {if(ids.has(x.id))throw Error('중복 ID: '+x.id);ids.add(x.id);}
  if(d.actions.length!==10||d.events.length!==10)throw Error('콘텐츠 수량 오류');
- if(d.version==='web-v1.4')validateFamiliarCatalog(d);
+ if(['web-v1.4','web-v1.5'].includes(d.version))validateFamiliarCatalog(d);
  else if(d.factions!==undefined||d.mentors.length!==4||MENTORS.some(expected=>!d.mentors.some(m=>m.id===expected.id&&m.origin===expected.origin)))throw Error('기존 스승 계약 오류');
+ if(d.version==='web-v1.5'&&!Number.isSafeInteger(d.enemies?.novice?.hpOverride))throw Error('초보 비무 생명력 정의 누락');
+ for(const [key,enemy]of Object.entries(d.enemies??{}))if('hpOverride' in enemy){
+  if(d.version!=='web-v1.5'||key!=='novice'||enemy.id!=='E-NOVICE'||enemy.mode!=='duel'||!Number.isSafeInteger(enemy.hpOverride)||enemy.hpOverride<=0)throw Error('초보 비무 생명력 정의 오류');
+ }
  const effects=new Set(['npc','extra','heal','clue','randomStudy','battle','herb','insight','learn','breakthrough','resolveThreat','fame','debt']);
  for(const e of d.events){
   const cs=new Set();if(!Array.isArray(e.choices)||!e.choices.length)throw Error('선택 없음');

@@ -141,6 +141,10 @@ h2[tabindex="-1"]:focus{outline:none}
 /* Let these decisions wrap into full rows as the button text grows. */
 .item-confirm:is([aria-label="내공 약 사용 확인"],[aria-label="영초 사용 확인"])>.row>button{flex:1 1 8em;min-width:min(100%,8em);word-break:keep-all;overflow-wrap:normal}
 .recorded-battle>.row>button{flex:1 1 5em;min-width:min(100%,5em);word-break:keep-all;overflow-wrap:normal}
+.battle-top{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap}
+.recorded-battle>.row{margin:.5rem 0}.recorded-battle>canvas{margin-top:.5rem}
+.replay-review>.row{margin-bottom:.6rem}.replay-review>.row>button{flex:1 1 7em;min-width:min(100%,7em)}
+.battle-sides{grid-template-columns:repeat(auto-fit,minmax(min(100%,8em),1fr))}
 
 /* Upgrade A: staged art CONTRACT / preview.css, scoped to the existing runtime. */
 .ua-goal{background:#edf3eb;border-color:#b2c9b7}.ua-kicker{font-size:.85rem;color:#426259;font-weight:700}

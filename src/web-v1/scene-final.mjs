@@ -2,20 +2,23 @@ import {artAsset,artStatus,skillPresentation} from './art.mjs';
 import {turnPresentation,timedFrame} from './scene-timing.mjs';
 import {playScene as fallback,stopScene as stopFallback} from './scene.mjs';
 import {playQiScene} from './qi-scene.mjs';
+import {playTimeline} from './replay-clock.mjs';
 let cancel=()=>{};
 export function stopScene(){cancel();cancel=()=>{};stopFallback();}
+export function setSceneSpeed(speed){cancel.setSpeed?.(speed);}
+export function finishScene(){cancel.finish?.();}
+export function resumeScene(){cancel.resume?.();}
 export function playScene(canvas,battle,onCaption,options={}){
  const {speed=1}=options;
  stopScene();
  if(battle?.resources){cancel=playQiScene(canvas,battle,onCaption,options);return cancel;}
- if(!artStatus().ready){canvas.dataset.art='fallback';return fallback(canvas,battle,onCaption,{speed});}
+ if(!artStatus().ready){canvas.dataset.art='fallback';cancel=fallback(canvas,battle,onCaption,options);return cancel;}
  canvas.dataset.art=artStatus().revision;const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
  const background=artAsset(battle?.mode==='duel'||battle?.enemyKey==='leader'?'AC-BG-COURTYARD':'AC-BG-ROAD');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const turns=battle?.turns?.length?battle.turns:null;
  let total=0;
  const timeline=turns?.map(turn=>{const plan=turnPresentation(turn,artAsset,skillPresentation),start=total;total+=plan.duration;return{turn,plan,start};});
- let stopped=false,frame=0,start=null;
  function sprite(id,x,y,flip,clipName,time,hold=false,custom=null){
   const a=artAsset(id),clip=a.clips[clipName]||a.clips.idle;
   const frames=custom?.frames||clip.frames,durations=custom?.durations||frames.map(()=>clip.frameMs);
@@ -36,7 +39,7 @@ export function playScene(canvas,battle,onCaption,options={}){
   if(!timeline){sprite('AC-CHR-PLAYER',56,120,false,'idle',0);sprite('AC-CHR-HUMAN',200,120,true,'idle',0);return;}
   const entry=timeline.find(x=>elapsed<x.start+x.plan.duration)||timeline.at(-1),{turn:t,plan:p}=entry,local=elapsed-entry.start;
   // Approach once per battle. Later turns keep the same positions during the lead-in.
-  const approaching=!reduced&&entry===timeline[0]&&local<p.approach;
+  const approaching=!reduced&&!finished&&entry===timeline[0]&&local<p.approach;
   const move=approaching?local/p.approach:1,px=56+47*move,ex=200-47*move;
   let pc='idle',ec='idle',pt=local,et=local;
   if(finished){pc=t.hp<=0?'down':battle.outcome==='win'?'victory':'idle';ec=t.enemyHp<=0?'down':battle.outcome==='loss'?'victory':'idle';}
@@ -60,10 +63,12 @@ export function playScene(canvas,battle,onCaption,options={}){
   }
   // Replay attributes contain no private lifetime facts.
   canvas.dataset.skill=t.skillId||'BASIC';canvas.dataset.effect=p.effectId;canvas.dataset.turn=String(t.round);
+  canvas.dataset.phase=finished?'finished':local<p.approach?'ready':local<p.contact?'attack':'hit';
   onCaption(`${t.round}합 · ${t.skill} 발동 · ${t.damage} 피해 / ${t.received} 피격`);
  }
- draw(0);
- if(!timeline){cancel=()=>{stopped=true;};return cancel;}
- function tick(now){if(stopped)return;if(start===null)start=now;const elapsed=Math.min(total,(now-start)*speed);draw(elapsed,elapsed>=total);if(elapsed<total)frame=requestAnimationFrame(tick);else onCaption(`기록된 결과: ${battle.outcome==='win'?'승리':battle.outcome==='escape'?'도주':battle.outcome==='mutual'?'동반 사망':'패배'} · PixelFX는 연출만 재생합니다.`);}
- frame=requestAnimationFrame(tick);cancel=()=>{stopped=true;cancelAnimationFrame(frame);};return cancel;
+ if(!timeline){draw(0);return cancel;}
+ cancel=playTimeline(canvas,total,(elapsed,finished)=>{
+  draw(elapsed,finished);
+  if(finished)onCaption(`기록된 결과: ${battle.outcome==='win'?'승리':battle.outcome==='escape'?'도주':battle.outcome==='mutual'?'동반 사망':'패배'} · PixelFX는 연출만 재생합니다.`);
+ },{speed,finish:options.finish||reduced,onState:options.onState});return cancel;
 }

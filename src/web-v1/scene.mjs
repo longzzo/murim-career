@@ -1,8 +1,9 @@
 // Self-authored TMP pixel scene. No PixelFX or third-party artwork is included.
+import {playTimeline} from './replay-clock.mjs';
 let cancelPrevious=()=>{};
 export function stopScene(){cancelPrevious();cancelPrevious=()=>{};}
-export function playScene(canvas,battle,onCaption,{speed=1}={}){
- stopScene();const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;let stopped=false,frame=0,start=0;
+export function playScene(canvas,battle,onCaption,{speed=1,finish=false,onState}={}){
+ stopScene();const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  function actor(x,y,flip,color,pose){
   ctx.save();ctx.translate(x,y);ctx.scale(flip?-1:1,1);
@@ -21,8 +22,11 @@ export function playScene(canvas,battle,onCaption,{speed=1}={}){
   if(phase>.35&&phase<.55){ctx.fillStyle='#f7f0d0';ctx.fillRect(130,69,28,3);ctx.fillRect(148,61,3,20);ctx.fillStyle='#c6a65d';ctx.fillRect(138,79,17,2);}
   const t=battle?.turns[index];if(t){ctx.fillStyle='#35564b';ctx.fillRect(17,14,84,3);ctx.fillRect(155,14,84,3);ctx.fillStyle='#90b99b';ctx.fillRect(17,14,Math.max(0,Math.floor(t.hp*.84)),3);ctx.fillStyle='#c6a16b';ctx.fillRect(155,14,Math.max(0,Math.floor(t.enemyHp*.84)),3);}
  }
- if(!battle){draw(0);cancelPrevious=()=>{stopped=true;cancelAnimationFrame(frame);};return cancelPrevious;}
- const duration=battle.turns.length*650/speed;
- function loop(now){if(stopped)return;if(!start)start=now;const elapsed=now-start,index=Math.min(battle.turns.length-1,Math.floor(elapsed/(650/speed)));draw(index,reduced?0:(elapsed%(650/speed))/(650/speed));const t=battle.turns[index];if(t)onCaption(`${t.round}합 · ${t.skill} 발동 · ${t.damage} 피해 / ${t.received} 피격`);if(elapsed<duration)frame=requestAnimationFrame(loop);else onCaption(`기록된 결과: ${battle.outcome==='win'?'승리':battle.outcome==='escape'?'도주':battle.outcome==='mutual'?'동반 사망':'패배'} · 연출은 판정을 바꾸지 않습니다.`);}
- frame=requestAnimationFrame(loop);cancelPrevious=()=>{stopped=true;cancelAnimationFrame(frame);};return cancelPrevious;
+ if(!battle){draw(0);return cancelPrevious;}
+ const duration=battle.turns.length*650;
+ cancelPrevious=playTimeline(canvas,duration,(elapsed,finished)=>{
+  const index=Math.min(battle.turns.length-1,Math.floor(elapsed/650));draw(index,reduced||finished?0:elapsed%650/650);
+  const t=battle.turns[index];canvas.dataset.turn=String(t.round);canvas.dataset.phase=finished?'finished':'attack';
+  onCaption(finished?`기록된 결과: ${battle.outcome==='win'?'승리':battle.outcome==='escape'?'도주':battle.outcome==='mutual'?'동반 사망':'패배'} · 연출은 판정을 바꾸지 않습니다.`:`${t.round}합 · ${t.skill} 발동 · ${t.damage} 피해 / ${t.received} 피격`);
+ },{speed,finish:finish||reduced,onState});return cancelPrevious;
 }
