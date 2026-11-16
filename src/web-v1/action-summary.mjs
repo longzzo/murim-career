@@ -1,5 +1,6 @@
 import {REALMS,ASSISTS} from './data.mjs';
 import {hasQi,maxQi,maxHp} from './qi.mjs';
+import {escortSnapshot} from './escort.mjs';
 
 // Optional presentation record. The baseline is captured BEFORE the start cost.
 // It never participates in combat, rewards, RNG, or lifetime decisions.
@@ -16,7 +17,7 @@ export function publicActionSnapshot(s){
   for(const [id,item]of Object.entries(s.content.items))if(item.type==='weapon')values[item.name+' 보유']=l.inventory.weapons.filter(w=>w.itemId===id).length;
  }
  if(hasQi(s))for(const [id,count]of Object.entries(l.qi.medicines))values[s.content.items[id].name+' 보유']=count;
- return values;
+ return {...values,...escortSnapshot(s)};
 }
 export function startActionSummary(before,action){
  return {version:1,lifeId:before.life.id,actionKey:action.key,actionId:action.id,target:action.target,

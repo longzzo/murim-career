@@ -44,7 +44,7 @@ export function actionCard(v,a,{recommended=false,target}={}){
   <button class="wide" data-ui="start-action" data-id="ACT-08" data-target="default" disabled>${v.factions===1?'교류·시험 완료':'명문 해금 완료'}</button></div>`;
  if(a.id==='ACT-05'&&v.qi)return recoveryCard(v,target);
  const cost=a.id==='ACT-05'&&v.money>=ECONOMY.treatment?ECONOMY.treatment:0;
- const reward=a.id==='ACT-03'?ECONOMY.commission:a.id==='ACT-04'?ECONOMY.escort:0;
+ const reward=a.id==='ACT-03'?ECONOMY.commission:a.id==='ACT-04'?(a.completionMoney??ECONOMY.escort):0;
  const mentor=a.id==='ACT-02'?(v.knowsMentorSkill&&!v.knowsMentorAssist?'검법을 익혔고, 사부의 기예는 아직 배우지 않았습니다.':!v.knowsMentorSkill?'사부의 후속 검법을 아직 배우지 않았습니다.':''):'';
  const directRisk=a.id==='ACT-06'?v.battleRisks.novice:a.id==='ACT-08'&&v.quest===1&&!v.assists.includes('의술')?v.battleRisks.rival:null;
  const targets=target?[target]:a.targets;
@@ -52,15 +52,18 @@ export function actionCard(v,a,{recommended=false,target}={}){
   const risk=a.id==='ACT-09'?v.battleRisks[id]:null;
   const confirm=risk&&risk.mode!=='duel';
   const label=risk?(confirm?'생사결 살피기':'비무 시작'):targetLabels[id]??(directRisk?'비무 시작':`${a.name} 시작`);
-  return `${risk?`<h4>${esc(risk.enemy)}</h4>${battleRisk(risk)}`:''}<button class="primary wide" data-ui="${confirm?'confirm-battle':'start-action'}" data-id="${a.id}" data-target="${id}">${esc(label)}</button>`;
+  const assistNote=a.id==='ACT-07'&&id==='assist'?`<p class="muted assist-action-note">${esc(v.mentorAssist)} · ${v.knowsMentorAssist?'이미 습득. 기반을 쌓으며 기예·무공 숙련은 그대로입니다.':'미습득. 기예를 배우고 기반을 쌓습니다.'}</p>`:'';
+  const skillNote=a.id==='ACT-07'&&id==='skill'&&v.qi&&v.loadout.primary==='BASIC'?'<p>기본 외공 · <strong>삼재검법 기초 숙련</strong>을 단련합니다.</p>':'';
+  return `${risk?`<h4>${esc(risk.enemy)}</h4>${battleRisk(risk)}`:''}${skillNote}${assistNote}<button class="primary wide" data-ui="${confirm?'confirm-battle':'start-action'}" data-id="${a.id}" data-target="${id}">${esc(label)}</button>`;
  }).join('');
  return `<div class="action-card">${recommended?'':`<h3>${image('UI-ICO-'+a.id,'menu-icon')}${esc(a.name)}</h3>`}
  ${recommended?'':`<p>${esc(a.desc)}</p>`}
+ ${a.id==='ACT-04'&&v.escortCareer?`<p class="ec-entry">${v.escortCareer.joined?'출발 때의 직위와 기본 보수로 약정합니다.':'첫 호송을 시작하면 신입 표사 경력이 시작됩니다.'} 중간 판단에 따라 기간과 정산이 달라집니다.</p>`:''}
  <p class="action-cost"><strong>${a.months}개월 · 선지출 ${cost} 재화${reward?` · 완료 보수 ${reward} 재화`:''}</strong></p>
  ${a.id==='ACT-05'&&!cost?'<p class="notice">무료 휴식으로는 심한 부상을 치료할 수 없습니다.</p>':''}
  ${directRisk?battleRisk(directRisk):a.id==='ACT-09'||recommended?'':'<p class="muted">돌발 사건의 위험은 대응 전에 안내합니다.</p>'}
  ${a.id==='ACT-07'?`<p class="muted">주력 ${esc(v.skills.find(skill=>skill.id===v.loadout.primary)?.name)} · 사부의 기예 ${esc(v.mentorAssist)}${v.knowsMentorAssist?' (습득함)':''}</p>`:''}
- ${v.qi&&v.loadout.primary==='BASIC'&&['ACT-07','ACT-10'].includes(a.id)?'<p>기본 외공 · <strong>삼재검법 기초 숙련</strong>을 단련합니다.</p>':''}
+ ${v.qi&&v.loadout.primary==='BASIC'&&a.id==='ACT-10'?'<p>기본 외공 · <strong>삼재검법 기초 숙련</strong>을 단련합니다.</p>':''}
  <p class="action-restriction">${image('UI-ICO-WARNING','menu-icon')}시작 후 행동을 바꿀 수 없습니다.</p><div class="action-options">${buttons}</div></div>`;
 }
 function recoveryCard(v,target){
@@ -91,12 +94,14 @@ export function character(v){
  return `<section class="character-scene" aria-label="캐릭터">
   ${image('UI-BG-HOME','home-background')}
   <div class="character-figure">${image('UI-CHR-PLAYER','home-character','武')}</div>
-  <div class="character-info"><p class="kicker">${esc(v.originName)} · ${esc(v.realm)}</p>
+  <div class="character-info"><p class="kicker">${esc(v.originName)} · ${esc(v.escortCareer?.joined?v.escortCareer.rank:v.realm)}</p>
+   ${v.escortCareer?.joined?`<p class="ec-realm">경지 · ${esc(v.realm)}</p>`:''}
    <h2 class="name">${esc(v.name)}</h2>
    <span class="badge ${v.body==='안정'?'':'warn'}">${esc(v.body)}</span>
    ${v.rejuvenated?'<span class="badge warn">육체 약화</span>':''}
    <p class="main-skill">${esc(skill?.name)}</p>
    <p class="reputation">명성 ${number(v.fame)} · 문파 신뢰 ${number(v.trust)}</p>
+   ${v.escortCareer?.joined?`<p class="ec-home-progress">${v.escortCareer.highest?'최고 직위 · 주요 호송 총괄':`다음 ${esc(v.escortCareer.next.name)} · ${v.escortCareer.completedAtRank>=2?'완수 조건 달성':`완수 ${v.escortCareer.completedAtRank}/2`}<br>${esc(v.escortCareer.responsibility)} ${v.escortCareer.responsibilityMet?'달성':'필요'}`}</p>`:''}
   </div>
   ${weapon?`<button class="equipped-preview" data-ui="item" data-id="${esc(weapon.id)}">${itemImage(weapon,'劍')}
    <span><strong>${esc(weapon.name)}</strong> <span>공격력 +${weapon.effective}</span> ${weaponGauge(weapon)}
@@ -114,7 +119,7 @@ export function home(v,notice=''){
  const marker=next.action?`UI-ICO-${next.action}`:next.item?'UI-ICO-CODEX':next.review?'UI-ICO-CHRONICLE':'UI-ICO-MAP';
  const attrs=next.item?`data-ui="item" data-id="${esc(next.item)}"`:next.review?`data-ui="review" data-id="${next.review}"`:
   `data-ui="group" data-id="${next.group}"`;
- return currency(v)+character(v)+`<section class="current-situation ua-goal"><p class="ua-kicker">${esc(next.direction)}</p><h2>${image(marker,'menu-icon')}${esc(next.title)}</h2><p>${esc(next.reason)}</p>
+ return currency(v)+character(v)+`<section class="current-situation ua-goal"><p class="ua-kicker">지금 추천</p><h2>${image(marker,'menu-icon')}${esc(next.title)}</h2><p>${esc(next.reason)}</p>
   ${v.age>=50&&v.body!=='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
   ${next.group==='duel'&&v.guidance?.practiceSuggested?'<p>교류 비무는 패배해도 생존합니다. 부상을 입을 수 있습니다.</p>':''}
   ${next.action?actionCard(v,v.actions.find(a=>a.id===next.action),{recommended:true,target:next.target}):`<button class="primary wide" ${attrs}>${next.label}</button>`}</section>${notice}

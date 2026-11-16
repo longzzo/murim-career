@@ -11,6 +11,8 @@ import {guidancePanel,guidanceHelp} from './guidance-ui.mjs';
 import {storyPanel,promiseHistory,storyResult} from './story-ui.mjs';
 import {loadoutPreview} from './upgrade-model.mjs';
 import {wholeSummary,combatSummary,nextPanel,configurationSummary} from './upgrade-ui.mjs';
+import {escortJourney,escortChoiceInfo,escortResult,escortHistory,escortEnding} from './escort-ui.mjs';
+import {clarifyButtons,labelButton} from './button-ui.mjs';
 const app=document.querySelector('#app'),store=new SaveStore();
 let busy=false,error='',battleConfirm=null,currentTab='home',group=null,review=null;
 let item=null,itemTab='weapon',itemConfirm=null,previousPage=null,returnFocus=null;
@@ -36,17 +38,17 @@ function updateReplaySpeed(){
  const canvas=app.querySelector('canvas'),speed=Number(canvas?.dataset.speed)||1;
  const reviewing=canvas?.dataset.paused==='true'&&canvas?.dataset.phase!=='finished';
  const label=app.querySelector('.replay-speed');if(label)label.textContent=`${canvas?.dataset.phase==='finished'?'완료':reviewing?'합 기록 조회':speed===4?'빠름':speed===.5?'느림':'기본'} · ${speed}×`;
- const replay=app.querySelector('[data-ui="replay"]');if(replay)replay.textContent=reviewing?'이 합 다음부터 이어보기':'처음부터 다시 보기';
+ const replay=app.querySelector('[data-ui="replay"]');labelButton(replay,reviewing?'이 합 다음부터 이어보기':'전투 처음부터 다시 보기','▶️');
  for(const [action,value,text]of [['fast',4,'빠르게 4×'],['slow',.5,'느리게 0.5×']]){
   const button=app.querySelector(`[data-ui="${action}"]`);if(!button)continue;
-  button.textContent=speed===value?'기본 1×':text;button.setAttribute('aria-pressed',String(speed===value));
+  labelButton(button,speed===value?'기본 1×':text,action==='fast'?'⏩':'🐢');button.setAttribute('aria-pressed',String(speed===value));
  }
 }
 function render(){
  stopScene();const start=performance.now();
  if(!store.state||startingNew){
   document.body.classList.remove('compact-home');
-  app.innerHTML=errors()+(error?'':setupScreen(setup,setupOrigin,configuring,startingNew,store.state?.meta.unlocks??[]));bind();return;
+  app.innerHTML=errors()+(error?'':setupScreen(setup,setupOrigin,configuring,startingNew,store.state?.meta.unlocks??[]));clarifyButtons(app);bind();return;
  }
  const v=publicView(store.state);
  const notice=!error&&!busy&&announcement.length&&v.phase!=='result'?`<aside class="change-notice" aria-label="저장된 상태 변화"><div><strong>상태 변화</strong><div class="result-tags">${changeTags(announcement)}</div></div>${btn('닫기','dismiss-notice','', 'aria-label="상태 변화 알림 닫기"')}</aside>`:'';
@@ -65,7 +67,7 @@ function render(){
  else body=homeScreen(v,cleanHome?notice:'');
  document.body.classList.toggle('compact-home',cleanHome);
  app.innerHTML=errors()+`<p class="save${cleanHome?' visually-hidden':''}" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 기록 '+v.revision}</p>`+body+(cleanHome?'':notice);
- bind();if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),#loadout select,#loadout input').forEach(b=>b.disabled=true);
+ clarifyButtons(app,v,{queued:store.state.queue.length>0,itemConfirm});bind();if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),#loadout select,#loadout input').forEach(b=>b.disabled=true);
  const canvas=app.querySelector('canvas');if(canvas)replayBattle(canvas,v.result?.battle);
  document.documentElement.dataset.renderMs=(performance.now()-start).toFixed(2);
 }
@@ -96,8 +98,8 @@ function homeScreen(v,notice){
  return currency(v)+`<section class="card">${detail}</section>`+bottomNav(currentTab);
 }
 function chronicleScreen(v){
- return `<h2>기록</h2>${v.canRejuvenate?btn('반로환동 방법 살피기','review','wide','data-id="renewal"'):''}${guidanceHelp(v)}${promiseHistory(v)}${changeHistory(v)}<details open><summary>이번 생애의 발자취</summary>${logs(v)}</details>
- <details class="past-lives"><summary>지난 생애</summary>${v.history.length?`<ul>${v.history.map(h=>`<li>${esc(h.name)} · ${esc(h.originName)} · ${esc(h.mentorName)} · ${h.age}세 · ${esc(h.realm)}${h.recapQuote?`<p>${esc(h.recapQuote)}</p>`:''}${promiseHistory(h)}</li>`).join('')}</ul>`:'<p class="empty">지난 생애 기록 없음</p>'}</details>
+ return `<h2>기록</h2>${v.canRejuvenate?btn('반로환동 방법 살피기','review','wide','data-id="renewal"'):''}${guidanceHelp(v)}${escortHistory(v)}${promiseHistory(v)}${changeHistory(v)}<details open><summary>이번 생애의 발자취</summary>${logs(v)}</details>
+ <details class="past-lives"><summary>지난 생애</summary>${v.history.length?`<ul>${v.history.map(h=>`<li>${esc(h.name)} · ${esc(h.originName)} · ${esc(h.mentorName)} · ${h.age}세 · ${esc(h.realm)}${h.recapQuote?`<p>${esc(h.recapQuote)}</p>`:''}${escortHistory(h)}${promiseHistory(h)}</li>`).join('')}</ul>`:'<p class="empty">지난 생애 기록 없음</p>'}</details>
  ${v.canRetire&&!v.success?btn('금분세수 살피기','review','wide','data-id="retire"'):''}
  ${v.success?btn('생애 마무리 살피기','review','wide','data-id="finish"'):''}`;
 }
@@ -142,6 +144,7 @@ function journeyScreen(v){
  ${v.active.masterySubject?`<p>수련 대상 · <strong>${esc(v.active.masterySubject)}</strong></p>`:''}
  ${v.age>=50||v.body==='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
  <progress class="journey-progress" aria-label="여정 진행" value="${v.active.elapsed}" max="${v.active.duration}"></progress>
+ ${escortJourney(v)}
  ${v.story?.offers.some(o=>o.status==='accepted')?storyPanel(v):''}
  ${v.result?.battle?battlePanel(v):''}${btn('여정 계속','advance','primary wide')}${v.actionSummary?`<details class="ua-detail"><summary>진행 중 전체 성과</summary>${wholeSummary(v.actionSummary)}</details>`:''}${inspectInventory()}</section>`;
 }
@@ -149,8 +152,9 @@ function eventScreen(v){
  const e=v.pending;
  return currency(v)+`<section class="card event-card">${e.id==='A-001'?image('UI-ILL-A001','event-art'):''}
  <h2>${esc(e.name)}</h2><p>${esc(e.text)}</p>
+ ${e.escortContract?`<p class="ec-choice-note"><strong>${esc(e.escortContract.rankName)}의 판단</strong> · 약정 기본 보수 ${e.escortContract.baseReward} 재화<br>기간은 선택 즉시, 보수·책임·인연은 호송 완수 때 반영합니다.</p>`:''}
  <div class="choices">${e.choices.map(c=>`<div class="event-choice">${c.risk?battleRisk(c.risk):''}<button class="wide" data-ui="${c.risk&&c.risk.mode!=='duel'?'confirm-event':'choose'}" data-id="${esc(c.id)}" ${c.allowed?'':'disabled'}>${esc(c.label)}
- ${c.extraMonths?`<small>기간 +${c.extraMonths}개월</small>`:''}
+ ${escortChoiceInfo(c)}
  ${c.allowed?'':`<small>${esc(c.reason)}</small>`}</button></div>`).join('')}</div>${inspectInventory()}</section>`;
 }
 function battlePanel(v){
@@ -165,6 +169,7 @@ function resultScreen(v){
  const next=situation({...v,phase:'home'});
  const changes=announcement.length?announcement:result?.changes??[];
  return currency(v)+`<section class="card result-card"><h2>${esc(result?.title||'행동 결과')}${battle?' · '+outcome[battle.outcome]:''}</h2>
+ ${escortResult(v)}
  ${battle?combatSummary(battle):wholeSummary(result?.actionSummary)}
  ${nextPanel(v)}
  ${battle?battlePanel(v):v.guidance?.active.includes('learning')?image('UI-ICO-LEARNING','learning-mark'):''}
@@ -187,7 +192,7 @@ function resultScreen(v){
 }
 const outcomes={win:'승리',loss:'패배',escape:'도주',mutual:'동반 사망'};
 function graceScreen(v){
- if(review!=='grace-end')return currency(v)+rejuvenation(v,{grace:true})+wholeSummary(v.actionSummary);
+ if(review!=='grace-end')return currency(v)+rejuvenation(v,{grace:true})+escortJourney(v)+wholeSummary(v.actionSummary);
  return currency(v)+`<section class="card"><h2>이 생애를 마칠까요?</h2><p>반로환동 없이 지금까지의 여정을 마칩니다.</p><div class="row">${btn('방법 비교로 돌아가기','grace-back')}${btn('생애 마무리 확정','declineGrace','danger')}</div></section>`;
 }
 function endedScreen(v){
@@ -197,14 +202,15 @@ function endedScreen(v){
  if(!recapOpen)return currency(v)+`<section class="card ending"><h2>생애의 마침표</h2>
  ${lastAction?`<p>마지막 행동 · ${esc(lastAction)}</p>`:''}
   ${battle?`<h3>${esc(battle.enemy)} · ${outcomes[battle.outcome]}</h3>`:''}
- <p class="notice">${ending}</p>${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
+ <p class="notice">${ending}</p>${escortEnding(v)}${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
  return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>${esc(v.originName)} · ${esc(v.mentor.name)}</p><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
  <p>${v.success==='retirement'?'금분세수의 성공을 남겼습니다.':v.success==='conquest'?'승리하고 생존해 정복의 성공을 남겼습니다.':'발견과 해금은 다음 생애에도 남습니다.'}</p></section>
  ${v.recapQuote?`<blockquote class="notice">${esc(v.recapQuote)}</blockquote>`:''}
+ ${escortEnding(v)}
  <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 새 생애는 새 문파 목록에서 선택하고, 회귀는 원래 출신·사부·규칙을 유지합니다. 능력과 재화는 새로 시작합니다.</p>
  <div class="choices">${btn('새 생애 · 문파 고르기','new-life-map','primary')}${btn('기억을 품고 회귀','review-regression')}${btn('마지막 순간 돌아보기','close-recap')}</div>
  ${review==='regression'?`<section class="item-confirm"><h3>이 생애의 기억을 품고 회귀할까요?</h3><div class="row">${btn('돌아가기','cancel-regression')}${btn('회귀 확정','regress','primary')}</div></section>`:''}</section>
- ${changeHistory(v)}<details class="card recap-details"><summary>기억할 선택과 인연</summary>${promiseHistory({story:record?.story})}${logs(v)}</details>`;
+ ${changeHistory(v)}<details class="card recap-details"><summary>기억할 선택과 인연</summary>${escortHistory(record??{})}${promiseHistory({story:record?.story})}${logs(v)}</details>`;
 }
 function logs(v){return `<ul class="log">${v.log.slice(-40).reverse().map(x=>`<li><small>${16+Math.floor(x.month/12)}세 ${x.month%12}개월</small>${esc(x.text)}</li>`).join('')}</ul>`;}
 async function perform(command){

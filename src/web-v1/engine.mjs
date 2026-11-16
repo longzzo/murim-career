@@ -5,6 +5,7 @@ import {hasQi,startQi,validateQi,maxQi,maxHp,qiView,qiDistribution,skillCost,qiR
 import {hasGuidance,startGuidance,validateGuidance,learnedGuidance,battleGuidance,practiceGuidance,manageGuidance,guidanceView} from './guidance.mjs';
 import {hasStory,startStory,validateStory,requireOffer,acceptOffer,decideOffer,storyCompletion,closeStory,storyView,savedStoryView} from './story.mjs';
 import {startActionSummary,recordActionSummary,actionSummary,validateActionSummaries} from './action-summary.mjs';
+import {hasEscort,startEscort,beginEscort,dueEscortEvent,markEscortEvent,chooseEscort,settleEscort,interruptEscort,validateEscort,escortSnapshot,escortView,savedEscortView,escortRecordView} from './escort.mjs';
 const clone=x=>structuredClone(x);
 const legacyOriginLabels=[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}];
 const addUnique=(xs,x)=>{if(!xs.includes(x))xs.push(x);};
@@ -31,6 +32,7 @@ function recordChanges(before,after,command){
  change('명성',previous.fame,current.fame);
  change('문파 신뢰',previous.trust,current.trust);
  change('몸 상태',bodyName(previous.injury),bodyName(current.injury));
+ if(hasEscort(before)&&hasEscort(after)){const old=escortSnapshot(before);for(const [label,value]of Object.entries(escortSnapshot(after)))change(label,old[label],value);}
  if(hasQi(before)&&hasQi(after)){
   change('현재 내공',previous.qi.current,current.qi.current);
   change('최대 내공',maxQi(before),maxQi(after));
@@ -106,6 +108,7 @@ function createGame(options,previous,version,data){
  if(hasQi(s))startQi(s);
  startGuidance(s);
  startStory(s);
+ startEscort(s);
  note(s,options.regress?'기억을 품고 새 생애를 시작했다. 실력과 배움은 다시 쌓아야 한다.':'삼재검법으로 강호의 첫걸음을 내디뎠다.');
  validateState(s);return s;
 }
@@ -113,8 +116,9 @@ export function validateState(s){
  const v=s?.versions;
  const legacy=v?.rules===LEGACY_VERSION.rules&&['web-v1.0',LEGACY_VERSION.content].includes(v.content);
  const inventory=v?.rules===INVENTORY_VERSION.rules&&v.save===2&&v.content===INVENTORY_VERSION.content;
- const qiVersion=v?.rules===VERSION.rules&&v.save===2&&v.qi===1&&
-  (v.content===PLAY_VERSION.content&&v.factions===undefined||['web-v1.4',VERSION.content].includes(v.content)&&v.factions===1);
+ const qiVersion=v?.save===2&&v.qi===1&&(
+  v.rules===PLAY_VERSION.rules&&(v.content===PLAY_VERSION.content&&v.factions===undefined||['web-v1.4','web-v1.5'].includes(v.content)&&v.factions===1)||
+  v.rules===VERSION.rules&&v.content===VERSION.content&&v.factions===1&&v.escortCareer===1);
  requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
   inventory||qiVersion,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
@@ -151,6 +155,7 @@ export function validateState(s){
  validateGuidance(s);
  validateStory(s);
  validateActionSummaries(s);
+ validateEscort(s);
  return true;
 }
 export function migrateSave(state){
@@ -168,6 +173,7 @@ function historyNames(record,content){return {
 };}
 function finishLife(s,cause,weapon=null){
  const l=s.life;if(l.ending)return;
+ interruptEscort(s,cause);
  const candidate=s.naturalRecapCandidate;
  const recap=cause==='natural'&&candidate&&validRecapFact(s,candidate)?{...clone(candidate),quoteKey:RECAP_QUOTE_KEY,cause}:null;
  l.ending=cause;s.phase='ended';s.active=null;s.pending=null;s.queue=[];
@@ -178,6 +184,7 @@ function finishLife(s,cause,weapon=null){
  if(recap)record.recap=recap;
  if(weapon)record.finalWeapon=clone(weapon);
  if(hasStory(s))record.story=clone(l.story);
+ if(hasEscort(s)&&l.escortCareer.joinedMonth!==null)record.escortCareer=clone(l.escortCareer);
  if(!s.meta.history.some(x=>x.id===l.id))s.meta.history.push(record);
  note(s,cause==='battle'?'전투에서 생애를 마쳤다.':'자연의 흐름 속에 생애를 마쳤다.');
 }
@@ -207,6 +214,7 @@ function randomEvent(s){
  const candidates=s.content.events.filter(e=>!e.special&&!l.seen.includes(e.id)&&e.tags.some(t=>def.tags.includes(t))&&(!e.npc||l.npc>=e.npc));
  if(candidates.length&&random(s)<.25){const e=candidates[Math.floor(random(s)*candidates.length)];addUnique(l.seen,e.id);event(s,e.id,`${l.id}/${a.key}/${e.id}`);return true;}return false;
 }
+function maybeEscort(s){const id=dueEscortEvent(s);if(!id)return false;event(s,id,markEscortEvent(s));return true;}
 export function attackDistribution(s){
  if(hasQi(s))return qiDistribution(s);
  const l=s.life,known=id=>l.skills[id]!==undefined&&!l.disabled.includes(id)&&s.content.skills.find(x=>x.id===id)?.type==='attack';
@@ -284,7 +292,7 @@ export function resolveBattle(s,enemyKey){
 function completeAction(s){
  const a=s.active,l=s.life,id=a.id;s.active=null;s.phase='result';
  const gains=a.itemGains??[];
- let text='진행한 시간과 성과를 기록했습니다.',battle=null;
+ let text='진행한 시간과 성과를 기록했습니다.',battle=null,escortRecord=null;
  if(id==='ACT-02'){
   const m=s.content.mentors.find(x=>x.id===l.mentor);
   if(l.skills[m.skill]===undefined){l.skills[m.skill]=10000;l.loadout.primary=m.skill;l.loadout.aux=['SAMJAE'];text='사부에게 후속 검법을 배웠습니다.';learnedGuidance(s,a,m.skill);}
@@ -301,7 +309,10 @@ function completeAction(s){
    if(gain)gains.push(gain);
   }
   if(l.debt.length){const debt=l.debt.shift();text=`의뢰를 마치고 ${debt}의 은원을 수습했습니다.`;}else text='의뢰 완료 · 재화 +30 · 명성 +1 · 문파 신뢰 +1';
- }else if(id==='ACT-04'){l.money+=ECONOMY.escort;l.fame+=2;l.npc++;text='호송 완료 · 재화 +50 · 명성 +2';}
+ }else if(id==='ACT-04'){
+  if(hasEscort(s)){escortRecord=settleEscort(s,a);text=`${escortRecord.mission} 완료 · 재화 +${escortRecord.actualReward} · 명성 +${escortRecord.fameGain} · 인연 +${escortRecord.npcGain}`;}
+  else{l.money+=ECONOMY.escort;l.fame+=2;l.npc++;text='호송 완료 · 재화 +50 · 명성 +2';}
+ }
  else if(id==='ACT-05'){
   if(hasQi(s)&&a.target==='breathing'){const before=l.qi.current;l.qi.current=maxQi(s);text=`운기 완료 · 현재 내공 ${before} → ${l.qi.current} · 부상 치료 효과 없음`;}
   else if(a.paid){l.injury=0;l.lightMonths=0;text='치료를 마쳤습니다.';}
@@ -309,7 +320,8 @@ function completeAction(s){
  }
  else if(id==='ACT-06'){battle=resolveBattle(s,'novice');practiceGuidance(s,battle,a);if(battle.outcome==='win')l.fame+=2;text='비무로 실전의 계기를 얻었습니다.';}
  else if(id==='ACT-07'&&a.target==='assist'){
-  const m=s.content.mentors.find(x=>x.id===l.mentor);addUnique(l.assists,m.assist);text=`${ASSISTS[m.assist]}를 배웠습니다.`;
+  const m=s.content.mentors.find(x=>x.id===l.mentor),known=l.assists.includes(m.assist);addUnique(l.assists,m.assist);
+  text=known?`${ASSISTS[m.assist]} · 배운 기예로 기반 수련을 마쳤습니다. 기예와 무공 숙련은 그대로입니다.`:`${ASSISTS[m.assist]}의 기초를 배웠습니다. 기반 수련도 마쳤습니다.`;
  }else if(id==='ACT-08'){
   const hadPopular=s.meta.unlocks.includes('F-POPULAR');
   if(l.quest===0){l.quest=1;addUnique(s.meta.clues,'명문 입문 의뢰의 단서');text='첫 단계를 마쳤습니다. 다음 의뢰에서 시험을 치릅니다.';}
@@ -326,16 +338,17 @@ function completeAction(s){
  if(l.ending)return;
  const title=id==='ACT-08'&&s.versions.factions===1?(l.quest===2?'명문 교류·시험 완료':'명문 교류·시험 진행'):s.content.actions.find(x=>x.id===id).name+' 완료';
  s.result={title,text,battle,actionId:id};note(s,text);
+ if(escortRecord){s.result.escortCareer=escortRecord;note(s,`${escortRecord.reaction.name}: ${escortRecord.reaction.text}`);if(escortRecord.promotion)note(s,escortRecord.promotion.reaction.text);}
  if(hasGuidance(s))s.result.actionKey=l.id+'/'+a.key;
  storyCompletion(s,a);
  if(hasInventory(s)&&id==='ACT-03')s.result.completionMoney=ECONOMY.commission;
- if(hasInventory(s)&&id==='ACT-04')s.result.completionMoney=ECONOMY.escort;
+ if(hasInventory(s)&&id==='ACT-04')s.result.completionMoney=escortRecord?.actualReward??ECONOMY.escort;
  if(hasInventory(s)&&a.paid)s.result.paidMoney=ECONOMY.treatment;
  if(gains.length)s.result.itemGains=gains;
 }
 function advance(s){
  requireThat(s.phase==='journey'&&s.active,'진행할 행동이 없습니다.');
- if(showQueue(s)||maybeBreak(s)||randomEvent(s))return;
+ if(showQueue(s)||maybeBreak(s)||randomEvent(s)||maybeEscort(s))return;
  for(let guard=0;guard<1000;guard++){
   const a=s.active,l=s.life,def=s.content.actions.find(x=>x.id===a.id);
   requireThat(a&&a.elapsed<a.duration,'행동 진행 오류');
@@ -361,7 +374,7 @@ function advance(s){
   if(naturalBoundary(s,candidate))return;
   worldAtBoundary(s);
   if(done)return;
-  if(showQueue(s)||maybeBreak(s)||randomEvent(s))return;
+  if(showQueue(s)||maybeBreak(s)||randomEvent(s)||maybeEscort(s))return;
  }
  throw Error('진행 안전 한도를 초과했습니다.');
 }
@@ -401,6 +414,7 @@ function choose(s,id){
  requireThat(s.phase==='event'&&s.pending,'선택할 사건이 없습니다.');
  const pending=s.pending,e=s.content.events.find(x=>x.id===pending.id),c=e.choices.find(x=>x.id===id);
  requireThat(c&&canChoose(s.life,c),'현재 선택할 수 없습니다.');
+ chooseEscort(s,pending,c);
  if(e.id==='V-004'){
   s.life.breakthroughOffers??=[];
   let offer=s.life.breakthroughOffers.find(x=>x.token===pending.token);
@@ -445,6 +459,7 @@ export function transition(input,command){
   l.lastActionId=def.id;
   s.active={id:def.id,key:`action-${++s.nextAction}`,target,duration:months,baseDuration:months,elapsed:0,xpCredited:0,masteryCredited:0,skill:hasQi(s)&&l.loadout.primary==='BASIC'?'SAMJAE':l.loadout.primary,randomChecked:false,breakDeclined:-1,paid};
   s.active.summary=startActionSummary(input,s.active);
+  beginEscort(s,s.active);
   if(offer)acceptOffer(s,offer,s.active);
   if(target==='leader'){l.leader=true;note(s,'지지와 실력을 인정받고 우두머리 결전에 나섰다.');}
   s.result=null;s.phase='journey';note(s,`${breathing?'운기 회복':def.name}을 확정했다. 기간 ${months}개월, 중간에 교체할 수 없다.`);
@@ -495,7 +510,7 @@ export function publicView(s){
  const l=s.life;
  const view={revision:s.revision,phase:s.phase,name:l.name,origin:l.origin,mentor:s.content.mentors.find(x=>x.id===l.mentor),age:16+Math.floor(l.month/12),season:['봄','여름','가을','겨울'][Math.floor(l.month%12/3)],worldYear:Math.floor(l.month/12)+1,realm:REALMS[l.realm],realmIndex:l.realm,xp:Math.floor(l.xp/1000),money:l.money,fame:l.fame,trust:l.trust,npc:l.npc,body:l.injury===2?'심한 부상':l.injury===1?'가벼운 상처':'안정',warning:l.injury===2?'몸을 돌보며 도전에 신중할 때입니다.':(16+Math.floor(l.month/12))>=50?'몸이 예전 같지 않습니다. 긴 수련은 부담이 됩니다.':'강호의 일에는 늘 변수가 따릅니다.',trait:l.traitKnown?l.trait:'아직 알아차리지 못한 체질',rejuvenated:l.rejuvenated,canRejuvenate:!l.ending&&!l.rejuvenated&&l.breakthroughs.length>=2,canRetire:originRoute(s.content,l.origin)==='orthodox'&&l.realm>=2&&l.world.resolved&&!l.debt.length,success:l.success,ending:l.ending,skills:Object.entries(l.skills).map(([id,value])=>({...s.content.skills.find(x=>x.id===id),mastery:Math.floor(value/1000)})),loadout:clone(l.loadout),assists:l.assists.map(x=>ASSISTS[x]),actions:s.content.actions.map(x=>({...x,targets:allowedTargets(s,x.id),risk:risk(s,x.id==='ACT-09'?'rival':'novice')})),active:s.active?{id:s.active.id,name:s.content.actions.find(x=>x.id===s.active.id).name,elapsed:s.active.elapsed,duration:s.active.duration}:null,pending:s.pending?{...s.content.events.find(x=>x.id===s.pending.id),choices:s.content.events.find(x=>x.id===s.pending.id).choices.map(x=>({id:x.id,label:x.label,allowed:canChoose(l,x),reason:x.requires==='mediation'?'명성4 · 인연3 필요':x.requires?`${ASSISTS[x.requires]} 필요`:''}))}:null,result:clone(s.result),log:clone(l.log),debt:clone(l.debt),threat:{occurred:l.world.occurred,resolved:l.world.resolved},quest:l.quest,unlocks:clone(s.meta.unlocks),clues:clone(s.meta.clues),history:clone(s.meta.history),regression:l.regression};
  // Internal boundary facts never enter the display model, including historical records.
- view.history=s.meta.history.map(({recap,story,...record})=>({...record,...historyNames(record,s.content),...(story?{story:savedStoryView(story,s.content.story)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
+ view.history=s.meta.history.map(({recap,story,escortCareer,...record})=>({...record,...historyNames(record,s.content),...(story?{story:savedStoryView(story,s.content.story)}:{}),...(escortCareer?{escortCareer:savedEscortView(escortCareer)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
  view.recapQuote=s.phase==='ended'?view.history.find(x=>x.id===l.id)?.recapQuote||null:null;
  view.ageMonths=l.month%12;
  view.changes=clone(l.changes??[]);
@@ -514,6 +529,12 @@ export function publicView(s){
  view.qi=qiView(s);
  view.guidance=guidanceView(s);
  view.story=storyView(s);
+ if(hasEscort(s)){
+  view.escortCareer=escortView(s);
+  const escort=view.actions.find(a=>a.id==='ACT-04');escort.name=view.escortCareer.joined?view.escortCareer.rank+' · 상단 호송':'상단 호송';escort.desc=view.escortCareer.mission;escort.completionMoney=view.escortCareer.reward;
+  if(view.active?.id==='ACT-04')view.active.name=s.active.escortCareer.mission;
+  if(view.result?.escortCareer)view.result.escortCareer=escortRecordView(s.result.escortCareer);
+ }
  if(view.qi){
   view.qi.canRestorePaidSkill=qiDistribution(s,view.qi.max).some(({id})=>skillCost(s,id)>view.qi.current);
   for(const skill of view.skills){skill.cost=skillCost(s,skill.id);skill.affordable=skill.cost<=view.qi.current;}
@@ -530,6 +551,10 @@ export function publicView(s){
  view.knowsMentorAssist=l.assists.includes(view.mentor.assist);
  if(view.result?.itemGains)view.result.itemGains=view.result.itemGains.map(({name,quantity})=>({name,quantity}));
  if(view.pending){for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);c.extraMonths=definition.effects.filter(([type])=>type==='extra').reduce((sum,[,months])=>sum+months,0);}}
+ if(view.pending?.special==='escortCareer'){
+  view.pending.escortContract=escortRecordView(s.active.escortCareer);
+  for(const c of view.pending.choices){const d=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id).escort;c.escort={finalReward:s.active.escortCareer.baseReward+d.rewardDelta,rewardDelta:d.rewardDelta,npcGain:d.npcGain,fameGain:d.fameGain,responsibility:d.milestone?s.content.escortCareer.ranks.find(r=>r.milestone===d.milestone).responsibility:null};}
+ }
  if(view.pending?.id==='W-E02'){const fight=view.pending.choices.find(c=>c.id==='fight');fight.label=originRoute(s.content,l.origin)==='orthodox'?'토벌 원정에 참여한다':'공격에 맞서 방어한다';}
  return view;
 }

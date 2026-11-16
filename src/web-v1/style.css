@@ -162,3 +162,30 @@ h2[tabindex="-1"]:focus{outline:none}
 .ua-last{padding:.65rem;background:#f4f5f2;border:1px solid #cbdad5;border-radius:8px}
 .ua-draft button,.ua-next button{min-height:44px;word-break:keep-all;overflow-wrap:break-word}
 .ua-draft :focus-visible,.ua-detail summary:focus-visible,.ua-next button:focus-visible{outline:3px solid #ad6421;outline-offset:3px}
+
+/* ESCORT-01 staged art: scoped role, contract, decision and settlement components. */
+.ec-home-progress,.ec-realm{font-size:.8rem;line-height:1.45;overflow-wrap:anywhere}.ec-home-progress{margin-top:.35rem;color:#365c53}
+.ec-entry,.ec-choice-note{font-size:.9rem;color:#47645f;overflow-wrap:anywhere}
+.ec-contract,.ec-result,.ec-ending{display:grid;gap:.65rem;min-width:0;padding:.8rem;border:1px solid #c4d6ce;border-radius:12px;background:#f7faf6;overflow-wrap:anywhere}
+.ec-terms{display:flex;gap:.4rem 1rem;flex-wrap:wrap;padding:.5rem 0;border-block:1px solid #dce5e5}
+.ec-current-pay{padding:.75rem;background:#e9f4ee;border-radius:9px}.ec-current-pay>strong{display:block;font-size:1.55em;color:#056558}
+.ec-future-pay{padding:.75rem;border:1px solid #bccdcb;border-radius:9px}.ec-future-pay strong{font-size:1.15em}
+.ec-reaction{border-left:3px solid #9e7848;padding-left:.65rem}.ec-reaction>strong{color:#78552d}
+.ec-choice-cost{display:block;margin-top:.4rem;font-size:1rem}.event-choice:has(.ec-choice-cost)>button{text-align:left}
+.ec-unpaid{padding:.6rem;background:#eef1f2;border:1px solid #cbd6d8;border-radius:8px;color:#40585e}
+.ec-progress,.ec-promotion{color:#075d51}.ec-history-entry{padding:.7rem 0;border-bottom:1px solid #d9e5e7}.ec-history-entry>*+*{margin-top:.4rem}
+.ec-history summary,.ec-result summary{min-height:44px;padding:.6rem 0;overflow-wrap:anywhere}
+
+/* BUTTON-01: names convey intent even without color or decorative emoji. */
+.bc-icon{display:inline-block;margin-right:.35em;vertical-align:baseline}.bc-label{word-break:keep-all;overflow-wrap:anywhere}
+.activity-grid button.bc-group{display:block;text-align:left;padding:.55rem .65rem}
+.bc-group-note,.bc-open-label{display:block;font-size:.78em;font-weight:400;color:#526873;margin-top:.15em}
+.equipped-preview>.bc-open-label{grid-column:2}.bottom-nav .bc-label{min-width:0}
+button[data-intent="preview-risk"]{color:#873f2c;border-color:#cf9d83;background:#fff7f1}
+button[data-intent="danger"]{background:#a52732;color:white;border-color:#a52732}
+button[data-intent="danger"]:hover{background:#84202a}
+button[aria-pressed="true"][data-intent="navigate"],button[aria-pressed="true"][data-intent="replay"]{background:#deeee6;border-color:#0b7565}
+
+/* BC-ART-01: only these choices need wider columns as text grows. */
+.story-actions{grid-template-columns:repeat(auto-fit,minmax(min(100%,12em),1fr))}
+.battle-confirm>.row>button,.item-confirm>.row:has(>[data-ui="cancel-regression"])>button{flex:1 1 10em;min-width:min(100%,10em)}
