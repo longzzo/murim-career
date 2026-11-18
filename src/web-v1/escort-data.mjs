@@ -24,7 +24,7 @@ export const ESCORT_EVENTS=[
 ];
 export function validateEscortData(d){
  const fail=()=>{throw Error('표사 경력 콘텐츠 정의 오류');};
- if(!['web-v1.6','web-v1.7','web-v1.8'].includes(d.version)){if(d.escortCareer!==undefined||d.events.some(e=>e.special==='escortCareer'||/^EC-/.test(e.id)))fail();return;}
+ if(!['web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(d.version)){if(d.escortCareer!==undefined||d.events.some(e=>e.special==='escortCareer'||/^EC-/.test(e.id)))fail();return;}
  const c=d.escortCareer;if(!c||c.version!==1||c.baseMonths!==12||c.choiceMonth!==6||c.requiredCompletions!==2||!Array.isArray(c.ranks)||c.ranks.length!==4||!Array.isArray(c.npcs)||c.npcs.length!==3)fail();
  const text=v=>typeof v==='string'&&v.trim().length>0;
  for(const n of ESCORT_CAREER.npcs)if(!c.npcs.some(x=>x.id===n.id&&text(x.name)))fail();

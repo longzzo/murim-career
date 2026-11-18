@@ -213,7 +213,7 @@ export const CAMPAIGN_ARCS=[hs01,hs02,ha01,ha02];
 export function withCampaign(data){const d=structuredClone(data);d.version='web-v1.8';d.campaign={version:1,stages:structuredClone(CAMPAIGN_STAGES),resources:structuredClone(CAMPAIGN_RESOURCES),arcs:structuredClone(CAMPAIGN_ARCS)};d.actions.push({id:'ACT-CAMPAIGN',name:'약속 수행',desc:'선택한 약속의 기간을 이어갑니다.',months:1,xp:0,mastery:0,tags:['campaign'],hidden:true});for(const arc of d.campaign.arcs){arc.scenes.forEach((s,i)=>{if(i===10)s.gate='foundation';if(i===15)s.gate='realm-ready';if(i===20)s.gate='readiness';s.id=arc.id+'/'+(i+1);s.stage=Math.floor(i/5);s.choices.forEach((c,j)=>c.id='choice-'+j);for(const v of s.variants??[])v.choice.id='variant-'+v.id;});d.enemies[arc.enemyKey]=structuredClone(arc.enemy);}return d;}
 export function validateCampaignData(d){
  const fail=()=>{throw Error('문파 이야기 콘텐츠 오류');},text=v=>typeof v==='string'&&!!v.trim();
- if(d.version!=='web-v1.8'){if(d.campaign!==undefined||d.actions.some(a=>a.id==='ACT-CAMPAIGN'))fail();return;}
+ if(!['web-v1.8','web-v1.9'].includes(d.version)){if(d.campaign!==undefined||d.actions.some(a=>a.id==='ACT-CAMPAIGN'))fail();return;}
  const c=d.campaign;if(c?.version!==1||c.stages?.length!==5||!c.stages.every(text)||!Array.isArray(c.arcs)||c.arcs.length!==4||['P-HUASHAN','S-HAOMEN'].some(id=>c.arcs.filter(a=>a.origin===id).length!==2))fail();
  if(new Set(c.arcs.map(a=>a.id)).size!==c.arcs.length)fail();
  const action=d.actions.find(a=>a.id==='ACT-CAMPAIGN');if(!action?.hidden||action.xp!==0||action.mastery!==0||action.tags.join()!=='campaign')fail();

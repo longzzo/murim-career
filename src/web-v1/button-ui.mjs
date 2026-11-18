@@ -1,5 +1,5 @@
 // BUTTON-01 is presentation only: commands, targets, disabled state and storage stay intact.
-export const UI_BUILD='BUTTON-01-r3';
+export const UI_BUILD='LOBBY-01-r1';
 const destinations={home:['🏠','홈'],record:['📖','무공 구성'],inventory:['🎒','소지품'],map:['🗺️','강호 지도'],chronicle:['📜','생애 기록'],training:['📚','수련·배움'],world:['🧭','강호 활동'],duel:['⚔️','비무·도전'],rest:['🩹','회복']};
 const groups={training:'내공·외공·무공',world:'의뢰·호송·교류',duel:'비무·강적 도전',rest:'운기·휴식·치료'};
 const icons={'ACT-01':'🌀','ACT-02':'📚','ACT-03':'📜','ACT-04':'🚚','ACT-05':'🩹','ACT-06':'⚔️','ACT-07':'🥋','ACT-08':'🤝','ACT-09':'⚔️','ACT-10':'🥋'};
@@ -12,6 +12,8 @@ export function labelButton(button,text,icon){
 }
 function intent(button,kind){button.dataset.intent=kind;if(['navigate','preview','preview-risk','choice','replay'].includes(kind))button.classList.remove('primary');if(kind==='danger'){button.classList.remove('primary');button.classList.add('danger');}}
 const labels={
+ 'lobby-open':['시작 화면','☰','navigate'],'lobby-back':['시작 화면으로','↩️','navigate'],'lobby-continue':['이어하기','▶️','execute'],
+ 'lobby-history':['지난 인물들','▤','navigate'],'lobby-legacy':['전생의 유산','🌿','navigate'],'new-life-confirm':['새로운 삶 시작 확정','🌱','execute'],'new-life-back':['취소 · 설정으로','↩️','navigate'],'legacy-dismiss':['획득 안내 닫기','✕','navigate'],
  'back-group':['홈으로','🏠','navigate'],'advance':['여정 진행','▶️','execute'],
  'battle-apply':['생사결 시작 확정','⚠️','danger'],'battle-cancel':['생사결 취소 · 선택으로','↩️','navigate'],
  'item-repair':['수리 비용 확인','🔧','preview'],'item-equip':[null,'🗡️','execute'],'compare-item':[null,'🔎','preview'],
@@ -21,7 +23,7 @@ const labels={
  'grace-review':['생애 종료 전 확인','⚠️','preview-risk'],'grace-back':['수명 연장 방법으로','↩️','navigate'],
  'finish':['생애 마무리 확정','⚠️','danger'],'declineGrace':['생애 마무리 확정','⚠️','danger'],'retire':['금분세수 확정','✅','execute'],
  'open-recap':['이번 생애 회고 보기','📜','navigate'],'close-recap':['생애 마지막 기록으로','↩️','navigate'],
- 'new-life-map':['새 생애 문파 고르기','🌱','preview'],'review-regression':['회귀 조건 확인','🔄','preview'],
+ 'new-life-map':['새로운 삶 · 문파 고르기','🌱','preview'],'review-regression':['회귀 조건 확인','🔄','preview'],
  'regress':['기억을 품고 회귀 시작','🔄','execute'],'cancel-regression':['회귀 취소','↩️','navigate'],
  'setup-map':['문파 지도로','🗺️','navigate'],'setup-cancel':['새 생애 준비 취소','↩️','navigate'],
  'school-detail':['선택한 문파 설명 보기','🔎','preview'],'school-back':['문파 표식으로','🗺️','navigate'],
@@ -66,7 +68,7 @@ export function clarifyButtons(root,v=null,{queued=false,itemConfirm=null}={}){
   else if(a==='review'){labelButton(b,({retire:'금분세수 조건 확인',finish:'생애 종료 전 확인',renewal:'수명 연장 방법 보기'})[id],id==='finish'?'⚠️':'📜');intent(b,id==='finish'?'preview-risk':'preview');}
   else if(a==='guide-fold'){labelButton(b,b.getAttribute('aria-expanded')==='true'?'안내 접기 · 읽음 기록':'안내 다시 보기','📖');intent(b,'execute');}
   else if(a?.startsWith('rejuvenate-')){labelButton(b,original.replace('으로 이어가기','으로 수명 연장'),'🌱');intent(b,'execute');b.classList.remove('primary');}
-  else if(b.type==='submit'){labelButton(b,b.closest('#setup')?'새 생애 시작':b.closest('#loadout')?'편집한 무공 구성 적용':original,b.closest('#setup')?'🌱':'✅');intent(b,'execute');}
+  else if(b.type==='submit'){labelButton(b,b.closest('#setup')?'새로운 삶 최종 확인':b.closest('#loadout')?'편집한 무공 구성 적용':original,b.closest('#setup')?'🌱':'✅');intent(b,'execute');}
  }
  const recommended=root.querySelector('.current-situation button');
  if(recommended){recommended.dataset.recommended='true';if(recommended.dataset.intent!=='preview-risk')recommended.classList.add('primary');}

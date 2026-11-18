@@ -1,6 +1,6 @@
 import {VERSION,PLAY_VERSION,REALMS} from './data.mjs';
 
-export const hasQi=s=>[PLAY_VERSION.rules,'web-v1.3','web-v1.4',VERSION.rules].includes(s.versions.rules)&&s.versions.qi===1;
+export const hasQi=s=>[PLAY_VERSION.rules,'web-v1.3','web-v1.4','web-v1.5',VERSION.rules].includes(s.versions.rules)&&s.versions.qi===1;
 export const MEDICINES=['CON-QI-RECOVER','CON-QI-CAPACITY'];
 const requireQi=(value,message)=>{if(!value)throw Error(message);};
 const integer=(value,min=0)=>Number.isSafeInteger(value)&&value>=min;
@@ -108,7 +108,7 @@ export function qiDistribution(s,current=s.life.qi.current){
 export const skillCost=(s,id)=>id==='BASIC'?0:s.content.skills.find(k=>k.id===id)?.cost??Infinity;
 function actors(s,enemy,weapon){
  const l=s.life,r=s.content.qiRules;
- if(enemy.hpOverride!==undefined)requireQi(['web-v1.5','web-v1.6','web-v1.7','web-v1.8'].includes(s.content.version)&&enemy.id==='E-NOVICE'&&enemy.mode==='duel'&&integer(enemy.hpOverride,1),'초보 비무 생명력 정의 오류');
+ if(enemy.hpOverride!==undefined)requireQi(['web-v1.5','web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(s.content.version)&&enemy.id==='E-NOVICE'&&enemy.mode==='duel'&&integer(enemy.hpOverride,1),'초보 비무 생명력 정의 오류');
  const opponentHp=enemy.hpOverride??health(enemy.foundation,r);
  const player={name:l.name,realm:l.realm,hp:Math.floor(maxHp(s)*(l.injury===2?.8:1)),maxHp:maxHp(s),maxQi:maxQi(s),qi:l.qi.current,
   power:(8+l.realm*4+(weapon?.attack??0))*(l.injury===2?.8:1)*(l.rejuvenated?.85:1)};

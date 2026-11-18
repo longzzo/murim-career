@@ -73,7 +73,7 @@ export function escortView(s){
 export function validateEscort(s,historyOnly=false){
  const c=s.life.escortCareer;
  if(!hasEscort(s)){requireEscort(s.versions.escortCareer===undefined&&s.content.escortCareer===undefined&&c===undefined&&s.active?.escortCareer===undefined,'기존 생애의 경력 상태 오류');return;}
- requireEscort((s.versions.content==='web-v1.6'&&s.versions.rules==='web-v1.3'||s.versions.content==='web-v1.7'&&s.versions.rules==='web-v1.4'||s.versions.content==='web-v1.8'&&s.versions.rules==='web-v1.5')&&c?.version===1&&c.lifeId===s.life.id&&integer(c.totalCompleted)&&Array.isArray(c.history)&&Array.isArray(c.milestones));
+ requireEscort((s.versions.content==='web-v1.6'&&s.versions.rules==='web-v1.3'||s.versions.content==='web-v1.7'&&s.versions.rules==='web-v1.4'||s.versions.content==='web-v1.8'&&s.versions.rules==='web-v1.5'||s.versions.content==='web-v1.9'&&s.versions.rules==='web-v1.6')&&c?.version===1&&c.lifeId===s.life.id&&integer(c.totalCompleted)&&Array.isArray(c.history)&&Array.isArray(c.milestones));
  const ranks=s.content.escortCareer.ranks,counts=emptyCounts(s),marks=[];let current='EC-R0',total=0,lastMonth=-1,lastKey=0;const sources=new Set();
  const validateContract=h=>{
   const r=rank(s,h.rankId),key=Number(h.actionKey?.slice(7));requireEscort(r&&h.version===1&&h.lifeId===s.life.id&&/^action-[1-9]\d*$/.test(h.actionKey)&&key>lastKey&&key<=s.nextAction&&h.source===s.life.id+'/'+h.actionKey);

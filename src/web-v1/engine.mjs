@@ -9,6 +9,7 @@ import {withRegressionMemory} from './regression-data.mjs';
 import {hasRegressionMemory,startRegressionMemory,canUseMemory,validateRegressionMemory,regressionView,memoryResultView} from './regression.mjs';
 import {hasEscort,startEscort,beginEscort,dueEscortEvent,markEscortEvent,chooseEscort,settleEscort,interruptEscort,validateEscort,escortSnapshot,escortView,savedEscortView,escortRecordView} from './escort.mjs';
 import {hasCampaign,startCampaign,updateCampaign,validateCampaign,campaignActionCompleted,beginCampaignChoice,completeCampaignChoice,campaignBattleKey,closeCampaign,campaignArchive,campaignEnemy,campaignSatisfied,campaignView} from './campaign.mjs';
+import {hasLegacy,startLegacy,validateLegacy,earnLegacy,extraHerbEvent} from './legacy.mjs';
 const clone=x=>structuredClone(x);
 const legacyOriginLabels=[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}];
 const addUnique=(xs,x)=>{if(!xs.includes(x))xs.push(x);};
@@ -116,6 +117,7 @@ function createGame(options,previous,version,data){
  startEscort(s);
  startRegressionMemory(s,previous,!!options.regress);
  startCampaign(s);
+ startLegacy(s);
  note(s,options.regress?'기억을 품고 새 생애를 시작했다. 실력과 배움은 다시 쌓아야 한다.':'삼재검법으로 강호의 첫걸음을 내디뎠다.');
  validateState(s);return s;
 }
@@ -127,7 +129,8 @@ export function validateState(s){
   v.rules===PLAY_VERSION.rules&&(v.content===PLAY_VERSION.content&&v.factions===undefined||['web-v1.4','web-v1.5'].includes(v.content)&&v.factions===1)||
   v.rules==='web-v1.3'&&v.content==='web-v1.6'&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===undefined||
   v.rules==='web-v1.4'&&v.content==='web-v1.7'&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===1&&v.campaign===undefined||
-  v.rules===VERSION.rules&&v.content===VERSION.content&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===1&&v.campaign===1);
+  v.rules==='web-v1.5'&&v.content==='web-v1.8'&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===1&&v.campaign===1&&v.legacy===undefined||
+  v.legacy===1&&v.rules===VERSION.rules&&v.content===VERSION.content&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===1&&v.campaign===1);
  requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
   inventory||qiVersion,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
@@ -167,6 +170,7 @@ export function validateState(s){
  validateEscort(s);
  validateRegressionMemory(s);
  validateCampaign(s);
+ validateLegacy(s);
  return true;
 }
 export function migrateSave(state){
@@ -199,8 +203,9 @@ function finishLife(s,cause,weapon=null){
  if(hasEscort(s)&&l.escortCareer.joinedMonth!==null)record.escortCareer=clone(l.escortCareer);
  if(hasRegressionMemory(s))record.regressionMemory=clone(l.regressionMemory);
  if(hasCampaign(s))record.campaign=campaignArchive(s);
+ if(hasLegacy(s))record.legacy=clone(l.legacy);
  if(!s.meta.history.some(x=>x.id===l.id))s.meta.history.push(record);
- note(s,cause==='battle'?'전투에서 생애를 마쳤다.':'자연의 흐름 속에 생애를 마쳤다.');
+ note(s,cause==='battle'?'전투에서 생애를 마쳤다.':cause==='interrupted'?'새로운 삶을 위해 이 생애를 중단했다.':'자연의 흐름 속에 생애를 마쳤다.');
 }
 function recordSuccess(s,kind){const l=s.life;if(l.success)return;l.success=kind;addUnique(s.meta.successes,l.id+':'+kind);note(s,kind==='retirement'?'은원을 정리하고 금분세수를 기록했다.':'결전에서 승리하고 살아남아 정복을 기록했다.');}
 function naturalBoundary(s,candidate=null){
@@ -226,7 +231,8 @@ function randomEvent(s){
  a.randomChecked=true;
  const def=s.content.actions.find(x=>x.id===a.id);
  const candidates=s.content.events.filter(e=>!e.special&&!l.seen.includes(e.id)&&e.tags.some(t=>def.tags.includes(t))&&(!e.npc||l.npc>=e.npc));
- if(candidates.length&&random(s)<.25){const e=candidates[Math.floor(random(s)*candidates.length)];addUnique(l.seen,e.id);event(s,e.id,`${l.id}/${a.key}/${e.id}`);return true;}return false;
+ if(candidates.length&&random(s)<.25){const e=candidates[Math.floor(random(s)*candidates.length)];addUnique(l.seen,e.id);event(s,e.id,`${l.id}/${a.key}/${e.id}`);return true;}
+ if(extraHerbEvent(s,def,random)){addUnique(l.seen,'A-007');event(s,'A-007',`${l.id}/${a.key}/A-007`);return true;}return false;
 }
 function maybeEscort(s){const id=dueEscortEvent(s);if(!id)return false;event(s,id,markEscortEvent(s));return true;}
 export function attackDistribution(s){
@@ -427,7 +433,7 @@ function applyEffect(s,type,value,source){const l=s.life;
   note(s,`${REALMS[next]}의 경지에 올랐다. 깨달음 +1`);
  }else throw Error('알 수 없는 효과');
 }
-function choose(s,id){
+function choose(s,id,command){
  requireThat(s.phase==='event'&&s.pending,'선택할 사건이 없습니다.');
  const pending=s.pending,e=s.content.events.find(x=>x.id===pending.id),c=e.choices.find(x=>x.id===id);
  requireThat(c&&canChoose(s.life,c),'현재 선택할 수 없습니다.');
@@ -444,6 +450,7 @@ function choose(s,id){
  const source=pending.token.startsWith(prefix)?pending.token:prefix+pending.token;
  for(const [type,value]of c.effects){applyEffect(s,type,value,source);if(s.life.ending)break;}
  if(s.life.ending)return;
+ if(earnLegacy(s,pending,c,command))note(s,'전생 유산 영초의 길을 얻었다. 다음 새로운 삶부터 적용된다.');
  note(s,`${e.name}: ${c.label}`);
  if(e.id==='A-001'&&c.id==='medicine'&&!s.life.traitKnown){s.life.traitKnown=true;addUnique(s.meta.clues,s.life.trait);}
  naturalBoundary(s);
@@ -458,10 +465,19 @@ export function transition(input,command){
  validateState(input);requireThat(command&&typeof command.type==='string'&&command.id,'명령 ID가 필요합니다.');
  if(input.commands.includes(command.id))return input;
  const s=clone(input),l=s.life;
- if(command.type==='newLife'){
+ if(command.type==='newLife'||command.type==='restartLife'){
+  if(command.type==='restartLife'){
+   requireThat(!command.options?.regress,'새로운 삶과 회귀는 별도 선택입니다.');
+   if(!l.ending){
+    const interrupted=s.active? actionSummary(s,s.active,'interrupted'):null;
+    finishLife(s,'interrupted');
+    if(interrupted)l.lastActionSummary=interrupted;
+    recordEnding(input,s);
+   }
+  }
   requireThat(s.phase==='ended','생애 종료 뒤에만 재도전할 수 있습니다.');
   const next=newGame({...command.options,seed:(s.rng^((l.seq+1)*2654435761))>>>0},s);
-  next.revision=s.revision+1;next.commands=[command.id];return next;
+  next.revision=s.revision+1;next.commands=[command.id];validateState(next);return next;
  }
  if(command.type==='startAction'||command.type==='acceptOffer'){
   requireThat(s.phase==='home'&&!s.active&&!l.ending,'현재 행동을 바꿀 수 없습니다.');
@@ -486,7 +502,7 @@ export function transition(input,command){
   if(choice.months){s.active={id:'ACT-CAMPAIGN',key:`action-${++s.nextAction}`,target:'default',duration:choice.months,baseDuration:choice.months,elapsed:0,xpCredited:0,masteryCredited:0,skill:'SAMJAE',randomChecked:true,breakDeclined:-1,paid:false};s.active.summary=startActionSummary(input,s.active);s.life.lastActionId='ACT-CAMPAIGN';s.result=null;s.phase='journey';}
   else{completeCampaignChoice(s);naturalBoundary(s);}
  }else if(command.type==='advance')advance(s);
- else if(command.type==='choose')choose(s,command.choice);
+ else if(command.type==='choose')choose(s,command.choice,command);
  else if(command.type==='ack'){
   requireThat(s.phase==='result','확인할 결과가 없습니다.');
   if(command.destination)requireThat(['record','inventory','duel','rest','training','world'].includes(command.destination),'다음 화면 오류');

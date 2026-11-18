@@ -32,7 +32,7 @@ export function schoolMap(selected,current=null,available=schoolChoices(DATA),ch
 
 export function setupScreen(setup,selected,configuring,returning,unlocks=[]){
  const schools=schoolChoices(DATA,unlocks),origin=schools.find(entry=>entry.id===setup.origin);
- if(!configuring||!origin?.available)return `<section class="card"><h2>강호에서 첫걸음</h2><p>약도에서 문파를 살펴보고 시작할 곳을 고르세요.</p>${returning?'<p>새 생애는 현재 문파 목록에서 고릅니다. 회귀는 이전 출신·사부·규칙을 유지합니다.</p>':''}${schoolMap(selected,null,schools,setup.origin)}${returning?button('회고로 돌아가기','setup-cancel'):''}</section>`;
+ if(!configuring||!origin?.available)return `<section class="card"><h2>강호에서 첫걸음</h2><p>약도에서 문파를 살펴보고 시작할 곳을 고르세요.</p>${returning?'<p>새 생애는 현재 문파 목록에서 고릅니다. 회귀는 이전 출신·사부·규칙을 유지합니다.</p>':''}${schoolMap(selected,null,schools,setup.origin)}${returning?button('시작 화면으로 돌아가기','setup-cancel'):''}</section>`;
  const mentors=origin.teachings;
  const mentorChoices=mentors.map(mentor=>{
   const skill=mentor.skill;
@@ -48,7 +48,7 @@ export function setupScreen(setup,selected,configuring,returning,unlocks=[]){
  <label>체질 · 타고난 성장 특성<select name="trait" aria-describedby="trait-description">${Object.keys(traits).map(key=>`<option value="${key}"${setup.trait===key?' selected':''}>${key==='random'?'인연에 맡기기':key}</option>`).join('')}</select></label>
  <p class="muted" id="trait-description">${traits[setup.trait]}</p>
  <p class="muted">16세 · 재화100 · 삼재검법으로 시작합니다. 사부의 검법과 기예는 강호에서 배웁니다. 내공·외공 성향은 문파와 별도로 선택합니다.</p>
- <button class="primary wide" type="submit" ${mentors.some(m=>m.id===setup.mentor)?'':'disabled'}>강호에 첫발을 내딛기</button></form>`;
+ <button class="primary wide" type="submit" ${mentors.some(m=>m.id===setup.mentor)?'':'disabled'}>새로운 삶 최종 확인</button></form>`;
 }
 
 export function setupTraitDescription(value){return traits[value];}

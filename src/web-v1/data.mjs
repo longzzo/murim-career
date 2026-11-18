@@ -5,7 +5,7 @@ import {withCampaign,validateCampaignData} from './campaign-data.mjs';
 export const LEGACY_VERSION = {save:1, content:'web-v1.1', rules:'web-v1.0', recap:1, presentation:'web-v1.1'};
 export const INVENTORY_VERSION = {save:2, content:'web-v1.2', rules:'web-v1.1', inventory:1, recap:1, presentation:'web-v1.2'};
 export const PLAY_VERSION = {save:2, content:'web-v1.3', rules:'web-v1.2', inventory:1, qi:1, guidance:1, story:1, recap:1, presentation:'web-v1.3'};
-export const VERSION = {...PLAY_VERSION,content:'web-v1.8',presentation:'web-v1.8',rules:'web-v1.5',factions:1,escortCareer:1,regressionMemory:1,campaign:1};
+export const VERSION = {...PLAY_VERSION,content:'web-v1.9',presentation:'web-v1.9',rules:'web-v1.6',factions:1,escortCareer:1,regressionMemory:1,campaign:1,legacy:1};
 export const ECONOMY = {commission:30, escort:50, treatment:20, rejuvenation:80};
 export const REJUVENATION_MONTHS=120;
 // INV-01 v1 test values from common plan 04. New lives snapshot these definitions.
@@ -88,22 +88,22 @@ export const PLAY_DATA = {
   'CON-QI-RECOVER':{type:'qiMedicine',name:'내공 회복약',effect:'recover',amount:12},
   'CON-QI-CAPACITY':{type:'qiMedicine',name:'내공 증진약',effect:'capacity',amount:4}}
 };
-export const DATA = withCampaign(withRegressionMemory({...PLAY_DATA,version:'web-v1.6',factions:1,origins:FAMILIAR_ORIGINS,mentors:FAMILIAR_MENTORS,
+export const DATA = {...withCampaign(withRegressionMemory({...PLAY_DATA,version:'web-v1.6',factions:1,origins:FAMILIAR_ORIGINS,mentors:FAMILIAR_MENTORS,
  escortCareer:ESCORT_CAREER,events:[...PLAY_DATA.events,...ESCORT_EVENTS],
  enemies:{...PLAY_DATA.enemies,novice:{...PLAY_DATA.enemies.novice,hpOverride:65}},
- skills:[...PLAY_DATA.skills.filter(s=>!['P-S01','P-S02'].includes(s.id)),...FAMILIAR_SKILLS]}));
+ skills:[...PLAY_DATA.skills.filter(s=>!['P-S01','P-S02'].includes(s.id)),...FAMILIAR_SKILLS]})),version:'web-v1.9'};
 export function validateData(d=DATA){
  if(!d||!['actions','events','skills','mentors'].every(k=>Array.isArray(d[k]))||typeof d.version!=='string')throw Error('콘텐츠 구조 오류');
  const ids=new Set(); for(const group of ['actions','events','skills','mentors']) for(const x of d[group]) {if(ids.has(x.id))throw Error('중복 ID: '+x.id);ids.add(x.id);}
- if(d.actions.length!==(d.version==='web-v1.8'?11:10)||d.events.length!==(['web-v1.6','web-v1.7','web-v1.8'].includes(d.version)?14:10))throw Error('콘텐츠 수량 오류');
+ if(d.actions.length!==(['web-v1.8','web-v1.9'].includes(d.version)?11:10)||d.events.length!==(['web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(d.version)?14:10))throw Error('콘텐츠 수량 오류');
  validateCampaignData(d);
  validateEscortData(d);
  validateRegressionData(d);
- if(['web-v1.4','web-v1.5','web-v1.6','web-v1.7','web-v1.8'].includes(d.version))validateFamiliarCatalog(d);
+ if(['web-v1.4','web-v1.5','web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(d.version))validateFamiliarCatalog(d);
  else if(d.factions!==undefined||d.mentors.length!==4||MENTORS.some(expected=>!d.mentors.some(m=>m.id===expected.id&&m.origin===expected.origin)))throw Error('기존 스승 계약 오류');
- if(['web-v1.5','web-v1.6','web-v1.7','web-v1.8'].includes(d.version)&&!Number.isSafeInteger(d.enemies?.novice?.hpOverride))throw Error('초보 비무 생명력 정의 누락');
+ if(['web-v1.5','web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(d.version)&&!Number.isSafeInteger(d.enemies?.novice?.hpOverride))throw Error('초보 비무 생명력 정의 누락');
  for(const [key,enemy]of Object.entries(d.enemies??{}))if('hpOverride' in enemy){
-  if(!['web-v1.5','web-v1.6','web-v1.7','web-v1.8'].includes(d.version)||key!=='novice'||enemy.id!=='E-NOVICE'||enemy.mode!=='duel'||!Number.isSafeInteger(enemy.hpOverride)||enemy.hpOverride<=0)throw Error('초보 비무 생명력 정의 오류');
+  if(!['web-v1.5','web-v1.6','web-v1.7','web-v1.8','web-v1.9'].includes(d.version)||key!=='novice'||enemy.id!=='E-NOVICE'||enemy.mode!=='duel'||!Number.isSafeInteger(enemy.hpOverride)||enemy.hpOverride<=0)throw Error('초보 비무 생명력 정의 오류');
  }
  const effects=new Set(['npc','extra','heal','clue','randomStudy','battle','herb','insight','learn','breakthrough','resolveThreat','fame','debt']);
  for(const e of d.events){

@@ -1,3 +1,4 @@
+import {lobbyScreen,historyScreen,legacyScreen,newLifeConfirm,legacyBranch,legacyAcquired} from './lobby-ui.mjs';
 import {SaveStore} from './storage.mjs';
 import {publicView} from './engine.mjs';
 import {DATA} from './data.mjs';
@@ -21,6 +22,8 @@ let item=null,itemTab='weapon',itemConfirm=null,previousPage=null,returnFocus=nu
 let setup={name:'',trait:'random',inclination:'inner'},setupOrigin=null,configuring=false,startingNew=false;
 let mapOrigin=null,recapOpen=false,announcement=[];
 let loadoutDraft=null;
+let menu=['lobby'],legacyNotice=false;
+const menuCaller=page=>page==='history'?'[data-ui="lobby-history"]':page==='legacy'?'[data-ui="lobby-legacy"]':page==='setup'?'[data-ui="new-life-map"]':'[data-ui="lobby-continue"],[data-ui="new-life-map"]';
 const editingLocked=()=>busy||!!error||!!store.pending;
 const displayedLoadout=()=>store.pending?.command.type==='loadout'?store.pending.command:loadoutDraft??store.state.life.loadout;
 const btn=(text,action,cls='',extra='')=>{const id={skip:'UI-ICO-SKIP',slow:'UI-ICO-SLOW',cancel:'UI-ICO-BACK'}[action],a=id&&artAsset(id);return `<button class="${cls}" data-ui="${action}" ${extra}>${a?`<img class="button-icon" src="${esc(a.source)}" alt="" width="20" height="20">`:''}${esc(text)}</button>`;};
@@ -48,9 +51,12 @@ function updateReplaySpeed(){
 }
 function render(){
  stopScene();const start=performance.now();
- if(!store.state||startingNew){
+ const menuButton=document.querySelector('.brand [data-ui="lobby-open"]');menuButton.hidden=menu.length>0;menuButton.disabled=editingLocked();
+ if(menu.length){
   document.body.classList.remove('compact-home');
-  app.innerHTML=errors()+(error?'':setupScreen(setup,setupOrigin,configuring,startingNew,store.state?.meta.unlocks??[]));clarifyButtons(app);bind();return;
+  const page=menu.at(-1),body=page==='setup'?setupScreen(setup,setupOrigin,configuring,true,store.state?.meta.unlocks??[]):page==='confirm'?newLifeConfirm(store.state,setup):page==='history'?historyScreen(store.state):page==='legacy'?legacyScreen(store.state):lobbyScreen(store.state);
+  app.innerHTML=errors()+`<p class="save" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 시작 화면'}</p>`+(error&&!store.state?'':body);
+  clarifyButtons(app);bind();lockControls();return;
  }
  const v=publicView(store.state);
  const notice=!error&&!busy&&announcement.length&&v.phase!=='result'?`<aside class="change-notice" aria-label="저장된 상태 변화"><div><strong>상태 변화</strong><div class="result-tags">${changeTags(announcement)}</div></div>${btn('닫기','dismiss-notice','', 'aria-label="상태 변화 알림 닫기"')}</aside>`:'';
@@ -68,11 +74,12 @@ function render(){
  else if(v.phase==='journey')body=journeyScreen(v);
  else body=homeScreen(v,cleanHome?notice:'');
  document.body.classList.toggle('compact-home',cleanHome);
- app.innerHTML=errors()+`<p class="save${cleanHome?' visually-hidden':''}" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 기록 '+v.revision}</p>`+body+(cleanHome?'':notice);
- clarifyButtons(app,v,{queued:store.state.queue.length>0,itemConfirm});bind();if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),#loadout select,#loadout input').forEach(b=>b.disabled=true);
+ app.innerHTML=errors()+(legacyNotice?legacyAcquired():'')+`<p class="save${cleanHome?' visually-hidden':''}" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 기록 '+v.revision}</p>`+body+(cleanHome?'':notice);
+ clarifyButtons(app,v,{queued:store.state.queue.length>0,itemConfirm});bind();lockControls();
  const canvas=app.querySelector('canvas');if(canvas)replayBattle(canvas,v.result?.battle);
  document.documentElement.dataset.renderMs=(performance.now()-start).toFixed(2);
 }
+function lockControls(){if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),select,input').forEach(b=>b.disabled=true);}
 function bindSetup(form){
  form.addEventListener('change',()=>{
   const chosen=form.querySelector('[name="mentor"]:checked,input[type="hidden"][name="mentor"]');
@@ -86,11 +93,7 @@ function bindSetup(form){
  form.addEventListener('submit',async e=>{
   e.preventDefault();if(busy||error||!form.reportValidity()||!form.querySelector('[name="mentor"]:checked,input[type="hidden"][name="mentor"]'))return;
   setup={...setup,...Object.fromEntries(new FormData(form))};
-  const options={...setup,name:setup.name.trim()||'무명'};
-  if(startingNew){await perform({type:'newLife',options});return;}
-  busy=true;
-  try{await store.initialize({...options,seed:crypto.getRandomValues(new Uint32Array(1))[0]});error='';}catch(err){error=err.message;}
-  busy=false;render();focusPage();
+  menu.push('confirm');render();focusPage('[data-ui="new-life-back"]');
  });
 }
 function homeScreen(v,notice){
@@ -154,7 +157,7 @@ function journeyScreen(v){
 function eventScreen(v){
  const e=v.pending;
  return currency(v)+`<section class="card event-card">${e.id==='A-001'?image('UI-ILL-A001','event-art'):''}
- <h2>${esc(e.name)}</h2><p>${esc(e.text)}</p>
+ <h2>${esc(e.name)}</h2><p>${esc(e.text)}</p>${legacyBranch(store.state)}
  ${e.escortContract?`<p class="ec-choice-note"><strong>${esc(e.escortContract.rankName)}의 판단</strong> · 약정 기본 보수 ${e.escortContract.baseReward} 재화<br>기간은 선택 즉시, 보수·책임·인연은 호송 완수 때 반영합니다.</p>`:''}
  <div class="choices">${e.choices.map(c=>`<div class="event-choice">${c.risk?battleRisk(c.risk):''}<button class="wide${c.memory?' rm-choice':''}" ${c.memory?'data-memory="true"':''} data-ui="${c.risk&&c.risk.mode!=='duel'?'confirm-event':'choose'}" data-id="${esc(c.id)}" ${c.allowed?'':'disabled'}>${esc(c.label)}
  ${escortChoiceInfo(c)}
@@ -225,9 +228,10 @@ async function perform(command){
  announcement=[];
  busy=true;render();
  try{
-  const beforeBattle=store.state?.result?.battle?.id;
+  const beforeBattle=store.state?.result?.battle?.id,ownedBefore=store.state?.meta.legacy?.earned.length??0;
   await store.dispatch({...command,id:crypto.randomUUID()});
   committed(command);
+  if((store.state.meta.legacy?.earned.length??0)>ownedBefore)legacyNotice=true;
   collectAnnouncement();
   const changedBattle=store.state?.result?.battle?.id&&store.state.result.battle.id!==beforeBattle;
   if(['startAction','choose','rejuvenate','campaignChoose'].includes(command.type)&&store.state.phase==='journey'&&!changedBattle){
@@ -258,13 +262,13 @@ function focusPage(selector='h2'){
  }
 }
 function committed(command){
- const type=command.type;
+ const type=['restartLife','initialize'].includes(command.type)?'newLife':command.type;
  if(type==='ack'||type==='startAction'||type==='acceptOffer'||type==='newLife'||type==='rejuvenate'||type==='campaignChoose'){currentTab='home';group=null;}
  if(type==='ack'&&command.destination&&store.state.phase==='home'){
   if(['record','inventory'].includes(command.destination))currentTab=command.destination;else group=command.destination;
  }
  if(type==='offerDecision'&&command.decision==='defer'){currentTab='home';group=null;}
- if(type==='newLife'){item=null;itemConfirm=null;mapOrigin=null;recapOpen=false;startingNew=false;configuring=false;}
+ if(type==='newLife'){menu=[];legacyNotice=false;battleConfirm=null;item=null;itemConfirm=null;mapOrigin=null;recapOpen=false;startingNew=false;configuring=false;}
  if(['loadout','newLife','startAction','acceptOffer'].includes(type))loadoutDraft=null;
  if(['retire','finish','rejuvenate','declineGrace','newLife'].includes(type))review=null;
  if(type==='startAction'||type==='choose')battleConfirm=null;
@@ -278,6 +282,7 @@ function focusSelector(el){
 }
 function bind(){
  app.onkeydown=e=>{
+  if(e.key==='Escape'&&menu.length>1&&!editingLocked()){e.preventDefault();const previous=menu.at(-1);if(previous==='confirm')menu.pop();else{menu=['lobby'];startingNew=false;configuring=false;}render();focusPage(previous==='confirm'?'#setup button[type="submit"]':menuCaller(previous));return;}
   if(e.key==='Escape'&&battleConfirm&&!busy&&!error){e.preventDefault();app.querySelector('[data-ui="battle-cancel"]')?.click();}
  };
  const setupForm=app.querySelector('#setup');if(setupForm)bindSetup(setupForm);
@@ -307,11 +312,21 @@ function bind(){
  app.querySelector('#battle-round')?.addEventListener('change',e=>{const canvas=app.querySelector('canvas');replayBattle(canvas,store.state.result.battle,{round:Number(e.target.value),speed:Number(canvas.dataset.speed)||1});});
  app.querySelectorAll('[data-ui]').forEach(el=>el.addEventListener('click',async()=>{
   const a=el.dataset.ui,id=el.dataset.id;
-  if(a==='retry'){if(busy)return;let retried;try{busy=true;error='';retried=store.pending.command;await store.retry();committed(retried);collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
-  if(a==='reload'){if(busy)return;try{busy=true;store.blocked=null;store.pending=null;await (store.db?store.read():store.open());error='';item=null;battleConfirm=null;review=null;announcement=[];loadoutDraft=null;if(store.state?.phase!=='ended')startingNew=false;}catch(e){error=e.message;}finally{busy=false;render();focusPage();}return;}
+  if(a==='retry'){if(busy)return;let retried;const earnedBefore=store.state?.meta.legacy?.earned.length??0;try{busy=true;error='';retried=store.pending.command;await store.retry();committed(retried);if((store.state.meta.legacy?.earned.length??0)>earnedBefore)legacyNotice=true;collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
+  if(a==='reload'){if(busy)return;try{busy=true;store.blocked=null;store.pending=null;await (store.db?store.read():store.open());error='';item=null;battleConfirm=null;review=null;announcement=[];loadoutDraft=null;menu=['lobby'];startingNew=false;configuring=false;}catch(e){error=e.message;}finally{busy=false;render();focusPage();}return;}
   if(error||busy)return;
   announcement=[];document.querySelector('#change-status').textContent='';
-  if(a==='school'){
+  if(a==='lobby-open'||a==='lobby-back'){const previous=menu.at(-1);menu=['lobby'];startingNew=false;configuring=false;render();focusPage(menuCaller(previous));}
+  else if(a==='lobby-continue'){menu=[];render();focusPage();}
+  else if(a==='lobby-history'||a==='lobby-legacy'){menu=['lobby',a.slice(6)];render();focusPage();}
+  else if(a==='legacy-dismiss'){legacyNotice=false;render();focusPage();}
+  else if(a==='new-life-back'){menu.pop();render();focusPage('#setup button[type="submit"]');}
+  else if(a==='new-life-confirm'){
+   const options={...setup,name:setup.name.trim()||'무명'};
+   if(store.state)await perform({type:'restartLife',options});
+   else{busy=true;render();try{await store.initialize({...options,seed:crypto.getRandomValues(new Uint32Array(1))[0]});committed({type:'initialize'});}catch(e){error=e.message;}finally{busy=false;render();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':'h2');}}
+  }
+  else if(a==='school'){
    if(!store.state||startingNew)setupOrigin=id;
    else mapOrigin=id;
    render();focusPage(focusSelector(el));
@@ -330,9 +345,9 @@ function bind(){
    setup={...setup,...Object.fromEntries(new FormData(el.closest('form')))};
    configuring=false;render();focusPage(`[data-ui="school"][data-id="${setupOrigin}"]`);
   }
-  else if(a==='setup-cancel'){startingNew=false;configuring=false;render();focusPage('[data-ui="new-life-map"]');}
+  else if(a==='setup-cancel'){menu=['lobby'];startingNew=false;configuring=false;render();focusPage('[data-ui="new-life-map"]');}
   else if(a==='new-life-map'){
-   setup={name:'',trait:'random',inclination:'inner'};setupOrigin=null;configuring=false;startingNew=true;render();focusPage();
+   setup={name:'',trait:'random',inclination:'inner'};setupOrigin=null;configuring=false;startingNew=true;menu=['lobby','setup'];render();focusPage();
   }
   else if(a==='start-action')perform({type:'startAction',action:id,target:el.dataset.target});
   else if(a==='guide-next')perform({type:'ack',destination:id,guideRead:publicView(store.state).guidance.active});
@@ -423,8 +438,9 @@ function bind(){
  });
 }
 const art=await loadArt();document.documentElement.dataset.art=art.ready?art.revision:'fallback';
+document.querySelector('.brand [data-ui="lobby-open"]').addEventListener('click',()=>{if(editingLocked())return;menu=['lobby'];startingNew=false;configuring=false;render();focusPage('[data-ui="lobby-continue"]');});
 document.querySelector('footer .muted').textContent=art.errors.length?'일부 아트를 읽지 못해 대체 표현을 사용합니다. 게임 결과와 저장은 유지됩니다.':'도트 시트·네 검법의 PixelFX PNG 효과 연결 · 출처와 고지를 자산 폴더에 보존했습니다.';
 try{await store.open();}catch(e){error=e.message;store.blocked=e;}
-render();
+render();focusPage('[data-ui="lobby-continue"],[data-ui="new-life-map"]');
 
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!editingLocked()&&app.querySelector('[data-ui=campaign-skip]')){event.preventDefault();perform({type:'ack'});}});
