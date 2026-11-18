@@ -2,7 +2,7 @@ import {VERSION,PLAY_VERSION,INVENTORY_VERSION} from './data.mjs';
 
 const integer = (n,min,max=Number.MAX_SAFE_INTEGER) => Number.isSafeInteger(n)&&n>=min&&n<=max;
 const requireItem = (condition,message) => {if(!condition)throw Error(message);};
-export const hasInventory = state => [INVENTORY_VERSION.rules,PLAY_VERSION.rules,VERSION.rules].includes(state.versions.rules);
+export const hasInventory = state => [INVENTORY_VERSION.rules,PLAY_VERSION.rules,'web-v1.3',VERSION.rules].includes(state.versions.rules);
 const herbId = 'CON-HERB';
 
 export function startInventory(state) {

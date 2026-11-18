@@ -5,6 +5,8 @@ import {hasQi,startQi,validateQi,maxQi,maxHp,qiView,qiDistribution,skillCost,qiR
 import {hasGuidance,startGuidance,validateGuidance,learnedGuidance,battleGuidance,practiceGuidance,manageGuidance,guidanceView} from './guidance.mjs';
 import {hasStory,startStory,validateStory,requireOffer,acceptOffer,decideOffer,storyCompletion,closeStory,storyView,savedStoryView} from './story.mjs';
 import {startActionSummary,recordActionSummary,actionSummary,validateActionSummaries} from './action-summary.mjs';
+import {withRegressionMemory} from './regression-data.mjs';
+import {hasRegressionMemory,startRegressionMemory,canUseMemory,validateRegressionMemory,regressionView,memoryResultView} from './regression.mjs';
 import {hasEscort,startEscort,beginEscort,dueEscortEvent,markEscortEvent,chooseEscort,settleEscort,interruptEscort,validateEscort,escortSnapshot,escortView,savedEscortView,escortRecordView} from './escort.mjs';
 const clone=x=>structuredClone(x);
 const legacyOriginLabels=[{id:'P-01',name:'정파 문중'},{id:'S-01',name:'사파 방파'}];
@@ -80,7 +82,9 @@ export function newGame(options={},previous=null){
   requireThat(previous,'회귀할 생애가 없습니다.');
   const old=previous.life;
   requireThat((!options.origin||options.origin===old.origin)&&(!options.mentor||options.mentor===old.mentor),'회귀는 원래 출신과 사부를 유지합니다.');
-  return createGame({...options,origin:old.origin,mentor:old.mentor},previous,previous.versions,previous.content);
+  const bridge=previous.versions.content==='web-v1.6';
+  const version=bridge?{...previous.versions,content:'web-v1.7',presentation:'web-v1.7',rules:'web-v1.4',regressionMemory:1}:previous.versions;
+  return createGame({...options,origin:old.origin,mentor:old.mentor},previous,version,bridge?withRegressionMemory(previous.content):previous.content);
  }
  return createGame(options,previous,VERSION,DATA);
 }
@@ -109,6 +113,7 @@ function createGame(options,previous,version,data){
  startGuidance(s);
  startStory(s);
  startEscort(s);
+ startRegressionMemory(s,previous,!!options.regress);
  note(s,options.regress?'기억을 품고 새 생애를 시작했다. 실력과 배움은 다시 쌓아야 한다.':'삼재검법으로 강호의 첫걸음을 내디뎠다.');
  validateState(s);return s;
 }
@@ -118,7 +123,8 @@ export function validateState(s){
  const inventory=v?.rules===INVENTORY_VERSION.rules&&v.save===2&&v.content===INVENTORY_VERSION.content;
  const qiVersion=v?.save===2&&v.qi===1&&(
   v.rules===PLAY_VERSION.rules&&(v.content===PLAY_VERSION.content&&v.factions===undefined||['web-v1.4','web-v1.5'].includes(v.content)&&v.factions===1)||
-  v.rules===VERSION.rules&&v.content===VERSION.content&&v.factions===1&&v.escortCareer===1);
+  v.rules==='web-v1.3'&&v.content==='web-v1.6'&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===undefined||
+  v.rules===VERSION.rules&&v.content===VERSION.content&&v.factions===1&&v.escortCareer===1&&v.regressionMemory===1);
  requireThat((legacy&&[1,2].includes(v.save)&&v.inventory===undefined)||
   inventory||qiVersion,'호환되지 않는 저장 버전입니다. 원본은 보존됩니다.');
  requireThat(s.versions.recap===undefined||s.versions.recap===1,'호환되지 않는 회고 버전입니다. 원본은 보존됩니다.');
@@ -156,6 +162,7 @@ export function validateState(s){
  validateStory(s);
  validateActionSummaries(s);
  validateEscort(s);
+ validateRegressionMemory(s);
  return true;
 }
 export function migrateSave(state){
@@ -185,6 +192,7 @@ function finishLife(s,cause,weapon=null){
  if(weapon)record.finalWeapon=clone(weapon);
  if(hasStory(s))record.story=clone(l.story);
  if(hasEscort(s)&&l.escortCareer.joinedMonth!==null)record.escortCareer=clone(l.escortCareer);
+ if(hasRegressionMemory(s))record.regressionMemory=clone(l.regressionMemory);
  if(!s.meta.history.some(x=>x.id===l.id))s.meta.history.push(record);
  note(s,cause==='battle'?'전투에서 생애를 마쳤다.':'자연의 흐름 속에 생애를 마쳤다.');
 }
@@ -196,7 +204,7 @@ function naturalBoundary(s,candidate=null){
  else finishLife(s,'natural');return true;
 }
 function event(s,id,token=id){const e=s.content.events.find(x=>x.id===id);requireThat(e,'없는 사건');s.pending={id,token,month:s.life.month};s.phase='event';addUnique(s.life.occurrences,token);if(id==='V-004'){s.life.breakthroughOffers??=[];s.life.breakthroughOffers.push({targetRealm:s.life.realm+1,token,offeredMonth:s.life.month});}addUnique(s.meta.clues,e.name);note(s,e.name+' — 새로운 선택을 마주했다.');}
-function canChoose(l,choice){return !choice.requires||(choice.requires==='mediation'?l.fame>=4&&l.npc>=3:choice.requires==='inner'?l.foundation.inner>=20000:l.assists.includes(choice.requires));}
+function canChoose(l,choice){return canUseMemory(l,choice)&&(!choice.requires||(choice.requires==='mediation'?l.fame>=4&&l.npc>=3:choice.requires==='inner'?l.foundation.inner>=20000:l.assists.includes(choice.requires)));}
 function canBreak(s){const l=s.life;return l.realm<4&&l.xp>=THRESHOLDS[l.realm+1]*1000&&l.insight&&s.active?.breakDeclined!==l.realm;}
 function maybeBreak(s){if(canBreak(s)){event(s,'V-004',`${s.life.id}/realm-${s.life.realm+1}/action-${s.active.key}`);return true;}return false;}
 function worldAtBoundary(s){
@@ -510,7 +518,7 @@ export function publicView(s){
  const l=s.life;
  const view={revision:s.revision,phase:s.phase,name:l.name,origin:l.origin,mentor:s.content.mentors.find(x=>x.id===l.mentor),age:16+Math.floor(l.month/12),season:['봄','여름','가을','겨울'][Math.floor(l.month%12/3)],worldYear:Math.floor(l.month/12)+1,realm:REALMS[l.realm],realmIndex:l.realm,xp:Math.floor(l.xp/1000),money:l.money,fame:l.fame,trust:l.trust,npc:l.npc,body:l.injury===2?'심한 부상':l.injury===1?'가벼운 상처':'안정',warning:l.injury===2?'몸을 돌보며 도전에 신중할 때입니다.':(16+Math.floor(l.month/12))>=50?'몸이 예전 같지 않습니다. 긴 수련은 부담이 됩니다.':'강호의 일에는 늘 변수가 따릅니다.',trait:l.traitKnown?l.trait:'아직 알아차리지 못한 체질',rejuvenated:l.rejuvenated,canRejuvenate:!l.ending&&!l.rejuvenated&&l.breakthroughs.length>=2,canRetire:originRoute(s.content,l.origin)==='orthodox'&&l.realm>=2&&l.world.resolved&&!l.debt.length,success:l.success,ending:l.ending,skills:Object.entries(l.skills).map(([id,value])=>({...s.content.skills.find(x=>x.id===id),mastery:Math.floor(value/1000)})),loadout:clone(l.loadout),assists:l.assists.map(x=>ASSISTS[x]),actions:s.content.actions.map(x=>({...x,targets:allowedTargets(s,x.id),risk:risk(s,x.id==='ACT-09'?'rival':'novice')})),active:s.active?{id:s.active.id,name:s.content.actions.find(x=>x.id===s.active.id).name,elapsed:s.active.elapsed,duration:s.active.duration}:null,pending:s.pending?{...s.content.events.find(x=>x.id===s.pending.id),choices:s.content.events.find(x=>x.id===s.pending.id).choices.map(x=>({id:x.id,label:x.label,allowed:canChoose(l,x),reason:x.requires==='mediation'?'명성4 · 인연3 필요':x.requires?`${ASSISTS[x.requires]} 필요`:''}))}:null,result:clone(s.result),log:clone(l.log),debt:clone(l.debt),threat:{occurred:l.world.occurred,resolved:l.world.resolved},quest:l.quest,unlocks:clone(s.meta.unlocks),clues:clone(s.meta.clues),history:clone(s.meta.history),regression:l.regression};
  // Internal boundary facts never enter the display model, including historical records.
- view.history=s.meta.history.map(({recap,story,escortCareer,...record})=>({...record,...historyNames(record,s.content),...(story?{story:savedStoryView(story,s.content.story)}:{}),...(escortCareer?{escortCareer:savedEscortView(escortCareer)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
+ view.history=s.meta.history.map(({recap,story,escortCareer,regressionMemory,...record})=>({...record,...historyNames(record,s.content),...(story?{story:savedStoryView(story,s.content.story)}:{}),...(escortCareer?{escortCareer:savedEscortView(escortCareer)}:{}),...(record.cause==='natural'&&recap?.schemaVersion===1&&recap.quoteKey===RECAP_QUOTE_KEY?{recapQuote:RECAP_QUOTE}:{})}));
  view.recapQuote=s.phase==='ended'?view.history.find(x=>x.id===l.id)?.recapQuote||null:null;
  view.ageMonths=l.month%12;
  view.changes=clone(l.changes??[]);
@@ -529,6 +537,8 @@ export function publicView(s){
  view.qi=qiView(s);
  view.guidance=guidanceView(s);
  view.story=storyView(s);
+ view.regressionMemory=regressionView(s);
+ view.memoryResult=memoryResultView(s);
  if(hasEscort(s)){
   view.escortCareer=escortView(s);
   const escort=view.actions.find(a=>a.id==='ACT-04');escort.name=view.escortCareer.joined?view.escortCareer.rank+' · 상단 호송':'상단 호송';escort.desc=view.escortCareer.mission;escort.completionMoney=view.escortCareer.reward;
@@ -550,7 +560,7 @@ export function publicView(s){
  view.knowsMentorSkill=l.skills[view.mentor.skill]!==undefined;
  view.knowsMentorAssist=l.assists.includes(view.mentor.assist);
  if(view.result?.itemGains)view.result.itemGains=view.result.itemGains.map(({name,quantity})=>({name,quantity}));
- if(view.pending){for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);c.extraMonths=definition.effects.filter(([type])=>type==='extra').reduce((sum,[,months])=>sum+months,0);}}
+ if(view.pending){view.pending.choices=view.pending.choices.filter(c=>canUseMemory(l,s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id)));for(const c of view.pending.choices){const definition=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id);const battle=definition.effects.find(x=>x[0]==='battle');if(battle)c.risk=risk(s,battle[1]);c.extraMonths=definition.effects.filter(([type])=>type==='extra').reduce((sum,[,months])=>sum+months,0);if(definition.requiresMemory)c.memory=view.regressionMemory.carried.find(m=>m.id===definition.requiresMemory);}}
  if(view.pending?.special==='escortCareer'){
   view.pending.escortContract=escortRecordView(s.active.escortCareer);
   for(const c of view.pending.choices){const d=s.content.events.find(e=>e.id===view.pending.id).choices.find(x=>x.id===c.id).escort;c.escort={finalReward:s.active.escortCareer.baseReward+d.rewardDelta,rewardDelta:d.rewardDelta,npcGain:d.npcGain,fameGain:d.fameGain,responsibility:d.milestone?s.content.escortCareer.ranks.find(r=>r.milestone===d.milestone).responsibility:null};}

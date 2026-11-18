@@ -1,4 +1,5 @@
 import {esc,number} from './experience.mjs';
+import {memoryBenefit,memoryResultSources} from './regression-ui.mjs';
 const response=r=>r?`<div class="ec-reaction"><strong>${esc(r.name)}</strong><p>${esc(r.text)}</p></div>`:'';
 export function escortProgress(c){
  if(!c?.joined)return '';
@@ -16,16 +17,17 @@ export function escortJourney(v){
 export function escortChoiceInfo(c){
  if(!c.escort)return c.extraMonths?`<small>기간 +${c.extraMonths}개월</small>`:'';
  return `<strong class="ec-choice-cost">추가 ${c.extraMonths}개월 · 완수 보수 ${c.escort.finalReward} 재화</strong>
- <small>${c.escort.rewardDelta<0?`지원·인계 비용 ${-c.escort.rewardDelta} 공제`:c.escort.rewardDelta>0?`보수 ${c.escort.rewardDelta} 추가`:'보수 조정 없음'}${c.escort.responsibility?' · '+esc(c.escort.responsibility)+' 기록':' · 승진 책임 추가 없음'}${c.escort.npcGain?' · 인연 +'+c.escort.npcGain:''}${c.escort.fameGain?' · 명성 +'+c.escort.fameGain:''}</small>`;
+ <small>${c.escort.rewardDelta<0?`지원·인계 비용 ${-c.escort.rewardDelta} 공제`:c.escort.rewardDelta>0?`보수 ${c.escort.rewardDelta} 추가`:'보수 조정 없음'}${c.escort.responsibility?' · '+esc(c.escort.responsibility)+' 기록':' · 승진 책임 추가 없음'}${c.escort.npcGain?' · 추가 인연 +'+c.escort.npcGain:''}${c.escort.fameGain?' · 추가 명성 +'+c.escort.fameGain:''}</small>${c.memory?`<small class="rm-choice-benefit">‘${esc(c.memory.baselineChoice)}’ 대비 추가 ${c.memory.monthsSaved} → 0개월</small>`:''}`;
 }
 export function escortResult(v){
  const r=v.result?.escortCareer;if(!r)return '';
  return `<section class="ec-result" aria-label="호송 정산과 경력"><p class="kicker">${esc(r.rankName)}의 임무 완료</p><h3>${esc(r.mission)}</h3>
- <div class="ec-current-pay"><span>이번 호송에서 받은 보수</span><strong>${number(r.actualReward)} 재화</strong><p>출발 약정 ${r.baseReward} · 선택 조정 ${r.choice.rewardDelta>0?'+':''}${r.choice.rewardDelta} · 실제 ${r.elapsed}개월</p></div>
+ <div class="ec-current-pay"><span>이번 호송에서 받은 보수</span><strong>${number(r.actualReward)} 재화</strong><p>출발 약정 ${r.baseReward} · 선택 조정 ${r.choice.rewardDelta>0?'+':''}${r.choice.rewardDelta}${v.memoryResult?'':` · 실제 ${r.elapsed}개월`}</p>${v.memoryResult?`<p><strong>실제 ${r.elapsed}개월</strong></p><p>${v.memoryResult.responsibility?esc(v.memoryResult.responsibility)+' 기록 · ':''}명성 +${v.memoryResult.fameGain} · 인연 +${v.memoryResult.npcGain}</p>`:''}</div>
+ ${memoryBenefit(v)}
  ${r.promotion?`<p class="ec-promotion"><strong>${esc(r.promotion.from)} → ${esc(r.promotion.to)} 승진</strong></p>`:''}
  ${r.promotion||r.actualReward!==v.escortCareer.reward?`<div class="ec-future-pay"><p>다음 호송의 기본 보수 <strong>${v.escortCareer.reward} 재화</strong></p><p>${esc(v.escortCareer.mission)}</p><p>다음 호송부터 적용됩니다.</p></div>`:''}
  <p>이번 생애 호송 총 완수 <strong>${r.totalCompleted-1} → ${r.totalCompleted}회</strong></p>${escortProgress(v.escortCareer)}
- ${response(r.promotion?.reaction??r.reaction)}${r.promotion?`<details><summary>이번 선택에 대한 반응</summary>${response(r.reaction)}</details>`:''}</section>`;
+ ${response(r.promotion?.reaction??r.reaction)}${r.promotion?`<details><summary>이번 선택에 대한 반응</summary>${response(r.reaction)}</details>`:''}${memoryResultSources(v)}</section>`;
 }
 export function escortHistory(v){
  const c=v.escortCareer;if(!c||c.joined===false||!c.rank)return '';

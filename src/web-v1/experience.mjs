@@ -1,6 +1,7 @@
 import {artAsset} from './art.mjs';
 import {ECONOMY} from './data.mjs';
 import {nextGoal} from './upgrade-model.mjs';
+import {homeMemories,escortMemoryHint} from './regression-ui.mjs';
 
 export const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export const number=value=>new Intl.NumberFormat('ko-KR',{maximumFractionDigits:20}).format(value);
@@ -59,6 +60,7 @@ export function actionCard(v,a,{recommended=false,target}={}){
  return `<div class="action-card">${recommended?'':`<h3>${image('UI-ICO-'+a.id,'menu-icon')}${esc(a.name)}</h3>`}
  ${recommended?'':`<p>${esc(a.desc)}</p>`}
  ${a.id==='ACT-04'&&v.escortCareer?`<p class="ec-entry">${v.escortCareer.joined?'출발 때의 직위와 기본 보수로 약정합니다.':'첫 호송을 시작하면 신입 표사 경력이 시작됩니다.'} 중간 판단에 따라 기간과 정산이 달라집니다.</p>`:''}
+ ${a.id==='ACT-04'&&!recommended?escortMemoryHint(v):''}
  <p class="action-cost"><strong>${a.months}개월 · 선지출 ${cost} 재화${reward?` · 완료 보수 ${reward} 재화`:''}</strong></p>
  ${a.id==='ACT-05'&&!cost?'<p class="notice">무료 휴식으로는 심한 부상을 치료할 수 없습니다.</p>':''}
  ${directRisk?battleRisk(directRisk):a.id==='ACT-09'||recommended?'':'<p class="muted">돌발 사건의 위험은 대응 전에 안내합니다.</p>'}
@@ -123,7 +125,7 @@ export function home(v,notice=''){
   ${v.age>=50&&v.body!=='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
   ${next.group==='duel'&&v.guidance?.practiceSuggested?'<p>교류 비무는 패배해도 생존합니다. 부상을 입을 수 있습니다.</p>':''}
   ${next.action?actionCard(v,v.actions.find(a=>a.id===next.action),{recommended:true,target:next.target}):`<button class="primary wide" ${attrs}>${next.label}</button>`}</section>${notice}
-  <section class="activity-grid" aria-label="활동 분류">${groups.map(g=>
+  ${homeMemories(v)}<section class="activity-grid" aria-label="활동 분류">${groups.map(g=>
    `<button data-ui="group" data-id="${g.id}">${image(g.icon,'menu-icon')}<span>${g.name}${g.id==='world'&&v.story?.offered?'<span class="offer-badge">새 제안</span>':''}</span></button>`).join('')}</section>`+
   bottomNav('home');
 }

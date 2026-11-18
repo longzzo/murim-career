@@ -45,7 +45,7 @@ export function clarifyButtons(root,v=null,{queued=false,itemConfirm=null}={}){
   else if(a==='choose'||a==='confirm-event'){
    // Preserve the choice's cost, duration and disabled explanation.
    const text=[...b.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
-   if(text){const label=text.textContent.trim()+(a==='confirm-event'?' · 위험 확인':'');text.replaceWith(emoji(a==='confirm-event'?'⚠️':'💬'),span('bc-label',label));}
+   if(text){const label=text.textContent.trim()+(a==='confirm-event'?' · 위험 확인':'');text.replaceWith(emoji(a==='confirm-event'?'⚠️':b.dataset.memory?'🧠':'💬'),span('bc-label',label));}
    intent(b,a==='choose'?'choice':'preview-risk');
   }else if(['ack','result-next','guide-next','story-next'].includes(a)){
    const dest=a==='ack'?'home':a==='story-next'?'world':id,[icon,name]=destinations[dest];
@@ -69,5 +69,5 @@ export function clarifyButtons(root,v=null,{queued=false,itemConfirm=null}={}){
  const next=root.querySelector('[data-ui="result-next"]')??root.querySelector('[data-ui="ack"]');if(next)next.classList.add('primary');
  const advance=root.querySelector('[data-ui="advance"]');
  if(advance){const hint=document.createElement('p');hint.className='muted bc-caption';hint.textContent='다음 사건이나 결과까지 진행합니다.';advance.after(hint);}
- for(const d of root.querySelectorAll('.ec-result details')){const summary=d.querySelector('summary');const update=()=>{summary.textContent=d.open?'선택 반응 접기':'선택 반응 보기';};update();d.addEventListener('toggle',update);}
+ for(const d of root.querySelectorAll('.ec-result details:not(.rm-sources)')){const summary=d.querySelector('summary');const update=()=>{summary.textContent=d.open?'선택 반응 접기':'선택 반응 보기';};update();d.addEventListener('toggle',update);}
 }

@@ -12,6 +12,7 @@ import {storyPanel,promiseHistory,storyResult} from './story-ui.mjs';
 import {loadoutPreview} from './upgrade-model.mjs';
 import {wholeSummary,combatSummary,nextPanel,configurationSummary} from './upgrade-ui.mjs';
 import {escortJourney,escortChoiceInfo,escortResult,escortHistory,escortEnding} from './escort-ui.mjs';
+import {regressionPreview,memorySources,memoryBenefit} from './regression-ui.mjs';
 import {clarifyButtons,labelButton} from './button-ui.mjs';
 const app=document.querySelector('#app'),store=new SaveStore();
 let busy=false,error='',battleConfirm=null,currentTab='home',group=null,review=null;
@@ -153,9 +154,9 @@ function eventScreen(v){
  return currency(v)+`<section class="card event-card">${e.id==='A-001'?image('UI-ILL-A001','event-art'):''}
  <h2>${esc(e.name)}</h2><p>${esc(e.text)}</p>
  ${e.escortContract?`<p class="ec-choice-note"><strong>${esc(e.escortContract.rankName)}의 판단</strong> · 약정 기본 보수 ${e.escortContract.baseReward} 재화<br>기간은 선택 즉시, 보수·책임·인연은 호송 완수 때 반영합니다.</p>`:''}
- <div class="choices">${e.choices.map(c=>`<div class="event-choice">${c.risk?battleRisk(c.risk):''}<button class="wide" data-ui="${c.risk&&c.risk.mode!=='duel'?'confirm-event':'choose'}" data-id="${esc(c.id)}" ${c.allowed?'':'disabled'}>${esc(c.label)}
+ <div class="choices">${e.choices.map(c=>`<div class="event-choice">${c.risk?battleRisk(c.risk):''}<button class="wide${c.memory?' rm-choice':''}" ${c.memory?'data-memory="true"':''} data-ui="${c.risk&&c.risk.mode!=='duel'?'confirm-event':'choose'}" data-id="${esc(c.id)}" ${c.allowed?'':'disabled'}>${esc(c.label)}
  ${escortChoiceInfo(c)}
- ${c.allowed?'':`<small>${esc(c.reason)}</small>`}</button></div>`).join('')}</div>${inspectInventory()}</section>`;
+ ${c.allowed?'':`<small>${esc(c.reason)}</small>`}</button></div>`).join('')}</div>${e.choices.some(c=>c.memory)?`<p class="rm-hint">기억은 이 선택의 추가 기간만 줄입니다. 기본 호송 기간과 다른 돌발 사건의 시간은 그대로입니다.</p>${memorySources(e.choices.filter(c=>c.memory).map(c=>c.memory))}`:''}${inspectInventory()}</section>`;
 }
 function battlePanel(v){
  if(v.result.battle.resources)return resourceBattlePanel(v.result.battle,btn);
@@ -198,18 +199,21 @@ function graceScreen(v){
 function endedScreen(v){
  const ending={natural:'자연의 흐름으로 생애가 끝났습니다.',battle:'전투에서 생애가 끝났습니다.',retired:'스스로 이 생애를 마무리했습니다.'}[v.ending];
  const battle=v.ending==='battle'?v.result?.battle:null,record=v.history.at(-1);
+ const finalEscort=v.result?.escortCareer,finalAction=record?.actionSummary,endedMonth=(v.age-16)*12+v.ageMonths;
+ const acquiredAtEnd=v.ending==='natural'&&v.memoryResult?.acquired&&finalEscort?.status==='completed'&&finalEscort.endedMonth===endedMonth&&
+  finalAction?.actionId==='ACT-04'&&finalAction.status==='complete'&&finalAction.lifeId===record.id&&finalAction.startMonth+finalAction.elapsed===endedMonth&&v.result.actionId==='ACT-04'&&v.result.actionKey===record.id+'/'+finalAction.actionKey;
  const lastAction=record?.lastAction??(v.result?.actionId?v.actions.find(a=>a.id===v.result.actionId)?.name:null);
  if(!recapOpen)return currency(v)+`<section class="card ending"><h2>생애의 마침표</h2>
  ${lastAction?`<p>마지막 행동 · ${esc(lastAction)}</p>`:''}
   ${battle?`<h3>${esc(battle.enemy)} · ${outcomes[battle.outcome]}</h3>`:''}
- <p class="notice">${ending}</p>${escortEnding(v)}${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
+ <p class="notice">${ending}</p>${escortEnding(v)}${acquiredAtEnd?memoryBenefit(v):''}${wholeSummary(record?.actionSummary)}${btn('회고 보기','open-recap','primary wide')}${battle?combatSummary(battle)+battlePanel(v):''}</section>`;
  return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>${esc(v.originName)} · ${esc(v.mentor.name)}</p><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
  <p>${v.success==='retirement'?'금분세수의 성공을 남겼습니다.':v.success==='conquest'?'승리하고 생존해 정복의 성공을 남겼습니다.':'발견과 해금은 다음 생애에도 남습니다.'}</p></section>
  ${v.recapQuote?`<blockquote class="notice">${esc(v.recapQuote)}</blockquote>`:''}
  ${escortEnding(v)}
- <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 새 생애는 새 문파 목록에서 선택하고, 회귀는 원래 출신·사부·규칙을 유지합니다. 능력과 재화는 새로 시작합니다.</p>
+ <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 새 생애는 새 문파 목록에서 선택하고, 회귀는 원래 출신·사부·체질과 기존 전투·수련을 유지합니다. 능력과 재화는 새로 시작합니다. 호송 기억의 이점은 회귀 조건에서 확인할 수 있습니다.</p>
  <div class="choices">${btn('새 생애 · 문파 고르기','new-life-map','primary')}${btn('기억을 품고 회귀','review-regression')}${btn('마지막 순간 돌아보기','close-recap')}</div>
- ${review==='regression'?`<section class="item-confirm"><h3>이 생애의 기억을 품고 회귀할까요?</h3><div class="row">${btn('돌아가기','cancel-regression')}${btn('회귀 확정','regress','primary')}</div></section>`:''}</section>
+ ${review==='regression'?`<section class="item-confirm"><h3>이 생애의 기억을 품고 회귀할까요?</h3>${regressionPreview(v)}<div class="row">${btn('돌아가기','cancel-regression')}${btn('회귀 확정','regress','primary')}</div></section>`:''}</section>
  ${changeHistory(v)}<details class="card recap-details"><summary>기억할 선택과 인연</summary>${escortHistory(record??{})}${promiseHistory({story:record?.story})}${logs(v)}</details>`;
 }
 function logs(v){return `<ul class="log">${v.log.slice(-40).reverse().map(x=>`<li><small>${16+Math.floor(x.month/12)}세 ${x.month%12}개월</small>${esc(x.text)}</li>`).join('')}</ul>`;}

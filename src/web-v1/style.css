@@ -189,3 +189,14 @@ button[aria-pressed="true"][data-intent="navigate"],button[aria-pressed="true"][
 /* BC-ART-01: only these choices need wider columns as text grows. */
 .story-actions{grid-template-columns:repeat(auto-fit,minmax(min(100%,12em),1fr))}
 .battle-confirm>.row>button,.item-confirm>.row:has(>[data-ui="cancel-regression"])>button{flex:1 1 10em;min-width:min(100%,10em)}
+/* REG-01: compact memory disclosure and the current choice's concrete benefit. */
+.rm-home{margin:12px 0;padding:4px 12px;border:1px solid #c4d6ce;border-radius:10px;background:#fff}
+.rm-review,.rm-home,.rm-benefit,.rm-sources,.rm-hint,.rm-choice{min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.rm-home summary,.rm-review summary,.rm-sources summary{min-height:44px;padding:10px 0;cursor:pointer;font-weight:650}
+.rm-list{display:grid;gap:10px;list-style:none;padding:0;margin:12px 0}
+.rm-list>li{min-width:0;border:1px solid #c4d6ce;border-radius:10px;padding:12px}
+.rm-list h3{font-size:1rem;margin:0}.rm-list p{margin:6px 0 0}.rm-condition{font-weight:650;color:#345a54}
+.rm-count,.rm-list strong,.rm-benefit strong{color:#075d51}.rm-count{font-size:1.1rem}
+.rm-review>details,.rm-sources{border-top:1px solid #d5dfe3;margin-top:12px}.rm-sources ul{padding-left:1.2rem}.rm-sources li+li{margin-top:12px}
+.rm-benefit{border:1px solid #b7cdbf;border-radius:10px;padding:12px;margin:12px 0}.rm-benefit h3{margin:0}.rm-benefit p{margin:8px 0 0}
+button.rm-choice{border:2px solid #779c8b;background:#f7faf6}.rm-choice .ec-choice-cost{font-weight:750}.rm-choice-benefit{margin-top:8px;color:#075d51}.rm-hint{color:#345a54}

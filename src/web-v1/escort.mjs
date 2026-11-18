@@ -1,4 +1,5 @@
 // Career state is settled only inside the engine's existing atomic command transition.
+import {escortChoiceRecord,memoryOutcome} from './regression.mjs';
 export const hasEscort=s=>s.versions.escortCareer===1;
 const clone=x=>structuredClone(x),requireEscort=(ok,message='표사 경력 기록 오류')=>{if(!ok)throw Error(message);};
 const integer=(x,min=0)=>Number.isSafeInteger(x)&&x>=min;
@@ -22,7 +23,7 @@ export function markEscortEvent(s){const c=s.active.escortCareer;c.eventShown=tr
 export function chooseEscort(s,pending,choice){
  if(!hasEscort(s)||s.content.events.find(e=>e.id===pending.id)?.special!=='escortCareer')return;
  const c=s.active?.escortCareer;requireEscort(c&&c.eventId===pending.id&&c.eventShown&&!c.choice&&pending.token===c.source+'/'+c.eventId,'호송 판단의 근거가 맞지 않습니다.');
- c.choice={id:choice.id,label:choice.label,month:s.life.month,...clone(choice.escort)};
+ c.choice=escortChoiceRecord(s,choice,s.life.month);
 }
 function promotion(s,from,to){return from===to?null:{from:rank(s,from).name,to:rank(s,to).name,nextMission:rank(s,to).mission,nextReward:rank(s,to).reward,
  reaction:speech(s,'NPC-ESCORT-STEWARD',`${rank(s,from).name}에서 ${rank(s,to).name}로 승진이다. 다음에는 ${rank(s,to).mission}을 맡기겠네.`)};}
@@ -37,6 +38,7 @@ export function settleEscort(s,a){
  if(index<3&&c.completedByRank[r.id]>=2&&c.milestones.includes(r.milestone))c.rankId=s.content.escortCareer.ranks[index+1].id;
  const record={...clone(contract),status:'completed',endedMonth:s.life.month,elapsed:a.elapsed,duration:a.duration,actualReward:reward,npcGain:1+choice.npcGain,fameGain:2+choice.fameGain,
   rankAfter:c.rankId,rankNameAfter:rank(s,c.rankId).name,totalCompleted:c.totalCompleted,promotion:promotion(s,r.id,c.rankId),reaction:speech(s,choice.speaker,choice.reaction)};
+ if(s.life.regressionMemory)record.memoryOutcome=memoryOutcome(s,record);
  c.history.push(record);return clone(record);
 }
 export function interruptEscort(s,cause){
@@ -71,7 +73,7 @@ export function escortView(s){
 export function validateEscort(s,historyOnly=false){
  const c=s.life.escortCareer;
  if(!hasEscort(s)){requireEscort(s.versions.escortCareer===undefined&&s.content.escortCareer===undefined&&c===undefined&&s.active?.escortCareer===undefined,'기존 생애의 경력 상태 오류');return;}
- requireEscort(s.versions.content==='web-v1.6'&&s.versions.rules==='web-v1.3'&&c?.version===1&&c.lifeId===s.life.id&&integer(c.totalCompleted)&&Array.isArray(c.history)&&Array.isArray(c.milestones));
+ requireEscort((s.versions.content==='web-v1.6'&&s.versions.rules==='web-v1.3'||s.versions.content==='web-v1.7'&&s.versions.rules==='web-v1.4')&&c?.version===1&&c.lifeId===s.life.id&&integer(c.totalCompleted)&&Array.isArray(c.history)&&Array.isArray(c.milestones));
  const ranks=s.content.escortCareer.ranks,counts=emptyCounts(s),marks=[];let current='EC-R0',total=0,lastMonth=-1,lastKey=0;const sources=new Set();
  const validateContract=h=>{
   const r=rank(s,h.rankId),key=Number(h.actionKey?.slice(7));requireEscort(r&&h.version===1&&h.lifeId===s.life.id&&/^action-[1-9]\d*$/.test(h.actionKey)&&key>lastKey&&key<=s.nextAction&&h.source===s.life.id+'/'+h.actionKey);
@@ -79,7 +81,7 @@ export function validateEscort(s,historyOnly=false){
   requireEscort(JSON.stringify(h.briefing)===JSON.stringify(speech(s,r.speaker,r.brief))&&typeof h.eventShown==='boolean');
   requireEscort(h.eventShown?integer(h.eventMonth)&&h.eventMonth>=h.startedMonth+6&&h.eventMonth<=s.life.month:h.eventMonth===null&&h.choice===null);
   if(!historyOnly)requireEscort(Array.isArray(s.life.occurrences)&&s.life.occurrences.includes(h.source+'/'+h.eventId)===h.eventShown,'호송 사건의 발생 근거가 맞지 않습니다.');
-  if(h.choice){const d=s.content.events.find(e=>e.id===h.eventId).choices.find(x=>x.id===h.choice.id);requireEscort(h.eventShown&&d&&integer(h.choice.month)&&h.choice.month===h.eventMonth&&h.choice.month<=s.life.month);requireEscort(JSON.stringify(h.choice)===JSON.stringify({id:d.id,label:d.label,month:h.choice.month,...d.escort}));}
+  if(h.choice){const d=s.content.events.find(e=>e.id===h.eventId).choices.find(x=>x.id===h.choice.id);requireEscort(h.eventShown&&d&&integer(h.choice.month)&&h.choice.month===h.eventMonth&&h.choice.month<=s.life.month);requireEscort(JSON.stringify(h.choice)===JSON.stringify(escortChoiceRecord(s,d,h.choice.month)));}
   return r;
  };
  for(const h of c.history){
@@ -87,11 +89,12 @@ export function validateEscort(s,historyOnly=false){
   requireEscort(!h.eventShown||h.eventMonth<=h.endedMonth);lastKey=Number(h.actionKey.slice(7));
   const from=current;
   if(h.status==='completed'){
+   requireEscort(JSON.stringify(h.memoryOutcome)===JSON.stringify(memoryOutcome(s,h,c.history.slice(0,c.history.indexOf(h)))),'호송 기억의 획득/사용 근거 오류');
    requireEscort(h.choice&&h.elapsed===h.duration&&h.actualReward===h.baseReward+h.choice.rewardDelta&&h.npcGain===1+h.choice.npcGain&&h.fameGain===2+h.choice.fameGain);
    counts[r.id]++;total++;if(h.choice.milestone&&!marks.includes(h.choice.milestone))marks.push(h.choice.milestone);
    const i=ranks.findIndex(x=>x.id===r.id);if(i<3&&counts[r.id]>=2&&marks.includes(r.milestone))current=ranks[i+1].id;
    requireEscort(JSON.stringify(h.reaction)===JSON.stringify(speech(s,h.choice.speaker,h.choice.reaction)));
-  }else requireEscort(!!s.life.ending&&h===c.history.at(-1)&&h.cause===s.life.ending&&h.elapsed<h.duration&&h.actualReward===0&&h.npcGain===0&&h.fameGain===0&&h.reaction===null);
+  }else requireEscort(!!s.life.ending&&h===c.history.at(-1)&&h.cause===s.life.ending&&h.elapsed<h.duration&&h.actualReward===0&&h.npcGain===0&&h.fameGain===0&&h.reaction===null&&h.memoryOutcome===undefined);
   requireEscort(h.rankAfter===current&&h.rankNameAfter===rank(s,current).name&&h.totalCompleted===total&&JSON.stringify(h.promotion)===JSON.stringify(promotion(s,from,current)));
  }
  requireEscort(JSON.stringify(c.completedByRank)===JSON.stringify(counts)&&JSON.stringify(c.milestones)===JSON.stringify(marks)&&c.totalCompleted===total);
@@ -114,7 +117,7 @@ export function validateEscort(s,historyOnly=false){
   const saved=h.escortCareer;
   requireEscort(saved.lifeId===h.id&&saved.joinedMonth!==null&&Array.isArray(saved.history)&&saved.history.length);
   if(h.id===s.life.id)requireEscort(!!s.life.ending&&JSON.stringify(saved)===JSON.stringify(c));
-  validateEscort({versions:s.versions,content:s.content,life:{id:h.id,month:h.id===s.life.id?s.life.month:(h.age-16)*12+(h.ageMonths??0),ending:h.cause,escortCareer:saved},
+  validateEscort({versions:s.versions,content:s.content,life:{id:h.id,month:h.id===s.life.id?s.life.month:(h.age-16)*12+(h.ageMonths??0),ending:h.cause,escortCareer:saved,regressionMemory:h.regressionMemory},
    active:null,pending:null,result:null,nextAction:Math.max(...saved.history.map(r=>Number(r.actionKey?.slice(7))))},true);
  }
 }
