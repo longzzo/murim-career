@@ -1,6 +1,7 @@
 import {SaveStore} from './storage.mjs';
 import {publicView} from './engine.mjs';
 import {DATA} from './data.mjs';
+import {campaignScreen,campaignResult,campaignRecap,campaignJourney} from './campaign-ui.mjs';
 import {canEnterOrigin} from './factions.mjs';
 import {playScene,stopScene,setSceneSpeed,finishScene,resumeScene} from './scene-final.mjs';
 import {loadArt,artAsset} from './art.mjs';
@@ -93,6 +94,7 @@ function bindSetup(form){
  });
 }
 function homeScreen(v,notice){
+ if(currentTab==='campaign'&&v.campaign)return campaignScreen(v);
  if(currentTab==='home')return group?actionGroup(v,group,group==='world'?storyPanel(v):''):home(v,notice);
  if(currentTab==='inventory')return inventory(v,itemTab)+bottomNav(currentTab);
  const detail=currentTab==='record'?recordScreen(v):currentTab==='map'?mapScreen(v):chronicleScreen(v);
@@ -147,7 +149,7 @@ function journeyScreen(v){
  <progress class="journey-progress" aria-label="여정 진행" value="${v.active.elapsed}" max="${v.active.duration}"></progress>
  ${escortJourney(v)}
  ${v.story?.offers.some(o=>o.status==='accepted')?storyPanel(v):''}
- ${v.result?.battle?battlePanel(v):''}${btn('여정 계속','advance','primary wide')}${v.actionSummary?`<details class="ua-detail"><summary>진행 중 전체 성과</summary>${wholeSummary(v.actionSummary)}</details>`:''}${inspectInventory()}</section>`;
+ ${campaignJourney(v)}${v.result?.battle?battlePanel(v):''}${btn('여정 계속','advance','primary wide')}${v.actionSummary?`<details class="ua-detail"><summary>진행 중 전체 성과</summary>${wholeSummary(v.actionSummary)}</details>`:''}${inspectInventory()}</section>`;
 }
 function eventScreen(v){
  const e=v.pending;
@@ -170,7 +172,7 @@ function resultScreen(v){
  const next=situation({...v,phase:'home'});
  const changes=announcement.length?announcement:result?.changes??[];
  return currency(v)+`<section class="card result-card"><h2>${esc(result?.title||'행동 결과')}${battle?' · '+outcome[battle.outcome]:''}</h2>
- ${escortResult(v)}
+ ${campaignResult(v)}${escortResult(v)}
  ${battle?combatSummary(battle):wholeSummary(result?.actionSummary)}
  ${nextPanel(v)}
  ${battle?battlePanel(v):v.guidance?.active.includes('learning')?image('UI-ICO-LEARNING','learning-mark'):''}
@@ -210,7 +212,7 @@ function endedScreen(v){
  return currency(v)+`<section class="card intro"><h2>${esc(v.name)}의 발자취</h2><p>${esc(v.originName)} · ${esc(v.mentor.name)}</p><p>마지막 경지 ${esc(v.realm)} · 생애 기록 ${v.history.length}회</p>
  <p>${v.success==='retirement'?'금분세수의 성공을 남겼습니다.':v.success==='conquest'?'승리하고 생존해 정복의 성공을 남겼습니다.':'발견과 해금은 다음 생애에도 남습니다.'}</p></section>
  ${v.recapQuote?`<blockquote class="notice">${esc(v.recapQuote)}</blockquote>`:''}
- ${escortEnding(v)}
+ ${escortEnding(v)}${campaignRecap(record)}
  <section class="card"><h2>다시 강호로</h2><p>해금·도감·생애 기록을 이어갑니다. 새 생애는 새 문파 목록에서 선택하고, 회귀는 원래 출신·사부·체질과 기존 전투·수련을 유지합니다. 능력과 재화는 새로 시작합니다. 호송 기억의 이점은 회귀 조건에서 확인할 수 있습니다.</p>
  <div class="choices">${btn('새 생애 · 문파 고르기','new-life-map','primary')}${btn('기억을 품고 회귀','review-regression')}${btn('마지막 순간 돌아보기','close-recap')}</div>
  ${review==='regression'?`<section class="item-confirm"><h3>이 생애의 기억을 품고 회귀할까요?</h3>${regressionPreview(v)}<div class="row">${btn('돌아가기','cancel-regression')}${btn('회귀 확정','regress','primary')}</div></section>`:''}</section>
@@ -228,7 +230,7 @@ async function perform(command){
   committed(command);
   collectAnnouncement();
   const changedBattle=store.state?.result?.battle?.id&&store.state.result.battle.id!==beforeBattle;
-  if(['startAction','choose','rejuvenate'].includes(command.type)&&store.state.phase==='journey'&&!changedBattle){
+  if(['startAction','choose','rejuvenate','campaignChoose'].includes(command.type)&&store.state.phase==='journey'&&!changedBattle){
    await store.dispatch({type:'advance',id:crypto.randomUUID()});
    collectAnnouncement();
   }
@@ -257,7 +259,7 @@ function focusPage(selector='h2'){
 }
 function committed(command){
  const type=command.type;
- if(type==='ack'||type==='startAction'||type==='acceptOffer'||type==='newLife'||type==='rejuvenate'){currentTab='home';group=null;}
+ if(type==='ack'||type==='startAction'||type==='acceptOffer'||type==='newLife'||type==='rejuvenate'||type==='campaignChoose'){currentTab='home';group=null;}
  if(type==='ack'&&command.destination&&store.state.phase==='home'){
   if(['record','inventory'].includes(command.destination))currentTab=command.destination;else group=command.destination;
  }
@@ -367,6 +369,10 @@ function bind(){
   else if(a==='grace-back'){review=null;render();focusPage('[data-ui="grace-review"]');}
   else if(a==='open-recap'||a==='close-recap'){recapOpen=a==='open-recap';review=null;render();focusPage();}
   else if(a==='review-regression'||a==='cancel-regression'){review=a==='review-regression'?'regression':null;render();focusPage(review?'[data-ui="cancel-regression"]':'[data-ui="review-regression"]');}
+  else if(a==='campaign-open'){currentTab='campaign';group=null;render();focusPage();}
+  else if(a==='campaign-skip')perform({type:'ack'});
+  else if(a==='campaign-defer'){currentTab='home';group=null;render();focusPage('[data-ui="campaign-open"]');}
+  else if(a==='campaign-choice')perform({type:'campaignChoose',sceneId:el.dataset.scene,variantId:el.dataset.variant||null,choice:id});
   else if(a==='group'){returnFocus=focusSelector(el);group=id;render();focusPage();}
   else if(a==='back-group'){const previous=group;group=null;render();focusPage(`.activity-grid [data-id="${previous}"]`);}
   else if(a.startsWith('tab-')){currentTab=a.slice(4);group=null;render();focusPage(store.state.phase==='home'?focusSelector(el):'h2');}
@@ -420,3 +426,5 @@ const art=await loadArt();document.documentElement.dataset.art=art.ready?art.rev
 document.querySelector('footer .muted').textContent=art.errors.length?'일부 아트를 읽지 못해 대체 표현을 사용합니다. 게임 결과와 저장은 유지됩니다.':'도트 시트·네 검법의 PixelFX PNG 효과 연결 · 출처와 고지를 자산 폴더에 보존했습니다.';
 try{await store.open();}catch(e){error=e.message;store.blocked=e;}
 render();
+
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!editingLocked()&&app.querySelector('[data-ui=campaign-skip]')){event.preventDefault();perform({type:'ack'});}});

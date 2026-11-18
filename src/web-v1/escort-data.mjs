@@ -24,7 +24,7 @@ export const ESCORT_EVENTS=[
 ];
 export function validateEscortData(d){
  const fail=()=>{throw Error('표사 경력 콘텐츠 정의 오류');};
- if(!['web-v1.6','web-v1.7'].includes(d.version)){if(d.escortCareer!==undefined||d.events.some(e=>e.special==='escortCareer'||/^EC-/.test(e.id)))fail();return;}
+ if(!['web-v1.6','web-v1.7','web-v1.8'].includes(d.version)){if(d.escortCareer!==undefined||d.events.some(e=>e.special==='escortCareer'||/^EC-/.test(e.id)))fail();return;}
  const c=d.escortCareer;if(!c||c.version!==1||c.baseMonths!==12||c.choiceMonth!==6||c.requiredCompletions!==2||!Array.isArray(c.ranks)||c.ranks.length!==4||!Array.isArray(c.npcs)||c.npcs.length!==3)fail();
  const text=v=>typeof v==='string'&&v.trim().length>0;
  for(const n of ESCORT_CAREER.npcs)if(!c.npcs.some(x=>x.id===n.id&&text(x.name)))fail();
@@ -32,7 +32,7 @@ export function validateEscortData(d){
   const r=c.ranks[i];for(const key of ['id','missionId','reward','eventId','milestone','responsibility','speaker'])if(r?.[key]!==expected[key])fail();
   if(!['name','mission','brief'].every(k=>text(r[k])))fail();
   const e=d.events.find(e=>e.id===r.eventId),base=ESCORT_EVENTS[i];
-  if(!e||e.special!=='escortCareer'||!text(e.name)||!text(e.text)||e.choices?.length!==(d.version==='web-v1.7'?3:2))fail();
+  if(!e||e.special!=='escortCareer'||!text(e.name)||!text(e.text)||e.choices?.length!==(d.version==='web-v1.6'?2:3))fail();
   for(const b of base.choices){const a=e.choices.find(x=>x.id===b.id);if(!a||!text(a.label)||a.requires!==null||a.requiresMemory!==undefined||a.escort?.memory!==undefined||JSON.stringify(a.effects)!==JSON.stringify(b.effects)||!text(a.escort?.reaction))fail();for(const key of ['months','rewardDelta','milestone','npcGain','fameGain','speaker'])if(a.escort[key]!==b.escort[key])fail();}
  }
  if(d.events.filter(e=>e.special==='escortCareer').length!==4)fail();

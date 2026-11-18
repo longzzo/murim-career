@@ -17,8 +17,9 @@ export function withRegressionMemory(data){
 }
 export function validateRegressionData(data){
  const fail=()=>{throw Error('호송 기억 콘텐츠 오류');};
- if(data.version!=='web-v1.7'){if(data.regressionMemory!==undefined||data.events.some(e=>e.choices.some(c=>c.requiresMemory!==undefined||c.escort?.memory!==undefined)))fail();return;}
- if(JSON.stringify(data.regressionMemory)!==JSON.stringify(REGRESSION_MEMORY))fail();
+ if(!['web-v1.7','web-v1.8'].includes(data.version)){if(data.regressionMemory!==undefined||data.events.some(e=>e.choices.some(c=>c.requiresMemory!==undefined||c.escort?.memory!==undefined)))fail();return;}
+ if(data.regressionMemory?.version!==1||data.regressionMemory.memories?.length!==4)fail();
+ for(const expected of REGRESSION_MEMORY.memories){const m=data.regressionMemory.memories.find(m=>m.id===expected.id);if(!m)fail();for(const key of ['eventId','rankId','earnedChoices','baseChoice','choiceId','monthsSaved'])if(JSON.stringify(m[key])!==JSON.stringify(expected[key]))fail();for(const key of ['name','rankName','label','reaction'])if(typeof m[key]!=='string'||!m[key].trim())fail();}
  for(const m of data.regressionMemory.memories){const e=data.events.find(e=>e.id===m.eventId),c=e?.choices.find(c=>c.id===m.choiceId);if(!c||JSON.stringify(c)!==JSON.stringify(memoryChoice(data,m)))fail();}
  const choices=data.events.flatMap(e=>e.choices);
  if(choices.filter(c=>c.requiresMemory!==undefined).length!==4||choices.filter(c=>c.escort?.memory!==undefined).length!==4)fail();

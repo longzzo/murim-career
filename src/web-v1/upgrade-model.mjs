@@ -11,6 +11,7 @@ export function nextGoal(v){
  if(v.success)return goal('강호에 이름을 남기다','성공을 기록했습니다. 계속 지내거나 생애를 마칠 수 있습니다.',{label:'생애 마무리 살피기',review:'finish'});
  if(v.canRetire)return goal('금분세수를 앞두고','경지와 위협·은원 정리 조건을 갖췄습니다.',{label:'금분세수 살피기',review:'retire'});
  if(v.qi?.canRestorePaidSkill)return goal('운기로 내공을 채울 때','편성한 무공 중 현재 내공으로 발동할 수 없는 것이 있습니다.',{label:'운기 회복',action:'ACT-05',target:'breathing'});
+ if(v.campaign?.next)return {...v.campaign.next,direction};
  const targets=v.actions.find(a=>a.id==='ACT-09').targets;
  if(targets.includes('leader'))return goal('우두머리에게 도전','현재 실력과 지지로 결전에 나설 자격이 있습니다.',{label:'결전 살피기',action:'ACT-09',target:'leader'});
  if(v.threat.occurred&&!v.threat.resolved&&targets.includes('threat'))return goal('강호에 닥친 위협','이미 마주한 위협이 아직 해결되지 않았습니다.',{label:'위협 대응 살피기',action:'ACT-09',target:'threat'});
@@ -52,7 +53,7 @@ export function nextPreparation(v){
  if(v.result?.battle?.outcome==='loss')return {title:'구성과 성장 비교',reason:'실제 발동 기록과 현재 구성을 함께 살펴보세요. 패인을 하나로 단정할 수는 없습니다.',destination:'record'};
  if(v.guidance?.active.includes('learning'))return {title:'배운 검법의 구성 확인',reason:'배운 기술과 편성한 기술을 확인한 뒤 교류 비무로 시험하세요.',destination:'record'};
  const goal=nextGoal({...v,phase:'home'});
- if(!goal||goal.review)return {title:'다음 발걸음',reason:goal?.reason??'홈에서 현재 상황을 확인하세요.',destination:null};
+ if(!goal||goal.review||goal.campaign)return {title:goal?.title??'다음 발걸음',reason:goal?.reason??'홈에서 현재 상황을 확인하세요.',destination:null};
  return {title:goal.title,reason:goal.reason,destination:goal.item?'inventory':goal.group??
   (['ACT-01','ACT-02','ACT-07','ACT-10'].includes(goal.action)?'training':['ACT-06','ACT-09'].includes(goal.action)?'duel':goal.action==='ACT-05'?'rest':'world')};
 }

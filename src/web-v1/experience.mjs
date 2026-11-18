@@ -1,6 +1,7 @@
 import {artAsset} from './art.mjs';
 import {ECONOMY} from './data.mjs';
 import {nextGoal} from './upgrade-model.mjs';
+import {campaignHome} from './campaign-ui.mjs';
 import {homeMemories,escortMemoryHint} from './regression-ui.mjs';
 
 export const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -119,13 +120,13 @@ export function resourceSummary(v){
 export function home(v,notice=''){
  const next=situation(v);
  const marker=next.action?`UI-ICO-${next.action}`:next.item?'UI-ICO-CODEX':next.review?'UI-ICO-CHRONICLE':'UI-ICO-MAP';
- const attrs=next.item?`data-ui="item" data-id="${esc(next.item)}"`:next.review?`data-ui="review" data-id="${next.review}"`:
+ const attrs=next.campaign?'data-ui="campaign-open"':next.item?`data-ui="item" data-id="${esc(next.item)}"`:next.review?`data-ui="review" data-id="${next.review}"`:
   `data-ui="group" data-id="${next.group}"`;
  return currency(v)+character(v)+`<section class="current-situation ua-goal"><p class="ua-kicker">지금 추천</p><h2>${image(marker,'menu-icon')}${esc(next.title)}</h2><p>${esc(next.reason)}</p>
   ${v.age>=50&&v.body!=='심한 부상'?`<p class="notice">${esc(v.warning)}</p>`:''}
   ${next.group==='duel'&&v.guidance?.practiceSuggested?'<p>교류 비무는 패배해도 생존합니다. 부상을 입을 수 있습니다.</p>':''}
   ${next.action?actionCard(v,v.actions.find(a=>a.id===next.action),{recommended:true,target:next.target}):`<button class="primary wide" ${attrs}>${next.label}</button>`}</section>${notice}
-  ${homeMemories(v)}<section class="activity-grid" aria-label="활동 분류">${groups.map(g=>
+  ${campaignHome(v)}${homeMemories(v)}<section class="activity-grid" aria-label="활동 분류">${groups.map(g=>
    `<button data-ui="group" data-id="${g.id}">${image(g.icon,'menu-icon')}<span>${g.name}${g.id==='world'&&v.story?.offered?'<span class="offer-badge">새 제안</span>':''}</span></button>`).join('')}</section>`+
   bottomNav('home');
 }

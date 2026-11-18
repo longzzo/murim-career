@@ -32,7 +32,7 @@ export function memoryOutcome(s,h,earlier=s.life.escortCareer.history){
 }
 export function validateRegressionMemory(s){
  if(!hasRegressionMemory(s)){requireMemory(s.versions.regressionMemory===undefined&&s.life.regressionMemory===undefined&&s.content.regressionMemory===undefined);return;}
- requireMemory(s.versions.content==='web-v1.7'&&s.versions.rules==='web-v1.4'&&s.versions.escortCareer===1);
+ requireMemory((s.versions.content==='web-v1.7'&&s.versions.rules==='web-v1.4'||s.versions.content==='web-v1.8'&&s.versions.rules==='web-v1.5')&&s.versions.escortCareer===1);
  const history=s.meta.history,all=[...history.filter(h=>h.id!==s.life.id),s.life],byId=new Map(all.map(l=>[l.id,l]));
  requireMemory(byId.size===all.length);
  for(const life of all){

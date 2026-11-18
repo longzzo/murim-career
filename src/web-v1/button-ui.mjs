@@ -42,6 +42,10 @@ export function clarifyButtons(root,v=null,{queued=false,itemConfirm=null}={}){
    if(!b.disabled)label=target==='inner'?'내공 수련 시작':target==='outer'?'외공 단련 시작':target==='skill'?'주력 무공 수련 시작':target==='assist'?(v.knowsMentorAssist?'배운 기예로 기반 수련 시작':'사부 기예 배우기'):original.endsWith('시작')?original:original+' 시작';
    if(target==='outer')icon='💪';if(target==='breathing')icon='🧘';labelButton(b,label,icon);intent(b,'execute');b.classList.remove('primary');
   }else if(a==='confirm-battle'){labelButton(b,'생사결 위험 확인','⚠️');intent(b,'preview-risk');}
+  else if(a==='campaign-choice'){intent(b,'choice');}
+  else if(a==='campaign-open'){labelButton(b,original,'📜');intent(b,'navigate');}
+  else if(a==='campaign-skip'){labelButton(b,'구간 전환 생략 · 다음 목표로','⏭️');intent(b,'execute');}
+  else if(a==='campaign-defer'){labelButton(b,'약속 보류 · 홈으로','🕒');intent(b,'navigate');}
   else if(a==='choose'||a==='confirm-event'){
    // Preserve the choice's cost, duration and disabled explanation.
    const text=[...b.childNodes].find(n=>n.nodeType===3&&n.textContent.trim());
