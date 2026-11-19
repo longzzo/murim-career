@@ -16,7 +16,10 @@ import {wholeSummary,combatSummary,nextPanel,configurationSummary} from './upgra
 import {escortJourney,escortChoiceInfo,escortResult,escortHistory,escortEnding} from './escort-ui.mjs';
 import {regressionPreview,memorySources,memoryBenefit} from './regression-ui.mjs';
 import {clarifyButtons,labelButton} from './button-ui.mjs';
+import {viewportState} from './viewport-state.mjs';
+import {reserveReplayLayout} from './replay-layout.mjs';
 const app=document.querySelector('#app'),store=new SaveStore();
+const viewport=viewportState(app);let releaseReplayLayout=()=>{};
 let busy=false,error='',battleConfirm=null,currentTab='home',group=null,review=null;
 let item=null,itemTab='weapon',itemConfirm=null,previousPage=null,returnFocus=null;
 let setup={name:'',trait:'random',inclination:'inner'},setupOrigin=null,configuring=false,startingNew=false;
@@ -25,6 +28,18 @@ let loadoutDraft=null;
 let menu=['lobby'],legacyNotice=false;
 const menuCaller=page=>page==='history'?'[data-ui="lobby-history"]':page==='legacy'?'[data-ui="lobby-legacy"]':page==='setup'?'[data-ui="new-life-map"]':'[data-ui="lobby-continue"],[data-ui="new-life-map"]';
 const editingLocked=()=>busy||!!error||!!store.pending;
+// A touch begun during a pending write must not activate its replacement after commit.
+const pendingPointers=new Set();
+document.addEventListener('pointerdown',event=>{
+ if(busy)pendingPointers.add(event.pointerId);else pendingPointers.delete(event.pointerId);
+},true);
+document.addEventListener('pointercancel',event=>{pendingPointers.delete(event.pointerId);},true);
+document.addEventListener('click',event=>{
+ // Keyboard/assistive clicks have no pointer type and cannot release another gesture's lock.
+ if(event.pointerType&&pendingPointers.delete(event.pointerId)){
+  event.preventDefault();event.stopImmediatePropagation();
+ }
+},true);
 const displayedLoadout=()=>store.pending?.command.type==='loadout'?store.pending.command:loadoutDraft??store.state.life.loadout;
 const btn=(text,action,cls='',extra='')=>{const id={skip:'UI-ICO-SKIP',slow:'UI-ICO-SLOW',cancel:'UI-ICO-BACK'}[action],a=id&&artAsset(id);return `<button class="${cls}" data-ui="${action}" ${extra}>${a?`<img class="button-icon" src="${esc(a.source)}" alt="" width="20" height="20">`:''}${esc(text)}</button>`;};
 function errors(){return error?`<section class="card error" role="alert"><h2>진행을 멈췄습니다</h2><p>${esc(error)}</p><p class="muted">${store.pending?.command.type==='startAction'?'행동이 시작되지 않았습니다. 이전 저장을 유지했습니다.':store.pending?.command.type==='advance'?'여정의 다음 진행은 저장되지 않았습니다. 마지막으로 저장된 시점이 유지됩니다.':'확정 저장되지 않은 결과를 진행하지 않습니다.'}</p>${store.pending?btn('같은 저장 다시 시도','retry','primary'):btn('최신 저장 불러오기','reload','primary')}</section>`:'';}
@@ -50,13 +65,14 @@ function updateReplaySpeed(){
  }
 }
 function render(){
- stopScene();const start=performance.now();
+ stopScene();releaseReplayLayout();const start=performance.now(),restore=viewport.begin(screenKey());
+ app.removeAttribute('aria-busy');
  const menuButton=document.querySelector('.brand [data-ui="lobby-open"]');menuButton.hidden=menu.length>0;menuButton.disabled=editingLocked();
  if(menu.length){
   document.body.classList.remove('compact-home');
   const page=menu.at(-1),body=page==='setup'?setupScreen(setup,setupOrigin,configuring,true,store.state?.meta.unlocks??[]):page==='confirm'?newLifeConfirm(store.state,setup):page==='history'?historyScreen(store.state):page==='legacy'?legacyScreen(store.state):lobbyScreen(store.state);
   app.innerHTML=errors()+`<p class="save" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 시작 화면'}</p>`+(error&&!store.state?'':body);
-  clarifyButtons(app);bind();lockControls();return;
+  clarifyButtons(app);bind();lockControls();restore();return;
  }
  const v=publicView(store.state);
  const notice=!error&&!busy&&announcement.length&&v.phase!=='result'?`<aside class="change-notice" aria-label="저장된 상태 변화"><div><strong>상태 변화</strong><div class="result-tags">${changeTags(announcement)}</div></div>${btn('닫기','dismiss-notice','', 'aria-label="상태 변화 알림 닫기"')}</aside>`:'';
@@ -76,8 +92,22 @@ function render(){
  document.body.classList.toggle('compact-home',cleanHome);
  app.innerHTML=errors()+(legacyNotice?legacyAcquired():'')+`<p class="save${cleanHome?' visually-hidden':''}" role="status">${busy?'저장 중 · 입력을 기다려 주세요':error?'저장 상태 확인 필요':'자동 저장됨 · 기록 '+v.revision}</p>`+body+(cleanHome?'':notice);
  clarifyButtons(app,v,{queued:store.state.queue.length>0,itemConfirm});bind();lockControls();
- const canvas=app.querySelector('canvas');if(canvas)replayBattle(canvas,v.result?.battle);
+ const canvas=app.querySelector('canvas');if(canvas){releaseReplayLayout=reserveReplayLayout(canvas.closest('.recorded-battle'),v.result.battle);replayBattle(canvas,v.result.battle);}
+ restore();
  document.documentElement.dataset.renderMs=(performance.now()-start).toFixed(2);
+}
+function screenKey(){
+ if(menu.length)return 'menu/'+menu.at(-1)+(menu.at(-1)==='setup'?'/'+configuring:'');
+ const s=store.state;
+ return JSON.stringify([s.life.id,item||'',item?'':currentTab,item?'':group,battleConfirm,review,recapOpen,s.phase,
+  ['result','event','journey'].includes(s.phase)?s.result?.battle?.id??s.pending?.token??s.active?.key??s.result?.actionKey??s.life.month:'']);
+}
+function saving(){
+ // Keep the pressed controls and current replay in place while the write is pending.
+ app.setAttribute('aria-busy','true');
+ const status=app.querySelector('.save');if(status)status.textContent='저장 중';
+ document.querySelector('.brand [data-ui="lobby-open"]').disabled=true;
+ lockControls();
 }
 function lockControls(){if(editingLocked())app.querySelectorAll('button:not([data-ui="retry"]):not([data-ui="reload"]),select,input').forEach(b=>b.disabled=true);}
 function bindSetup(form){
@@ -226,7 +256,7 @@ async function perform(command){
  if(busy||error)return;
  const keepFocus=command.type==='loadout'?'[data-focus="apply-loadout"]':document.activeElement?.dataset.ui?focusSelector(document.activeElement):'h2';
  announcement=[];
- busy=true;render();
+ busy=true;saving();
  try{
   const beforeBattle=store.state?.result?.battle?.id,ownedBefore=store.state?.meta.legacy?.earned.length??0;
   await store.dispatch({...command,id:crypto.randomUUID()});
@@ -253,14 +283,7 @@ function collectAnnouncement(){
  const change=store.state.life.changes?.at(-1);
  if(change?.revision===store.state.revision)announcement.push(...change.changes);
 }
-function focusPage(selector='h2'){
- const target=app.querySelector(selector)??app.querySelector('h2');
- if(target){
-  const next=target.disabled?app.querySelector('h2'):target;
-  if(next?.tagName==='H2')next.tabIndex=-1;
-  next?.focus();
- }
-}
+function focusPage(selector='h2',options={}){viewport.focus(selector,{reveal:!!error,...options});}
 function committed(command){
  const type=['restartLife','initialize'].includes(command.type)?'newLife':command.type;
  if(type==='ack'||type==='startAction'||type==='acceptOffer'||type==='newLife'||type==='rejuvenate'||type==='campaignChoose'){currentTab='home';group=null;}
@@ -312,7 +335,7 @@ function bind(){
  app.querySelector('#battle-round')?.addEventListener('change',e=>{const canvas=app.querySelector('canvas');replayBattle(canvas,store.state.result.battle,{round:Number(e.target.value),speed:Number(canvas.dataset.speed)||1});});
  app.querySelectorAll('[data-ui]').forEach(el=>el.addEventListener('click',async()=>{
   const a=el.dataset.ui,id=el.dataset.id;
-  if(a==='retry'){if(busy)return;let retried;const earnedBefore=store.state?.meta.legacy?.earned.length??0;try{busy=true;error='';retried=store.pending.command;await store.retry();committed(retried);if((store.state.meta.legacy?.earned.length??0)>earnedBefore)legacyNotice=true;collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
+  if(a==='retry'){if(busy)return;let retried;const earnedBefore=store.state?.meta.legacy?.earned.length??0;try{busy=true;error='';saving();el.disabled=true;retried=store.pending.command;await store.retry();committed(retried);if((store.state.meta.legacy?.earned.length??0)>earnedBefore)legacyNotice=true;collectAnnouncement();}catch(e){error=e.message;}finally{busy=false;render();announceChanges();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':retried?.type==='loadout'?'[data-focus="apply-loadout"]':'h2');}return;}
   if(a==='reload'){if(busy)return;try{busy=true;store.blocked=null;store.pending=null;await (store.db?store.read():store.open());error='';item=null;battleConfirm=null;review=null;announcement=[];loadoutDraft=null;menu=['lobby'];startingNew=false;configuring=false;}catch(e){error=e.message;}finally{busy=false;render();focusPage();}return;}
   if(error||busy)return;
   announcement=[];document.querySelector('#change-status').textContent='';
@@ -324,7 +347,7 @@ function bind(){
   else if(a==='new-life-confirm'){
    const options={...setup,name:setup.name.trim()||'무명'};
    if(store.state)await perform({type:'restartLife',options});
-   else{busy=true;render();try{await store.initialize({...options,seed:crypto.getRandomValues(new Uint32Array(1))[0]});committed({type:'initialize'});}catch(e){error=e.message;}finally{busy=false;render();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':'h2');}}
+   else{busy=true;saving();try{await store.initialize({...options,seed:crypto.getRandomValues(new Uint32Array(1))[0]});committed({type:'initialize'});}catch(e){error=e.message;}finally{busy=false;render();focusPage(error?'[data-ui="retry"],[data-ui="reload"]':'h2');}}
   }
   else if(a==='school'){
    if(!store.state||startingNew)setupOrigin=id;
@@ -332,8 +355,8 @@ function bind(){
    render();focusPage(focusSelector(el));
    document.querySelector('#change-status').textContent=DATA.origins.find(o=>o.id===id).name+' 설명을 열었습니다. 입문 선택은 바뀌지 않았습니다.';
   }
-  else if(a==='school-detail')focusPage('.school-description h3');
-  else if(a==='school-back')focusPage(`[data-ui="school"][data-id="${id}"]`);
+  else if(a==='school-detail')focusPage('.school-description h3',{reveal:true});
+  else if(a==='school-back')focusPage(`[data-ui="school"][data-id="${id}"]`,{reveal:true});
   else if(a==='school-select'){
    if(!canEnterOrigin(DATA,setupOrigin,store.state?.meta.unlocks??[]))return;
    const same=setup.origin===setupOrigin&&DATA.mentors.some(m=>m.id===setup.mentor&&m.origin===setupOrigin);
@@ -390,7 +413,7 @@ function bind(){
   else if(a==='campaign-choice')perform({type:'campaignChoose',sceneId:el.dataset.scene,variantId:el.dataset.variant||null,choice:id});
   else if(a==='group'){returnFocus=focusSelector(el);group=id;render();focusPage();}
   else if(a==='back-group'){const previous=group;group=null;render();focusPage(`.activity-grid [data-id="${previous}"]`);}
-  else if(a.startsWith('tab-')){currentTab=a.slice(4);group=null;render();focusPage(store.state.phase==='home'?focusSelector(el):'h2');}
+  else if(a.startsWith('tab-')){currentTab=a.slice(4);group=null;render();focusPage();}
   else if(a==='back-phase'){const previous=currentTab;currentTab='home';render();focusPage(`[data-ui="tab-${previous}"]`);}
   else if(a.startsWith('items-')){itemTab=a.slice(6);render();focusPage(focusSelector(el));}
   else if(a==='item'){previousPage={tab:currentTab,selector:focusSelector(el)};item=id;itemConfirm=null;render();focusPage();}
@@ -411,7 +434,7 @@ function bind(){
    finishScene();
    updateReplaySpeed();
    app.querySelector('.battle-caption').textContent='연출을 생략했습니다. 기록된 결과와 보상은 같습니다.';
-   focusPage('h2');
+   el.focus({preventScroll:true});
   }
   else if(a==='fast'||a==='slow'){
    const selected=a==='fast'?4:.5,current=Number(app.querySelector('canvas').dataset.speed)||1;

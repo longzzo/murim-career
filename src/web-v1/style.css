@@ -88,6 +88,7 @@ h2[tabindex="-1"]:focus{outline:none}
 .school-map .is-current{border-left:4px solid #244f42}
 .school-map .network-route{font-size:.9rem;color:#866a3c;letter-spacing:.1em}
 .school-map .marker-location{font-size:.8rem}
+.school-map .state-placeholder{visibility:hidden}
 .school-description{gap:.7rem;margin-top:.7rem;min-width:0}
 .school-description .description-title{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
 .school-description .school-teachings{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}
@@ -121,6 +122,10 @@ h2[tabindex="-1"]:focus{outline:none}
 .qi-meter::-webkit-progress-value,.hp-meter::-webkit-progress-value{background:var(--meter-color)}
 .qi-meter::-moz-progress-bar,.hp-meter::-moz-progress-bar{background:var(--meter-color)}
 .battle-resources{display:grid;gap:.5rem;margin:.5rem 0;overflow-wrap:anywhere}
+.battle-resources{align-content:start}
+.replay-size-probe{position:absolute;visibility:hidden;pointer-events:none;inset:0 auto auto 0}
+.replay-size-stack{display:grid}
+.replay-size-stack>*{grid-area:1/1;align-self:start;margin:0}
 .battle-sides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
 .battle-side{min-width:0;padding:.45rem;background:#f1f6f7;border:1px solid #c8d6da;border-radius:8px}
 .battle-side label{margin-top:.3rem;font-size:.85rem}
